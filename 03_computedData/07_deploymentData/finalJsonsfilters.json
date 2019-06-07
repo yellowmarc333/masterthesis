@@ -1,0 +1,12 @@
+,{"name":1,"value":"filter01","observations":1190,"machines":"all","times":"all","filters":[]}
+,{"name":2,"value":"filter02","observations":1190,"machines":"none","times":"all","filters":[]}
+,{"name":3,"value":"filter03","observations":1266,"machines":"all","times":"none","filters":[]}
+,{"name":4,"value":"filter04","observations":804,"machines":"all","times":"all","filters":[{"name":"Trail","options":["0"]}]}
+,{"name":5,"value":"filter05","observations":804,"machines":"none","times":"all","filters":[{"name":"Trail","options":["0"]}]}
+,{"name":6,"value":"filter06","observations":809,"machines":"all","times":"none","filters":[{"name":"Trail","options":["0"]}]}
+,{"name":7,"value":"filter07","observations":290,"machines":"all","times":"all","filters":[{"name":"Material","options":["0R0069"]}]}
+,{"name":8,"value":"filter08","observations":290,"machines":"none","times":"all","filters":[{"name":"Material","options":["0R0069"]}]}
+,{"name":9,"value":"filter09","observations":291,"machines":"all","times":"none","filters":[{"name":"Material","options":["0R0069"]}]}
+,{"name":10,"value":"filter10","observations":254,"machines":"all","times":"all","filters":[{"name":"Material","options":["0R0069"]},{"name":"Trail","options":["0"]}]}
+,{"name":11,"value":"filter11","observations":254,"machines":"none","times":"all","filters":[{"name":"Material","options":["0R0069"]},{"name":"Trail","options":["0"]}]}
+,{"name":12,"value":"filter12","observations":254,"machines":"all","times":"none","filters":[{"name":"Material","options":["0R0069"]},{"name":"Trail","options":["0"]}]}

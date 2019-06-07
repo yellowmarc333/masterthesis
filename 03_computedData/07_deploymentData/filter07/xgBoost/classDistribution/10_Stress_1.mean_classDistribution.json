@@ -1,0 +1,1 @@
+{"feature":"Stress_1.mean","type":"boxplot","data":[{"name":"0","n":215,"max":515,"min":269,"median":356,"lower":322.5,"upper":402.5,"outlier":[592,525,569,545]},{"name":"1","n":75,"max":502,"min":299,"median":401,"lower":369,"upper":423.5,"outlier":[565,521]}]}

@@ -1,0 +1,1 @@
+{"feature":"PunchingTransferTime_UPPER","type":"boxplot","data":[{"name":"0","n":674,"max":33,"min":10,"median":22,"lower":19,"upper":25,"outlier":[35,42,38,35,38,46,37,55,36,35,35,37,36,35,37]},{"name":"1","n":135,"max":30,"min":15,"median":21,"lower":18,"upper":23.5,"outlier":[32,37]}]}

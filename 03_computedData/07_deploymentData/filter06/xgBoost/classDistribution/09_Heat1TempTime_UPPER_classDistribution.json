@@ -1,0 +1,1 @@
+{"feature":"Heat1TempTime_UPPER","type":"boxplot","data":[{"name":"0","n":674,"max":141,"min":0,"median":45,"lower":24,"upper":71,"outlier":[209,213,216,145,149,152,145]},{"name":"1","n":135,"max":132,"min":2,"median":43,"lower":28,"upper":72,"outlier":143}]}

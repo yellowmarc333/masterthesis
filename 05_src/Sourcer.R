@@ -7,25 +7,13 @@ sourceAll = function() {
   require(xgboost)
   require(stringi)
   require(stringr)
-  require(rpart)
-  require(rpart.plot)
   require(RcppRoll)
-  require(Hmisc)
   require(ggplot2)
-  require(readxl)
   library(gsubfn)
-  require(assertthat)
+  require(checkmate)
   require(caret)
-  require(DALEX)
-  require(ceterisParibus)
-  require(ranger)
   require(devtools)
-  require(rjson)
-  require(jsonlite)
-  require(plyr)
-  require(quanteda)
-  require(topicmodels)
-  library(tidytext)
+
 
 
   # source internal source files

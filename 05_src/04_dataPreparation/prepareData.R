@@ -5,7 +5,7 @@ prepareData = function(inPath = "03_computedData/02_dataCleaning/",
   
   subsetData = data[sample.int(.N, .N * subsetSize)]
   
-  label = wdl::oneHotEncode(subsetData$category)
+  label = oneHotEncode(subsetData$category)
   texts = subsetData$headline
   tokens <- processTokens(texts)
   hasWords <- lengths(tokens) > 0

@@ -12,6 +12,7 @@ sourceAll = function() {
   require(devtools)
   require(plyr)
   require(quanteda)
+  require(h2o)
 
 
 

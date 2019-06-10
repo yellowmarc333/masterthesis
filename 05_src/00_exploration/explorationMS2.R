@@ -22,4 +22,7 @@ predict.h2o <- h2o.predict(object = model.h2o, newdata = data.h2o)
 # next steps:
 # 3blue one brown deep learning serie anschauen + notizen
 # liste machen mit methoden die ausprobiert werden können
+# random forest, xgboost, multinomial naive bayes
+# recurrent neural net, hierarchical attention neural net
 # nach ähnlichen Datensätzen suchen
+# markus seine methode im blick behalten

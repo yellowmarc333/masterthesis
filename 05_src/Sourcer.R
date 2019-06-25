@@ -13,6 +13,8 @@ sourceAll = function() {
   require(plyr)
   require(quanteda)
   require(h2o)
+  require(nnet)
+  require(neuralnet)
 
 
 

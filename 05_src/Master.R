@@ -38,6 +38,7 @@ cleanData(inPath = paste0(computedDataPath,"01_importedData/"),
 # ######
 # 04 DATA PREPARATION
 prepareData(inPath = paste0(computedDataPath, "02_cleanedData/"),
-            outPath = paste0(computedDataPath, "04_preparedData/"))
+            outPath = paste0(computedDataPath, "04_preparedData/"), 
+            subsetSize = 0.01)
 
 

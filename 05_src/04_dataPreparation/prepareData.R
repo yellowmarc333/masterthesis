@@ -4,7 +4,8 @@ prepareData = function(inPath = "03_computedData/02_dataCleaning/",
   data = read.fst(path = paste0(inPath, "News.fst"), as.data.table = T)
   set.seed(123)
   subsetData = data[sample.int(.N, floor(.N * subsetSize))]
-
+  if(subsetSize == 1) subsetData = data
+  
   label = oneHotEncode(subsetData$category)
   labelRaw = as.factor(subsetData$category)
   texts = subsetData$headline

@@ -6,16 +6,13 @@ wdl::installDependencies()
 source("05_src/Sourcer.R")
 sourcedFiles = sourceAll()
 wdl::performChecks(sourcefiles = sourcedFiles, srcFolder = "05_src", 
-                   ignoreFolders = c("src/00_deprecated", "src/06_results"), printCallHierarchy = T)
+                   ignoreFolders = c("src/00_deprecated", "src/06_results"), 
+                   printCallHierarchy = T)
 
 
 #######
 # init directory
 computedDataPath <- "03_computedData/"
-dir.create(computedDataPath, showWarnings = F)
-folders <- c("01_importedData/", "02_cleanedData/", "03_integratedData/", "04_preparedData/", "05_modelData/","06_evaluatedData/", "07_deploymentData/finalJsons/")
-for (folder in folders) {dir.create(paste0(computedDataPath, folder), recursive = T, showWarnings = F)}
-
 
 #######
 # 01 IMPORT

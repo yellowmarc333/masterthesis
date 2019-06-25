@@ -5,6 +5,9 @@
 #' @return Nothing. writes files as fst
 importData = function(inPath = "02_initialData/", 
                       outPath = "03_computedData/01_importedData/"){
+  assertString(inPath)
+  assertString(outPath)
+  
   fileName <- paste0(inPath, "News_Category_Dataset_v2.json")
   # open connection and read in textfile by lines
   con <- file(fileName, "r") 

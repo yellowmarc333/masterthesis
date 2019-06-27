@@ -36,6 +36,7 @@ install.packages("h2o", type="source",
 
 # next steps:
 # xxset up h2o to work
+# xgboost: add watchlist
 # set up error rate for h20
 # rename column names from data in preparation
 # add error measurement of the network

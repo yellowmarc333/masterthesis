@@ -24,6 +24,9 @@ sourceAll = function() {
                   
                   "05_src/04_dataPreparation/04_textProcessingHelper.R",
                   "05_src/04_dataPreparation/prepareData.R",
+                  
+                  "05_src/05_model/modelPredictors.R",
+                  
                   "05_src/09_utilities/oneHotEncode.R")
   
   for (file in sourcefiles) {

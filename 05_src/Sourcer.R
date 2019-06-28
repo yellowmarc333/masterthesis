@@ -15,6 +15,10 @@ sourceAll = function() {
   require(h2o)
   require(nnet)
   require(neuralnet)
+  require(xgboost)
+  require(microbenchmark)
+  require(ranger)
+  require(text2vec)
 
 
 

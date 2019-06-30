@@ -1,8 +1,11 @@
 # next steps:
 # für NN normalizierung rein
+# find similarities to words to see if word2vec works. (write function)
+# check out h2o word2vec
+# in word2vec sonderzeichen entfernen bzw stemmen
 # ueberlegen wie explaining aussehen koennte.
 # liste machen mit methoden die ausprobiert werden können
-# random forest, xxxgboost, multinomial naive bayes
+# xxrandom forest, xxxgboost, multinomial naive bayes
 # recurrent neural net, hierarchical attention neural net
 # nach ähnlichen Datensätzen suchen
 # markus seine methode im blick behalten
@@ -13,6 +16,7 @@
 # world post und the world post zusammenfassen
 # xxbert link öffnen
 
+# größeren wordvec ausprobieren mit weniger pruning
 # xxprepareWord2Vec 
 # xxsetup random forest
 # xxset up h2o to work

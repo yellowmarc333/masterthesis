@@ -18,8 +18,8 @@ cleanData(inPath = paste0(computedDataPath,"01_importedData/"),
 # 04 DATA PREPARATION
 prepareDataBOW(inPath = "03_computedData/02_cleanedData/",
             outPath = "03_computedData/04_preparedData/", 
-            subsetSize = 0.01)
+            subsetSize = 0.1)
 
 prepareDataW2V(inPath = "03_computedData/02_cleanedData/",
                outPath = "03_computedData/04_preparedData/", 
-               subsetSize = 0.01)
+               subsetSize = 0.1, word2VecSize = 50)

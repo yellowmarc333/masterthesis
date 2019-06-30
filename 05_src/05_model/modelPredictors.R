@@ -4,6 +4,8 @@ predictNN <- function(dataPath, fileName, trainRatio = 0.75){
   assertString(dataPath)
   assertString(fileName)
   assertNumber(trainRatio, lower = 0, upper = 1)
+  
+ 
 
   h2o.init(nthreads=-1, max_mem_size="4G")
   h2o.removeAll()
@@ -13,6 +15,8 @@ predictNN <- function(dataPath, fileName, trainRatio = 0.75){
   indexes <- sample.int(nrow(data), size = round(nrow(data) * trainRatio))
   trainData <- data[indexes]
   testData <- data[-indexes]
+  testLabel <- as.character(testData$labelRaw)
+  
   trainData.h2o <- as.h2o(trainData)
   testData.h2o <- as.h2o(testData)
   model <- h2o.deeplearning(y = "labelRaw", training_frame = trainData.h2o, 
@@ -22,14 +26,14 @@ predictNN <- function(dataPath, fileName, trainRatio = 0.75){
   predict.h2o <- h2o.predict(object = model, newdata = testData.h2o)
   predict.local <- as.data.table(predict.h2o)
   
-  predictions <- as.character(predict.local[, predict][[1]])
+  predictions <- as.character(predict.local[, predict])
   predict.local[, predict := NULL]
-
+  
   truth <- oneHotEncode(testData$labelRaw)
   resultDiffProb <- (truth - predict.local)^2 
   
-  meanSquareError <- sum(resultDiffProb)/prod(dim(predict.local))
-  accuracy <- mean(as.character(testData$labelRaw) == predictions)
+  meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
+  accuracy <- mean(testLabel == predictions)
   
   return(list(meanSquareError = meanSquareError,
               accuracy = accuracy,
@@ -81,7 +85,7 @@ predictXG <- function(dataPath, fileName, trainRatio = 0.75){
                              nrounds = nrounds, 
                              verbose = 1, 
                              watchlist = watchlist)
-  
+
   # evaluating predictions and eval metrics
   predictions <- predict(model, newdata =  testMat, reshape = TRUE)
   predictionsMax <- sapply(data.table(t(predictions)), which.max) - 1

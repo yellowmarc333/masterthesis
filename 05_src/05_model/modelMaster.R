@@ -7,14 +7,20 @@ fileName3 <- "W2V0.01Subset.fst"
 fileName4 <- "W2V-0.1-100.fst"
 fileName5 <- "W2V-0.1-500.fst"
 fileName6 <- "W2V-0.1-50.fst"
+fileName7 <- "BOW-0.01-TRUE.fst"
 
 resultNN <- predictNN(dataPath, fileName1, trainRatio = 0.75) #0.29
-resultXG <- predictXG(dataPath, fileName1, trainRatio = 0.75) #0.26
-resultRF <- predictRF(dataPath, fileName1, trainRatio = 0.75) #0.38
+resultXG <- predictXG(dataPath, fileName1, trainRatio = 0.75) #0.269
+resultRF <- predictRF(dataPath, fileName1, trainRatio = 0.75) #0.33
 
-resultNN2 <- predictNN(dataPath, fileName2, trainRatio = 0.75)
-resultXG2 <- predictXG(dataPath, fileName2, trainRatio = 0.75)
-resultRF2 <- predictRF(dataPath, fileName2, trainRatio = 0.75)
+# with shortdescription
+resultNN7 <- predictNN(dataPath, fileName7, trainRatio = 0.75) # 0.274
+resultXG7 <- predictXG(dataPath, fileName7, trainRatio = 0.75) # 0.356
+resultRF7 <- predictRF(dataPath, fileName7, trainRatio = 0.75) # 0.386
+
+resultNN2 <- predictNN(dataPath, fileName2, trainRatio = 0.75) #0.389
+resultXG2 <- predictXG(dataPath, fileName2, trainRatio = 0.75) #0.413
+resultRF2 <- predictRF(dataPath, fileName2, trainRatio = 0.75) # 0.456
 # 2 stundne laufzeit auf 10% der daten.
 
 # from here on word2vec
@@ -38,7 +44,12 @@ resultRF6 <- predictRF(dataPath, fileName6, trainRatio = 0.75) # 0.253
 for(file in grep(x = ls(), pattern = "result", value = TRUE)){
   saveRDS(get(file, inherits = FALSE),
           file = paste0("03_computedData/05_modelData/",
-                                   file))
+                                   file, ".RDS"))
 }
 
-
+einlesen
+# for(file in list.files("03_computedData/05_modelData/")){
+#   assign(x = gsub(file (get(file, inherits = FALSE),
+#           file = paste0("03_computedData/05_modelData/",
+#                         file))
+# }

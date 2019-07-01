@@ -5,9 +5,7 @@ predictNN <- function(dataPath, fileName, trainRatio = 0.75){
   assertString(fileName)
   assertNumber(trainRatio, lower = 0, upper = 1)
   
- 
-
-  h2o.init(nthreads=-1, max_mem_size="4G")
+  h2o.init(nthreads=-1, max_mem_size="16G")
   h2o.removeAll()
   
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)

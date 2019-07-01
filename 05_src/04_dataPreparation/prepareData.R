@@ -1,16 +1,25 @@
 prepareDataBOW = function(inPath = "03_computedData/02_cleanedData/", 
                        outPath = "03_computedData/04_preparedData/",
-                       subsetSize = 0.01){
+                       subsetSize = 0.01,
+                       mergeSD = FALSE){
+  assertString(inPath)
+  assertString(outPath)
+  assertNumber(subsetSize, lower = 0, upper = 1)
+  assertFlag(mergeSD)
   
   data = read.fst(path = paste0(inPath, "News.fst"), as.data.table = T)
   set.seed(123)
-  subsetData = data[sample.int(.N, floor(.N * subsetSize))]
-  if(subsetSize == 1) subsetData = data
+  subsetData <- data[sample.int(.N, floor(.N * subsetSize))]
+  if (subsetSize == 1) subsetData = data
   
-  
-  label = oneHotEncode(subsetData$category)
-  labelRaw = as.factor(subsetData$category)
-  texts = subsetData$headline
+  label <- oneHotEncode(subsetData$category)
+  labelRaw <- as.factor(subsetData$category)
+  subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
+  if (mergeSD) {
+    texts <- subsetData$HeadLShortD
+  } else {
+    texts <- subsetData$headline
+  }
   tokens <- processTokens(texts)
   
   # reduce to tokens > 0
@@ -27,7 +36,7 @@ prepareDataBOW = function(inPath = "03_computedData/02_cleanedData/",
   tokens.dt.label <- data.table(labelRaw, tokens.dt)
   
   write.fst(tokens.dt.label, path = paste0(outPath, "BOW-", 
-                                           subsetSize, ".fst"))
+                                           subsetSize, "-", mergeSD, ".fst"))
 }
 
 
@@ -35,14 +44,28 @@ prepareDataBOW = function(inPath = "03_computedData/02_cleanedData/",
 prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/", 
                           outPath = "03_computedData/04_preparedData/",
                           subsetSize = 0.01,
-                          word2VecSize = 100){
+                          word2VecSize = 100,
+                          mergeSD = FALSE){
+  assertString(inPath)
+  assertString(outPath)
+  assertNumber(word2VecSize)
+  assertNumber(subsetSize, lower = 0, upper = 1)
+  assertFlag(mergeSD)
+  
+  
   data <- read.fst(path = paste0(inPath, "News.fst"), as.data.table = TRUE)
   set.seed(123)
   subsetData = data[sample.int(.N, floor(.N * subsetSize))]
   if(subsetSize == 1) subsetData = data
   
   label <- subsetData$category
-  text <- subsetData$headline
+  
+  subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
+  if (mergeSD) {
+    texts <- subsetData$HeadLShortD
+  } else {
+    texts <- subsetData$headline
+  }
   
 
   # Create iterator over tokens
@@ -98,7 +121,8 @@ prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/",
                       t(wordVectorSums))
 
   write.fst(result, path = paste0(outPath, "W2V-", 
-                                           subsetSize, "-", word2VecSize, ".fst"))
+                                  subsetSize, "-", word2VecSize,
+                                  "-", mergeSD, ".fst"))
 }
 
 

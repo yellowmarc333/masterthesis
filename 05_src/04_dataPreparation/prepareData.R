@@ -66,10 +66,9 @@ prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/",
   } else {
     texts <- subsetData$headline
   }
-  
 
   # Create iterator over tokens
-  tokens <- quanteda::tokens(text, what = "word", remove_numbers = FALSE, 
+  tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
                               remove_punct = TRUE, remove_symbols = TRUE, 
                               remove_hyphens = TRUE)
   tokens <- as.list(tokens)
@@ -96,6 +95,9 @@ prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/",
   
   wordVectors <- as.data.table(glove$components)
   
+  write.fst(wordVectors, paste0(outPath, "WordVectors-", 
+                                subsetSize, "-", word2VecSize,
+                                "-", mergeSD, ".fst"))
   # testVector <- wordVectors[,Ginger]
   # 
   # cos_sim = sapply(data.table(wordVectors), function(x) {

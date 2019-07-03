@@ -134,4 +134,88 @@ predictRF <- function(dataPath, fileName, trainRatio = 0.75) {
 }
 
 
+predictKeras <- function(dataPath, fileName, trainRatio = 0.75) {
+  assertString(dataPath)
+  assertString(fileName)
+  assertNumber(trainRatio, lower = 0, upper = 1)
+  
+  fileName <- fileName6
+
+  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+  
+  indexes <- sample.int(nrow(data), size = round(nrow(data) * trainRatio))
+  trainData <- data[indexes]
+  trainData <- trainData - min(trainData)
+  testData <- data[-indexes]
+  testData <- testData - min(testData)
+  
+  trainLabel <- to_categorical(as.numeric(trainData$labelRaw) -1)
+  testLabel <- to_categorical(as.numeric(testData$labelRaw) -1)
+  trainData[, labelRaw := NULL]
+  testData[, labelRaw := NULL]
+  
+  wordVectors <- read.fst("03_computedData/04_preparedData/WordVectors-0.1-50-FALSE.fst",
+                          as.data.table = TRUE)
+  
+  
+  input <- layer_input(
+    shape = list(NULL),
+    dtype = "int32",
+    name = "input"
+  )
+  
+  
+  model <- keras_model_sequential()
+  model %>% 
+    layer_embedding(name = "embedding", input_dim = ncol(trainData)+1,
+                output_dim = 32) %>% 
+    layer_global_average_pooling_1d() %>%
+    # layer_lstm(units = 50, dropout = 0.25, 
+    #            recurrent_dropout = 0.25, 
+    #            return_sequences = FALSE, name = "lstm") %>% 
+    layer_dense(units = 32, activation = "sigmoid", name = "dense",
+                input_shape = 1) %>% 
+    layer_dense(units = ncol(trainLabel),
+                activation = "softmax", 
+                name = "predictions")
+  
+  summary(model)
+  
+  
+  # Bring model together
+  model <- keras_model(input, predictions)
+  
+  # Freeze the embedding weights initially to prevent updates propgating 
+  # back through and ruining our embedding
+  # get_layer(model, name = "embedding") %>% 
+  #   set_weights(list(wordVectors)) %>% 
+  #   freeze_weights()
+  
+  
+  # Compile
+  model %>% compile(
+    loss = 'categorical_crossentropy',
+    optimizer = optimizer_rmsprop(),
+    metrics = c('accuracy')
+  )
+  
+  # Print architecture (plot_model isn't implemented in the R package yet)
+
+  history <- model %>% fit(
+    as.matrix(trainData),
+    trainLabel,
+    batch_size = 2048,
+    validation_data = list(as.matrix(testData), testLabel),
+    epochs = 35,
+    view_metrics = FALSE,
+    verbose = 0
+  )
+  
+  # Look at training results
+  
+  print(history)
+  plot(history)
+  
+  
+}
 

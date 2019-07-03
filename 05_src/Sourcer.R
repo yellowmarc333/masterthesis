@@ -5,7 +5,6 @@ sourceAll = function() {
   require(data.table)
   require(stringi)
   require(stringr)
-  require(RcppRoll)
   require(ggplot2)
   require(checkmate)
   require(jsonlite)
@@ -18,6 +17,8 @@ sourceAll = function() {
   require(microbenchmark)
   require(ranger)
   require(text2vec)
+  require(keras)
+  require(tensorflow)
 
 
 

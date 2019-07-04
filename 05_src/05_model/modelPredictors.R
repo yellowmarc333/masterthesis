@@ -145,14 +145,15 @@ predictKeras <- function(dataPath, fileName, trainRatio = 0.75) {
   
   indexes <- sample.int(nrow(data), size = round(nrow(data) * trainRatio))
   trainData <- data[indexes]
-  trainData <- trainData - min(trainData)
   testData <- data[-indexes]
-  testData <- testData - min(testData)
   
   trainLabel <- to_categorical(as.numeric(trainData$labelRaw) -1)
   testLabel <- to_categorical(as.numeric(testData$labelRaw) -1)
   trainData[, labelRaw := NULL]
   testData[, labelRaw := NULL]
+  
+  trainData <- trainData - min(trainData)
+  testData <- testData - min(testData)
   
   wordVectors <- read.fst("03_computedData/04_preparedData/WordVectors-0.1-50-FALSE.fst",
                           as.data.table = TRUE)
@@ -164,17 +165,19 @@ predictKeras <- function(dataPath, fileName, trainRatio = 0.75) {
     name = "input"
   )
   
-  
+  # jeder Datenpunkt des inputs ist length(sentence) * ncol(wordVectors)
   model <- keras_model_sequential()
   model %>% 
-    layer_embedding(name = "embedding", input_dim = ncol(trainData)+1,
-                output_dim = 32) %>% 
-    layer_global_average_pooling_1d() %>%
+    layer_conv_1d(name = "conv", filters = 100L, kernel_size = 5L,
+                  input_shape = (NULL, nrow(wordVectors))) %>%
+    # layer_embedding(name = "embedding", input_dim = ncol(trainData)+1,
+    #             output_dim = 32) %>% 
+   # layer_global_average_pooling_1d() %>%
     # layer_lstm(units = 50, dropout = 0.25, 
     #            recurrent_dropout = 0.25, 
     #            return_sequences = FALSE, name = "lstm") %>% 
-    layer_dense(units = 32, activation = "sigmoid", name = "dense",
-                input_shape = 1) %>% 
+    layer_dense(units = 100L, activation = "sigmoid", name = "dense",
+                input_shape = 100L) %>% 
     layer_dense(units = ncol(trainLabel),
                 activation = "softmax", 
                 name = "predictions")

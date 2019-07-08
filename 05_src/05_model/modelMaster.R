@@ -51,7 +51,7 @@ for(file in grep(x = ls(), pattern = "result", value = TRUE)){
                                    file, ".RDS"))
 }
 
-einlesen
+
 # for(file in list.files("03_computedData/05_modelData/")){
 #   assign(x = gsub(file (get(file, inherits = FALSE),
 #           file = paste0("03_computedData/05_modelData/",

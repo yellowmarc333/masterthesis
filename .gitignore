@@ -3,3 +3,6 @@
 .RData
 .Ruserdata
 *.fst
+*.rds
+03_computedData/05_modelData/resultRF2
+03_computedData/05_modelData/resultXG2

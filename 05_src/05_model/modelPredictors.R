@@ -150,26 +150,31 @@ predictKeras <- function(dataPath, fileName, trainRatio = 0.75) {
   trainData <- data[indexes, , ]
   testData <- data[-indexes, , ]
   
+  trainLabelRaw <- label[indexes]
+  testLabelRaw <- label[-indexes]
+  
   trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
   testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
   
-
+  # building model with layers
   model <- keras_model_sequential()
-  
   model %>% 
     
     # Add a Convolution1D, which will learn filters
     # Word group filters of size filter_length:
     layer_conv_1d(input_shape  = list(maxWords, channels),
                   data_format = "channels_last",
-      filters = 100, kernel_size = 5, 
-      padding = "valid", activation = "relu", strides = 1
+      filters = 50, kernel_size = 5, 
+      padding = "valid", activation = "relu", strides = 1,
+      name = "conv1"
     ) %>%
+    # lstm
+    #layer_lstm(units = 70) %>%
     # Apply max pooling:
     layer_global_max_pooling_1d() %>%
     
     # Add a vanilla hidden layer:
-    layer_dense(100) %>%
+    layer_dense(50) %>%
     
     # Apply 20% layer dropout
     layer_dropout(0.2) %>%
@@ -180,31 +185,30 @@ predictKeras <- function(dataPath, fileName, trainRatio = 0.75) {
                 activation = "softmax", 
                 name = "predictions")
 
-  summary(model)
-  model$input_shape
-  
-  # Compile
+  # Compiling model
   model %>% compile(
     loss = 'categorical_crossentropy',
     optimizer = optimizer_rmsprop(),
     metrics = c('accuracy')
   )
   
-  # Print architecture (plot_model isn't implemented in the R package yet)
-
-  
+  # fitting model
   history <- model %>% fit(
     x = trainData,
     y = trainLabel,
-    validation_data = list(testData, testLabel),
+    epochs = 10,
+    batchsize = 32,
+    validation_split = 0.5,
     view_metrics = FALSE,
     verbose = 2)
   
   # Look at training results
-  
+  summary(model)
   print(history)
   plot(history)
   
+  predictionResult <- model %>% evaluate(testData, testLabel, batch_size = 32)
+ 
   
 }
 

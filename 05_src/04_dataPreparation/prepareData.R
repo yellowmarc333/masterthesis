@@ -7,10 +7,8 @@ prepareDataBOW = function(inPath = "03_computedData/02_cleanedData/",
   assertNumber(subsetSize, lower = 0, upper = 1)
   assertFlag(mergeSD)
   
-  data = read.fst(path = paste0(inPath, "News.fst"), as.data.table = T)
-  set.seed(123)
-  subsetData <- data[sample.int(.N, floor(.N * subsetSize))]
-  if (subsetSize == 1) subsetData = data
+  subsetData <- read.fst(path = paste0(inPath, "trainSubset10pc.fst"), 
+                         as.data.table = TRUE)
   
   label <- oneHotEncode(subsetData$category)
   labelRaw <- as.factor(subsetData$category)
@@ -41,7 +39,7 @@ prepareDataBOW = function(inPath = "03_computedData/02_cleanedData/",
 
 
 
-prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/", 
+prepareDataW2V = function(inPath = "03_computedData/03_integratedData/", 
                           outPath = "03_computedData/04_preparedData/",
                           subsetSize = 0.01,
                           word2VecSize = 100,
@@ -52,11 +50,9 @@ prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/",
   assertNumber(subsetSize, lower = 0, upper = 1)
   assertFlag(mergeSD)
   
-  
-  data <- read.fst(path = paste0(inPath, "News.fst"), as.data.table = TRUE)
-  set.seed(123)
-  subsetData = data[sample.int(.N, floor(.N * subsetSize))]
-  if(subsetSize == 1) subsetData = data
+  subsetData <- read.fst(path = paste0(inPath, "trainSubset10pc.fst"), 
+                   as.data.table = TRUE)
+
   
   label <- subsetData$category
   
@@ -69,22 +65,20 @@ prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/",
 
   # Create iterator over tokens
   tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
-                              remove_punct = TRUE, remove_symbols = TRUE, 
+                              remove_punct = FALSE, remove_symbols = FALSE, 
                               remove_hyphens = TRUE)
   tokens <- as.list(tokens)
   maxWords <- max(sapply(tokens, length))
-  # old method
-  # tokens <- text2vec::space_tokenizer(text)
 
   # Create vocabulary. Terms will be unigrams (simple words).
   itoken <- text2vec::itoken(tokens, progressbar = FALSE)
   vocab <- create_vocabulary(itoken)
-  vocab <- prune_vocabulary(vocab, term_count_min = 5L)
+  vocab <- prune_vocabulary(vocab, term_count_min = 2L)
   
   # Use our filtered vocabulary
   vectorizer <- text2vec::vocab_vectorizer(vocab)
   # use window of 5 for context words
-  tcm <- create_tcm(itoken, vectorizer, skip_grams_window = 4L)
+  tcm <- create_tcm(itoken, vectorizer, skip_grams_window = 5L)
 
   glove <- GlobalVectors$new(word_vectors_size = word2VecSize, 
                             vocabulary = vocab, x_max = 10, 
@@ -92,7 +86,7 @@ prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/",
                             alpha = 0.75, lambda = 0)
   
   print("creating glove fit")
-  glove$fit_transform(tcm, n_iter = 25)
+  glove$fit_transform(tcm, n_iter = 10)
   
   wordVectors <- as.data.table(glove$components)
   
@@ -108,7 +102,6 @@ prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/",
   #                norm = "l2")
   # head(sort(cos_sim[,1], decreasing = TRUE), 20)
 
-  # hier werden schon die seltenen woerter nicht genutzt
   wordVectorsNames <- colnames(wordVectors)
   channels <- nrow(wordVectors)
   
@@ -133,13 +126,13 @@ prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/",
     # fill up rows with 0's for equal array length, when length < maxWords
     if (nrow(tmpMatrix) != maxWords) {
       tmpFillUp <- rbind(tmpMatrix,
-                         matrix(numeric((maxWords - length(existWords)) * 
+                         matrix(numeric((maxWords - nrow(tmpMatrix)) * 
                                           channels),
                                 ncol = channels))
     } else {
-      if(!identical(c(maxWords, channels), dim(tmpMatrix))) browser()
       tmpFillUp <- tmpMatrix
     }
+    # if(!identical(c(maxWords, channels), dim(tmpFillUp))) browser()
     wordVectorArray[i, , ] <- tmpFillUp
 
   }

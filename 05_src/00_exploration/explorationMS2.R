@@ -1,14 +1,16 @@
 # next steps:
+# xxwrite array  in word to vec, then try to implement CNN
 # für NN normalizierung rein
 # binary cross entropy > mse? auschecken?
 # find similarities to words to see if word2vec works. (write function)
 # check out h2o word2vec
 # generell: bei verschiedenen auswahlmöglichkeiten schauen was gut dokumentiert ist
 # in word2vec sonderzeichen entfernen bzw stemmen 
-# (ueberlegen, was alles raus muss, numbers drin, toLower)
+# (ueberlegen, was alles raus muss, numbers drin, toLower, sonderzeichen bleiben drin)
 # ueberlegen wie explaining aussehen koennte.
 # methoden: multinomial naive bayes
 # balancing for training?
+# tdfidf
 # features: number of words, number of words per category, Number of Camel words,
 # number of caps
 # Number of camel words

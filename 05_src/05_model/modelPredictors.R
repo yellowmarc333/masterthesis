@@ -139,61 +139,49 @@ predictKeras <- function(dataPath, fileName, trainRatio = 0.75) {
   assertString(fileName)
   assertNumber(trainRatio, lower = 0, upper = 1)
   
-  fileName <- fileName6
 
-  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+  dataRDS <- readRDS(paste0(dataPath, fileName))
+  data <- dataRDS[["wordVectorArray"]]
+  label <- as.factor(dataRDS[["label"]])
+  maxWords <- dataRDS[["maxWords"]]
+  channels <- dataRDS[["channels"]]
   
-  indexes <- sample.int(nrow(data), size = round(nrow(data) * trainRatio))
-  trainData <- data[indexes]
-  testData <- data[-indexes]
+  indexes <- sample.int(dim(data)[1], size = round(dim(data)[1] * trainRatio))
+  trainData <- data[indexes, , ]
+  testData <- data[-indexes, , ]
   
-  trainLabel <- to_categorical(as.numeric(trainData$labelRaw) -1)
-  testLabel <- to_categorical(as.numeric(testData$labelRaw) -1)
-  trainData[, labelRaw := NULL]
-  testData[, labelRaw := NULL]
+  trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
+  testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
   
-  trainData <- trainData - min(trainData)
-  testData <- testData - min(testData)
-  
-  wordVectors <- read.fst("03_computedData/04_preparedData/WordVectors-0.1-50-FALSE.fst",
-                          as.data.table = TRUE)
-  
-  
-  input <- layer_input(
-    shape = list(NULL),
-    dtype = "int32",
-    name = "input"
-  )
-  
-  # jeder Datenpunkt des inputs ist length(sentence) * ncol(wordVectors)
+
   model <- keras_model_sequential()
+  
   model %>% 
-    layer_conv_1d(name = "conv", filters = 100L, kernel_size = 5L,
-                  input_shape = (NULL, nrow(wordVectors))) %>%
-    # layer_embedding(name = "embedding", input_dim = ncol(trainData)+1,
-    #             output_dim = 32) %>% 
-   # layer_global_average_pooling_1d() %>%
-    # layer_lstm(units = 50, dropout = 0.25, 
-    #            recurrent_dropout = 0.25, 
-    #            return_sequences = FALSE, name = "lstm") %>% 
-    layer_dense(units = 100L, activation = "sigmoid", name = "dense",
-                input_shape = 100L) %>% 
+    
+    # Add a Convolution1D, which will learn filters
+    # Word group filters of size filter_length:
+    layer_conv_1d(input_shape  = list(maxWords, channels),
+                  data_format = "channels_last",
+      filters = 100, kernel_size = 5, 
+      padding = "valid", activation = "relu", strides = 1
+    ) %>%
+    # Apply max pooling:
+    layer_global_max_pooling_1d() %>%
+    
+    # Add a vanilla hidden layer:
+    layer_dense(100) %>%
+    
+    # Apply 20% layer dropout
+    layer_dropout(0.2) %>%
+    layer_activation("relu") %>%
+    
+    # Project onto a single unit output layer, and squash it with a sigmoid
     layer_dense(units = ncol(trainLabel),
                 activation = "softmax", 
                 name = "predictions")
-  
+
   summary(model)
-  
-  
-  # Bring model together
-  model <- keras_model(input, predictions)
-  
-  # Freeze the embedding weights initially to prevent updates propgating 
-  # back through and ruining our embedding
-  # get_layer(model, name = "embedding") %>% 
-  #   set_weights(list(wordVectors)) %>% 
-  #   freeze_weights()
-  
+  model$input_shape
   
   # Compile
   model %>% compile(
@@ -204,15 +192,13 @@ predictKeras <- function(dataPath, fileName, trainRatio = 0.75) {
   
   # Print architecture (plot_model isn't implemented in the R package yet)
 
+  
   history <- model %>% fit(
-    as.matrix(trainData),
-    trainLabel,
-    batch_size = 2048,
-    validation_data = list(as.matrix(testData), testLabel),
-    epochs = 35,
+    x = trainData,
+    y = trainLabel,
+    validation_data = list(testData, testLabel),
     view_metrics = FALSE,
-    verbose = 0
-  )
+    verbose = 2)
   
   # Look at training results
   

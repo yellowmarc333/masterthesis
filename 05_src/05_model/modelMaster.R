@@ -8,8 +8,10 @@ fileName4 <- "W2V-0.1-100.fst"
 fileName5 <- "W2V-0.1-500.fst"
 fileName6 <- "W2V-0.1-50.fst"
 fileName7 <- "BOW-0.01-TRUE.fst"
+fileName8 <- "W2VArray-0.1-50-FALSE.rds"
 
-fileName <- fileName6
+fileName <- fileName8
+trainRatio <- 0.75
 
 resultNN <- predictNN(dataPath, fileName1, trainRatio = 0.75) #0.29
 resultXG <- predictXG(dataPath, fileName1, trainRatio = 0.75) #0.269

@@ -72,6 +72,7 @@ prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/",
                               remove_punct = TRUE, remove_symbols = TRUE, 
                               remove_hyphens = TRUE)
   tokens <- as.list(tokens)
+  maxWords <- max(sapply(tokens, length))
   # old method
   # tokens <- text2vec::space_tokenizer(text)
 
@@ -91,7 +92,7 @@ prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/",
                             alpha = 0.75, lambda = 0)
   
   print("creating glove fit")
-  glove$fit_transform(tcm, n_iter = 20)
+  glove$fit_transform(tcm, n_iter = 25)
   
   wordVectors <- as.data.table(glove$components)
   
@@ -109,8 +110,54 @@ prepareDataW2V = function(inPath = "03_computedData/02_cleanedData/",
 
   # hier werden schon die seltenen woerter nicht genutzt
   wordVectorsNames <- colnames(wordVectors)
+  channels <- nrow(wordVectors)
+  
+  print("creating wordVectorArray")
+  wordVectorArray <- array(numeric(nrow(subsetData)* maxWords * channels),
+                           dim = c(nrow(subsetData), maxWords, channels))
+  print("fill wordVectorArray")
+
+  for(i in seq_len(nrow(subsetData))) {
+    
+    tmpWords <- tokens[[i]]
+    existWords <- tmpWords[tmpWords %in% wordVectorsNames]
+    if(length(existWords) == 0){
+      tmpMatrix <- matrix(numeric(channels),
+                                 ncol = channels)
+      
+    } else{
+      tmpMatrix <- as.matrix(t(wordVectors[, .SD, .SDcols = existWords]))
+    }
+    # if there are no existWords, still initialize a matrix
+    
+    # fill up rows with 0's for equal array length, when length < maxWords
+    if (nrow(tmpMatrix) != maxWords) {
+      tmpFillUp <- rbind(tmpMatrix,
+                         matrix(numeric((maxWords - length(existWords)) * 
+                                          channels),
+                                ncol = channels))
+    } else {
+      if(!identical(c(maxWords, channels), dim(tmpMatrix))) browser()
+      tmpFillUp <- tmpMatrix
+    }
+    wordVectorArray[i, , ] <- tmpFillUp
+
+  }
+  
+  print("finished filling")
+  
+  saveRDS(list(label = label,
+               wordVectorArray = wordVectorArray,
+               maxWords = maxWords,
+               channels = channels),
+          file = paste0(outPath, "W2VArray-", 
+                                  subsetSize, "-", word2VecSize,
+                                  "-", mergeSD, ".rds"))
+  
+
   
   print("sum word vectors to text vectors")
+  
   wordVectorSums <- vapply(tokens,FUN.VALUE = numeric(word2VecSize),
                            function(x, data = wordVectors) {
     cols <- wordVectorsNames[wordVectorsNames %in% x]

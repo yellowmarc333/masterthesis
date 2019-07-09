@@ -134,4 +134,81 @@ predictRF <- function(dataPath, fileName, trainRatio = 0.75) {
 }
 
 
+predictKeras <- function(dataPath, fileName, trainRatio = 0.75) {
+  assertString(dataPath)
+  assertString(fileName)
+  assertNumber(trainRatio, lower = 0, upper = 1)
+  
+
+  dataRDS <- readRDS(paste0(dataPath, fileName))
+  data <- dataRDS[["wordVectorArray"]]
+  label <- as.factor(dataRDS[["label"]])
+  maxWords <- dataRDS[["maxWords"]]
+  channels <- dataRDS[["channels"]]
+  
+  indexes <- sample.int(dim(data)[1], size = round(dim(data)[1] * trainRatio))
+  trainData <- data[indexes, , ]
+  testData <- data[-indexes, , ]
+  
+  trainLabelRaw <- label[indexes]
+  testLabelRaw <- label[-indexes]
+  
+  trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
+  testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
+  
+  # building model with layers
+  model <- keras_model_sequential()
+  model %>% 
+    
+    # Add a Convolution1D, which will learn filters
+    # Word group filters of size filter_length:
+    layer_conv_1d(input_shape  = list(maxWords, channels),
+                  data_format = "channels_last",
+      filters = 50, kernel_size = 5, 
+      padding = "valid", activation = "relu", strides = 1,
+      name = "conv1"
+    ) %>%
+    # lstm
+    #layer_lstm(units = 70) %>%
+    # Apply max pooling:
+    layer_global_max_pooling_1d() %>%
+    
+    # Add a vanilla hidden layer:
+    layer_dense(50) %>%
+    
+    # Apply 20% layer dropout
+    layer_dropout(0.2) %>%
+    layer_activation("relu") %>%
+    
+    # Project onto a single unit output layer, and squash it with a sigmoid
+    layer_dense(units = ncol(trainLabel),
+                activation = "softmax", 
+                name = "predictions")
+
+  # Compiling model
+  model %>% compile(
+    loss = 'categorical_crossentropy',
+    optimizer = optimizer_rmsprop(),
+    metrics = c('accuracy')
+  )
+  
+  # fitting model
+  history <- model %>% fit(
+    x = trainData,
+    y = trainLabel,
+    epochs = 10,
+    batchsize = 32,
+    validation_split = 0.5,
+    view_metrics = FALSE,
+    verbose = 2)
+  
+  # Look at training results
+  summary(model)
+  print(history)
+  plot(history)
+  
+  predictionResult <- model %>% evaluate(testData, testLabel, batch_size = 32)
+ 
+  
+}
 

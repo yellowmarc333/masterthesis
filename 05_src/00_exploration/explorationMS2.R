@@ -1,5 +1,6 @@
 # next steps:
 
+# mit na's auffüllen ausprobieren, MLP als input überlegen
 # coden dass alle verfahren die gleiche hardgecodete subsets bekommen
 # schau die layers an und ob da alles gut gegangen ist
 # xxpreparedataW2V nochmal durchgehen und besser selecten
@@ -25,9 +26,9 @@
 # mehrere saetze als input haben eventuell beruecksichtigen
 # toxicity datensatz ziehen
 # framework intelligent neu schreiben prepareData, dann als argument
-# welche methode mit parametern.
 # bert auschecken
 
+# xxkeras auf mac zum laufen zu bringen
 # xxwrite array  in word to vec, then try to implement CNN
 # xxbenchmarken mit anderen spalten (short description) im datensatz
 # xxworld post und the world post zusammenfassen
@@ -44,6 +45,18 @@
 # xxrename column names from data in preparation (nicht notwendig)
 # xxadd error measurement of the network
 # xx3blue one brown deep learning serie anschauen + notizen
+
+
+install_keras(method = c("auto", "virtualenv", "conda"),
+              conda = "auto", version = "default", tensorflow = "default",
+              extra_packages = c("tensorflow-hub"), ...)
+
+library(reticulate)
+use_python("//usr/local/bin/python3", required = TRUE)
+py_available()
+py_config()
+py_numpy_available()
+library(keras)
 
 
 

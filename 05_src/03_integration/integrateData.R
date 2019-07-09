@@ -20,4 +20,5 @@ integrateData = function(inPath = "03_computedData/02_cleanedData/",
   write.fst(trainSubset100pc, path = paste0(outPath, "trainSubset100pc.fst"))
   write.fst(trainSubset10pc, path = paste0(outPath, "trainSubset10pc.fst"))
   write.fst(trainSubset1pc, path = paste0(outPath, "trainSubset1pc.fst"))
+  write.fst(valData, path = paste0(outPath, "valData.fst"))
 }

@@ -1,10 +1,10 @@
 prepareDataBOW = function(inPath = "03_computedData/02_cleanedData/", 
                        outPath = "03_computedData/04_preparedData/",
-                       subsetSize = 0.01,
+                       subsetSize = c("1pc", "10pc", "100pc"),
                        mergeSD = FALSE){
   assertString(inPath)
   assertString(outPath)
-  assertNumber(subsetSize, lower = 0, upper = 1)
+  subsetSize <- match.arg(subsetSize)
   assertFlag(mergeSD)
   
   subsetData <- read.fst(path = paste0(inPath, "trainSubset10pc.fst"), 
@@ -41,13 +41,13 @@ prepareDataBOW = function(inPath = "03_computedData/02_cleanedData/",
 
 prepareDataW2V = function(inPath = "03_computedData/03_integratedData/", 
                           outPath = "03_computedData/04_preparedData/",
-                          subsetSize = 0.01,
+                          subsetSize = c("1pc", "10pc", "100pc"),
                           word2VecSize = 100,
                           mergeSD = FALSE){
   assertString(inPath)
   assertString(outPath)
+  subsetSize <- match.arg(subsetSize)
   assertNumber(word2VecSize)
-  assertNumber(subsetSize, lower = 0, upper = 1)
   assertFlag(mergeSD)
   
   subsetData <- read.fst(path = paste0(inPath, "trainSubset10pc.fst"), 

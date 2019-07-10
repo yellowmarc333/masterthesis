@@ -53,7 +53,6 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   subsetData <- read.fst(path = paste0(inPath, "trainSubset10pc.fst"), 
                    as.data.table = TRUE)
 
-  
   label <- subsetData$category
   
   subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
@@ -68,8 +67,17 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
                               remove_punct = FALSE, remove_symbols = FALSE, 
                               remove_hyphens = TRUE)
   tokens <- as.list(tokens)
-  maxWords <- max(sapply(tokens, length))
 
+  # here select max words as smallest number of length, that at least
+  # 0.999 of the Data points have (maybe complicated coded)
+  tableWords <- sort(table(sapply(tokens, length)), decreasing = TRUE)
+  cumsumWords <- cumsum(tableWords) / sum(tableWords)
+  sortedNumWords <- sort(as.integer(names(which(cumsumWords > 0.999))), 
+                   decreasing = FALSE)
+  maxWords <- max(sortedNumWords[1:2])
+  
+  tokens <- tokens[sapply(tokens, length) <= maxWords]
+  
   # Create vocabulary. Terms will be unigrams (simple words).
   itoken <- text2vec::itoken(tokens, progressbar = FALSE)
   vocab <- create_vocabulary(itoken)
@@ -78,7 +86,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   # Use our filtered vocabulary
   vectorizer <- text2vec::vocab_vectorizer(vocab)
   # use window of 5 for context words
-  tcm <- create_tcm(itoken, vectorizer, skip_grams_window = 5L)
+  tcm <- create_tcm(itoken, vectorizer, skip_grams_window = 2L)
 
   glove <- GlobalVectors$new(word_vectors_size = word2VecSize, 
                             vocabulary = vocab, x_max = 10, 
@@ -93,14 +101,14 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   write.fst(wordVectors, paste0(outPath, "WordVectors-", 
                                 subsetSize, "-", word2VecSize,
                                 "-", mergeSD, ".fst"))
-  # testVector <- wordVectors[,Ginger]
-  # 
-  # cos_sim = sapply(data.table(wordVectors), function(x) {
-  #   sum((x - testVector)^2)
-  # })
-  # cos_sim = sim2(x = t(wordVectors), y = t(testVector), method = "cosine",
-  #                norm = "l2")
-  # head(sort(cos_sim[,1], decreasing = TRUE), 20)
+  testVector <- wordVectors[, Senator]
+
+  cos_sim = sapply(data.table(wordVectors), function(x) {
+    sum((x - testVector)^2)
+  })
+  cos_sim = sim2(x = t(wordVectors), y = t(testVector), method = "cosine",
+                 norm = "l2")
+  head(sort(cos_sim[,1], decreasing = TRUE), 20)
 
   wordVectorsNames <- colnames(wordVectors)
   channels <- nrow(wordVectors)
@@ -110,8 +118,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
                            dim = c(nrow(subsetData), maxWords, channels))
   print("fill wordVectorArray")
 
-  for(i in seq_len(nrow(subsetData))) {
-    
+  for(i in seq_along(tokens)) {
     tmpWords <- tokens[[i]]
     existWords <- tmpWords[tmpWords %in% wordVectorsNames]
     if(length(existWords) == 0){
@@ -132,7 +139,6 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
     } else {
       tmpFillUp <- tmpMatrix
     }
-    # if(!identical(c(maxWords, channels), dim(tmpFillUp))) browser()
     wordVectorArray[i, , ] <- tmpFillUp
 
   }

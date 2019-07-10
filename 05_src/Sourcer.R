@@ -17,7 +17,7 @@ sourceAll = function() {
   require(microbenchmark)
   require(ranger)
   require(text2vec)
-  #require(keras)
+  require(keras)
   require(tensorflow)
 
 

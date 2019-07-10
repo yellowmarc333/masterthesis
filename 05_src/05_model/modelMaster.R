@@ -8,7 +8,7 @@ fileName4 <- "W2V-0.1-100.fst"
 fileName5 <- "W2V-0.1-500.fst"
 fileName6 <- "W2V-0.1-50.fst"
 fileName7 <- "BOW-0.01-TRUE.fst"
-fileName8 <- "W2VArray-0.1-50-FALSE.rds"
+fileName8 <- "W2VArray-10pc-50-FALSE.rds"
 
 fileName <- fileName8
 trainRatio <- 0.75

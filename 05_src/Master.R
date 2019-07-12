@@ -15,13 +15,14 @@ cleanData(inPath = paste0(computedDataPath,"01_importedData/"),
 
 # # 03 INTEGRATION
 integrateData(inPath = "03_computedData/02_cleanedData/", 
-             outPath = "03_computedData/03_integratedData/")
+             outPath = "03_computedData/03_integratedData/",
+             trainSize = 0.6)
 
 # 04 DATA PREPARATION
 prepareDataBOW(inPath = "03_computedData/02_cleanedData/",
             outPath = "03_computedData/04_preparedData/", 
-            subsetSize = 0.01, mergeSD = TRUE)
+            subsetSize = "10pc", mergeSD = TRUE)
 
 prepareDataW2V(inPath = "03_computedData/03_integratedData/",
                outPath = "03_computedData/04_preparedData/", 
-               subsetSize = 0.1, word2VecSize = 50)
+               subsetSize = "10pc", word2VecSize = 50)

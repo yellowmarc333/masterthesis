@@ -1,16 +1,15 @@
 
 
-predictNN <- function(dataPath, fileName, trainRatio = 0.75){
+predictNN <- function(dataPath, fileName){
   assertString(dataPath)
   assertString(fileName)
-  assertNumber(trainRatio, lower = 0, upper = 1)
   
   h2o.init(nthreads=-1, max_mem_size="16G")
   h2o.removeAll()
   
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
   
-  indexes <- sample.int(nrow(data), size = round(nrow(data) * trainRatio))
+  indexes <- read.fst("03_computedData/03_integratedData/indexes10pc.fst")[[1]]
   trainData <- data[indexes]
   testData <- data[-indexes]
   testLabel <- as.character(testData$labelRaw)
@@ -39,13 +38,12 @@ predictNN <- function(dataPath, fileName, trainRatio = 0.75){
 }
 
 
-predictXG <- function(dataPath, fileName, trainRatio = 0.75){
+predictXG <- function(dataPath, fileName){
   assertString(dataPath)
   assertString(fileName)
-  assertNumber(trainRatio, lower = 0, upper = 1)
   
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
-  indexes <- sample.int(nrow(data), size = round(nrow(data) * trainRatio))
+  indexes <- read.fst("03_computedData/03_integratedData/indexes10pc.fst")[[1]]
   trainData <- data[indexes]
   testData <- data[-indexes]
 
@@ -56,7 +54,7 @@ predictXG <- function(dataPath, fileName, trainRatio = 0.75){
 
   # create watchlist
   watchIndexes <- sample.int(nrow(trainData), 
-                             size = round(nrow(trainData) * trainRatio))
+                             size = round(nrow(trainData) * 0.8))
   watchTrain <- trainData[watchIndexes]
   watchTest <- trainData[-watchIndexes]
   watchTrainLabel <- trainLabel[watchIndexes]
@@ -100,14 +98,13 @@ predictXG <- function(dataPath, fileName, trainRatio = 0.75){
 }
 
 
-predictRF <- function(dataPath, fileName, trainRatio = 0.75) {
+predictRF <- function(dataPath, fileName) {
   assertString(dataPath)
   assertString(fileName)
-  assertNumber(trainRatio, lower = 0, upper = 1)
   
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
   
-  indexes <- sample.int(nrow(data), size = round(nrow(data) * trainRatio))
+  indexes <- read.fst("03_computedData/03_integratedData/indexes10pc.fst")[[1]]
   trainData <- data[indexes]
   testData <- data[-indexes]
   
@@ -134,19 +131,17 @@ predictRF <- function(dataPath, fileName, trainRatio = 0.75) {
 }
 
 
-predictKeras <- function(dataPath, fileName, trainRatio = 0.75) {
+predictKeras <- function(dataPath, fileName) {
   assertString(dataPath)
   assertString(fileName)
-  assertNumber(trainRatio, lower = 0, upper = 1)
-  
 
   dataRDS <- readRDS(paste0(dataPath, fileName))
   data <- dataRDS[["wordVectorArray"]]
   label <- as.factor(dataRDS[["label"]])
   maxWords <- dataRDS[["maxWords"]]
   channels <- dataRDS[["channels"]]
-  
-  indexes <- sample.int(dim(data)[1], size = round(dim(data)[1] * trainRatio))
+  indexes <- read.fst("03_computedData/03_integratedData/indexes10pc.fst")[[1]]
+
   trainData <- data[indexes, , ]
   testData <- data[-indexes, , ]
   
@@ -159,22 +154,30 @@ predictKeras <- function(dataPath, fileName, trainRatio = 0.75) {
   # building model with layers
   model <- keras_model_sequential()
   model %>% 
-    
     # Add a Convolution1D, which will learn filters
     # Word group filters of size filter_length:
     layer_conv_1d(input_shape  = list(maxWords, channels),
                   data_format = "channels_last",
-      filters = 50, kernel_size = 5, 
-      padding = "valid", activation = "relu", strides = 1,
+      filters = 50, kernel_size = 2, 
+      padding = "same", activation = "relu", strides = 1,
       name = "conv1"
     ) %>%
-    # lstm
-    #layer_lstm(units = 70) %>%
-    # Apply max pooling:
+    layer_conv_1d(filters = 100, kernel_size = 3, 
+                  padding = "same", activation = "relu",
+                  strides = 1,
+                  name = "conv2") %>%
+    layer_conv_1d(filters = 100, kernel_size = 4, 
+                  padding = "same", activation = "relu",
+                  strides = 1,
+                  name = "conv3") %>%
+    layer_conv_1d(filters = 100, kernel_size = 5, 
+                  padding = "same", activation = "relu",
+                  strides = 1,
+                  name = "conv4") %>%
     layer_global_max_pooling_1d() %>%
     
     # Add a vanilla hidden layer:
-    layer_dense(50) %>%
+    layer_dense(100) %>%
     
     # Apply 20% layer dropout
     layer_dropout(0.2) %>%
@@ -191,14 +194,14 @@ predictKeras <- function(dataPath, fileName, trainRatio = 0.75) {
     optimizer = optimizer_rmsprop(),
     metrics = c('accuracy')
   )
-  
+
   # fitting model
   history <- model %>% fit(
     x = trainData,
     y = trainLabel,
-    epochs = 10,
+    epochs = 6,
     batchsize = 32,
-    validation_split = 0.5,
+    validation_data = list(testData, testLabel),
     view_metrics = FALSE,
     verbose = 2)
   

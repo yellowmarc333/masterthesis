@@ -1,49 +1,45 @@
 dataPath <- "03_computedData/04_preparedData/"
 list.files(dataPath)
-fileName1 <- "News0.01Subset.fst"
-fileName2 <- "News0.1Subset.fst"
+fileName7 <- "Emb-100pc-FALSE.fst"
+fileName <- fileName7
+subsetSize <- "100pc"
 
-fileName3 <- "W2V0.01Subset.fst"
-fileName4 <- "W2V-0.1-100.fst"
-fileName5 <- "W2V-0.1-500.fst"
-fileName6 <- "W2V-0.1-50.fst"
-fileName7 <- "BOW-0.01-TRUE.fst"
-fileName8 <- "W2VArray-10pc-50-FALSE.rds"
 
-fileName <- fileName8
-trainRatio <- 0.75
 
-resultNN <- predictNN(dataPath, fileName1, trainRatio = 0.75) #0.29
-resultXG <- predictXG(dataPath, fileName1, trainRatio = 0.75) #0.269
-resultRF <- predictRF(dataPath, fileName1, trainRatio = 0.75) #0.33
+# TFIDF 10pc # 13-07
+fileName1 <- "TFIDF-10pc--FALSE.fst" 
+resultXG1 <- predictXG(dataPath, fileName1, subsetSize = "10pc") # 0.400
+resultRF1 <- predictRF(dataPath, fileName1, subsetSize = "10pc") # 0.437
 
-# with shortdescription
-resultNN7 <- predictNN(dataPath, fileName7, trainRatio = 0.75) # 0.274
-resultXG7 <- predictXG(dataPath, fileName7, trainRatio = 0.75) # 0.356
-resultRF7 <- predictRF(dataPath, fileName7, trainRatio = 0.75) # 0.386
 
-resultNN2 <- predictNN(dataPath, fileName2, trainRatio = 0.75) #0.389
-resultXG2 <- predictXG(dataPath, fileName2, trainRatio = 0.75) #0.413
-resultRF2 <- predictRF(dataPath, fileName2, trainRatio = 0.75) # 0.456
-# 2 stundne laufzeit auf 10% der daten.
+# BOW 10pc # 12-07
+fileName2 <- "BOW-10pc-FALSE.fst" 
+resultNN2 <- predictNN(dataPath, fileName2) # 
+resultXG2 <- predictXG(dataPath, fileName2, subsetSize = "10pc") # 0.400
+resultRF2 <- predictRF(dataPath, fileName2, subsetSize = "10pc") # 0.433
 
-# from here on word2vec
-resultNN3 <- predictNN(dataPath, fileName3, trainRatio = 0.75) # 0.15
-resultXG3 <- predictXG(dataPath, fileName3, trainRatio = 0.75) # 0.19
-resultRF3 <- predictRF(dataPath, fileName3, trainRatio = 0.75) # 0.21
 
-resultNN4 <- predictNN(dataPath, fileName4, trainRatio = 0.75) # 0.244
-resultXG4 <- predictXG(dataPath, fileName4, trainRatio = 0.75) # 0.231
-resultRF4 <- predictRF(dataPath, fileName4, trainRatio = 0.75) # 0.243
+# Sums of word2vec 10PC
+fileName3 <- "W2V-10pc-50-FALSE.fst"
+resultNN3 <- predictNN(dataPath, fileName3) # 
+resultXG3 <- predictXG(dataPath, fileName3, subsetSize = "10pc") # 0.14
+resultRF3 <- predictRF(dataPath, fileName3, subsetSize = "10pc") # 0.17
 
-resultNN5 <- predictNN(dataPath, fileName5, trainRatio = 0.75) # 0.243
-resultXG5 <- predictXG(dataPath, fileName5, trainRatio = 0.75) # 0.21
-resultRF5 <- predictRF(dataPath, fileName5, trainRatio = 0.75) # 0.21
-# word vector mit zu vielen dimensionen bringt nichts
+# Sums of word2vec 100PC
+fileName4 <- "W2V-100pc-50-FALSE.fst"
+resultXG4 <- predictXG(dataPath, fileName4, subsetSize = "100pc") # 18.6
+resultRF4 <- predictRF(dataPath, fileName4, subsetSize = "100pc") # 
 
-resultNN6 <- predictNN(dataPath, fileName6, trainRatio = 0.75) # 0.25
-resultXG6 <- predictXG(dataPath, fileName6, trainRatio = 0.75) # 0.238
-resultRF6 <- predictRF(dataPath, fileName6, trainRatio = 0.75) # 0.253
+
+
+# Array word2vec 10PC
+fileName5 <- "W2VArray-10pc-50-FALSE.rds"
+resultCN <- predictCNN(dataPath, fileName5, subsetSize = "10pc") # 0.15
+
+# Array word2vec 100PC
+fileName6 <- "W2VArray-100pc-50-FALSE.rds"
+resultCN <- predictCNN(dataPath, fileName6, subsetSize = "100pc") # 0.208
+
 
 for(file in grep(x = ls(), pattern = "result", value = TRUE)){
   saveRDS(get(file, inherits = FALSE),

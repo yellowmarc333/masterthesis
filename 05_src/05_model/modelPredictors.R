@@ -3,13 +3,16 @@
 predictNN <- function(dataPath, fileName){
   assertString(dataPath)
   assertString(fileName)
-  
+
   h2o.init(nthreads=-1, max_mem_size="16G")
   h2o.removeAll()
-  
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
   
   indexes <- read.fst("03_computedData/03_integratedData/indexes10pc.fst")[[1]]
+  # in integrate data, the indexes were sampled before reducing some rows
+  # in prepare Data, therefore rereduce it here
+  indexes <- indexes[indexes %in% seq_len(nrow(data))]
+  
   trainData <- data[indexes]
   testData <- data[-indexes]
   testLabel <- as.character(testData$labelRaw)
@@ -38,12 +41,16 @@ predictNN <- function(dataPath, fileName){
 }
 
 
-predictXG <- function(dataPath, fileName){
+predictXG <- function(dataPath, fileName, subsetSize){
   assertString(dataPath)
   assertString(fileName)
-  
+
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
-  indexes <- read.fst("03_computedData/03_integratedData/indexes10pc.fst")[[1]]
+  indexes <- read.fst(paste0("03_computedData/03_integratedData/",
+  "indexes", subsetSize, ".fst"))[[1]]
+  # in integrate data, the indexes were sampled before reducing some rows
+  # in prepare Data, therefore rereduce it here
+  indexes <- indexes[indexes %in% seq_len(nrow(data))]
   trainData <- data[indexes]
   testData <- data[-indexes]
 
@@ -52,6 +59,9 @@ predictXG <- function(dataPath, fileName){
   trainData[, labelRaw := NULL]
   testData[, labelRaw := NULL]
 
+  print(paste("in train are number of uniques:", length(unique(trainLabel))))
+  print(paste("in test are number of uniques:", length(unique(testLabel))))
+  
   # create watchlist
   watchIndexes <- sample.int(nrow(trainData), 
                              size = round(nrow(trainData) * 0.8))
@@ -74,6 +84,7 @@ predictXG <- function(dataPath, fileName){
   objective <- "multi:softprob"
   nrounds <- 20
   
+  print("training xgboost model")
   model = xgboost::xgb.train(eval_metric = eval_metric,
                              objective = objective,
                              num_class = numClass,
@@ -98,13 +109,17 @@ predictXG <- function(dataPath, fileName){
 }
 
 
-predictRF <- function(dataPath, fileName) {
+predictRF <- function(dataPath, fileName, subsetSize) {
   assertString(dataPath)
   assertString(fileName)
-  
+
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
   
-  indexes <- read.fst("03_computedData/03_integratedData/indexes10pc.fst")[[1]]
+  indexes <- read.fst(paste0("03_computedData/03_integratedData/",
+                             "indexes", subsetSize, ".fst"))[[1]]  # in integrate data, the indexes were sampled before reducing some rows
+  # in prepare Data, therefore rereduce it here
+  indexes <- indexes[indexes %in% seq_len(nrow(data))]
+  
   trainData <- data[indexes]
   testData <- data[-indexes]
   
@@ -131,22 +146,32 @@ predictRF <- function(dataPath, fileName) {
 }
 
 
-predictKeras <- function(dataPath, fileName) {
+predictCNN <- function(dataPath, fileName, subsetSize) {
   assertString(dataPath)
   assertString(fileName)
 
+  print("read in Data")
   dataRDS <- readRDS(paste0(dataPath, fileName))
   data <- dataRDS[["wordVectorArray"]]
   label <- as.factor(dataRDS[["label"]])
   maxWords <- dataRDS[["maxWords"]]
   channels <- dataRDS[["channels"]]
-  indexes <- read.fst("03_computedData/03_integratedData/indexes10pc.fst")[[1]]
-
+  indexes <- read.fst(paste0("03_computedData/03_integratedData/",
+                             "indexes", subsetSize, ".fst"))[[1]]  
+  # in integrate data, the indexes were sampled before reducing some rows
+  indexes <- indexes[indexes %in% seq_len(nrow(data))]
+  
   trainData <- data[indexes, , ]
   testData <- data[-indexes, , ]
   
   trainLabelRaw <- label[indexes]
   testLabelRaw <- label[-indexes]
+  
+  print(paste("in train are number of uniques:", 
+              length(unique(trainLabelRaw))))
+  print(paste("in test are number of uniques:", 
+              length(unique(testLabelRaw))))
+  
   
   trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
   testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
@@ -162,15 +187,15 @@ predictKeras <- function(dataPath, fileName) {
       padding = "same", activation = "relu", strides = 1,
       name = "conv1"
     ) %>%
-    layer_conv_1d(filters = 100, kernel_size = 3, 
+    layer_conv_1d(filters = 100, kernel_size = 3,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv2") %>%
-    layer_conv_1d(filters = 100, kernel_size = 4, 
+    layer_conv_1d(filters = 100, kernel_size = 4,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv3") %>%
-    layer_conv_1d(filters = 100, kernel_size = 5, 
+    layer_conv_1d(filters = 100, kernel_size = 5,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv4") %>%
@@ -191,27 +216,118 @@ predictKeras <- function(dataPath, fileName) {
   # Compiling model
   model %>% compile(
     loss = 'categorical_crossentropy',
-    optimizer = optimizer_rmsprop(),
+    optimizer = optimizer_rmsprop(lr = 0.001),
     metrics = c('accuracy')
   )
 
-  # fitting model
+  print("fitting model")
+  
   history <- model %>% fit(
     x = trainData,
     y = trainLabel,
-    epochs = 6,
+    epochs = 4,
     batchsize = 32,
     validation_data = list(testData, testLabel),
     view_metrics = FALSE,
     verbose = 2)
   
   # Look at training results
-  summary(model)
-  print(history)
-  plot(history)
+  # summary(model)
+  # print(history)
+  # plot(history)
   
   predictionResult <- model %>% evaluate(testData, testLabel, batch_size = 32)
- 
   
+  return(predictionResult)
+}
+
+
+predictEmb <- function(dataPath, fileName, subsetSize) {
+  assertString(dataPath)
+  assertString(fileName)
+  
+  print("read in Data")
+  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+  label <- data$labelRaw
+
+  indexes <- read.fst(paste0("03_computedData/03_integratedData/",
+                             "indexes", subsetSize, ".fst"))[[1]]  
+  # in integrate data, the indexes were sampled before reducing some rows
+  indexes <- indexes[indexes %in% seq_len(nrow(data))]
+  
+  trainData <- data[indexes, , ]
+  testData <- data[-indexes, , ]
+  
+  trainData[, labelRaw := NULL]
+  testData[, labelRaw := NULL]
+  
+  trainLabelRaw <- label[indexes]
+  testLabelRaw <- label[-indexes]
+  
+  print(paste("in train are number of uniques:", 
+              length(unique(trainLabelRaw))))
+  print(paste("in test are number of uniques:", 
+              length(unique(testLabelRaw))))
+  
+  trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
+  testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
+  
+  nVocab = max(rbind(trainData,testData)) + 1
+  
+  model <- keras_model_sequential() %>% 
+    # Start off with an efficient embedding layer which maps
+    # the vocab indices into embedding_dims dimensions
+    layer_embedding(input_dim = nVocab,
+                    output_dim = 50, 
+                    input_length = ncol(trainData)) %>%
+    layer_dropout(0.2) %>%
+    
+    # Add a Convolution1D, which will learn filters
+    layer_conv_1d(filters = 250, kernel_size  = 3, 
+      padding = "valid", activation = "relu", strides = 1
+    ) %>%
+    # Apply max pooling:
+    layer_global_max_pooling_1d() %>%
+    
+    # Add a vanilla hidden layer:
+    layer_dense(units = 100) %>%
+    
+    # Apply 20% layer dropout
+    layer_dropout(0.2) %>%
+    layer_activation("relu") %>%
+    
+    # Project onto a single unit output layer, and squash it with a sigmoid
+    layer_dense(units = ncol(trainLabel),
+                activation = "softmax", 
+                name = "predictions")
+  
+ 
+  # Compiling model
+  model %>% compile(
+    loss = 'categorical_crossentropy',
+    optimizer = optimizer_rmsprop(lr = 0.0005),
+    metrics = c('accuracy')
+  )
+  
+  print("fitting model")
+  
+  history <- model %>% fit(
+    x = as.matrix(trainData),
+    y = trainLabel,
+    epochs = 5,
+    batchsize = 32,
+    validation_data = list(as.matrix(testData), testLabel),
+    view_metrics = FALSE,
+    verbose = 2)
+  
+  # Look at training results
+  # summary(model)
+  # print(history)
+  # plot(history)
+  
+  predictionResult <- model %>% 
+    evaluate(as.matrix(testData), testLabel, batch_size = 32)
+  View(predictionResult)
+  return(predictionResult)
 }
 

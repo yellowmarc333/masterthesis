@@ -19,10 +19,18 @@ integrateData(inPath = "03_computedData/02_cleanedData/",
              trainSize = 0.6)
 
 # 04 DATA PREPARATION
-prepareDataBOW(inPath = "03_computedData/02_cleanedData/",
+prepareDataBOW(inPath = "03_computedData/03_integratedData/",
             outPath = "03_computedData/04_preparedData/", 
-            subsetSize = "10pc", mergeSD = TRUE)
+            subsetSize = "10pc", mergeSD = FALSE)
 
 prepareDataW2V(inPath = "03_computedData/03_integratedData/",
                outPath = "03_computedData/04_preparedData/", 
                subsetSize = "10pc", word2VecSize = 50)
+
+prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
+               outPath = "03_computedData/04_preparedData/", 
+               subsetSize = "10pc")
+
+prepareDataEmb(inPath = "03_computedData/03_integratedData/",
+                 outPath = "03_computedData/04_preparedData/", 
+                 subsetSize = "100pc")

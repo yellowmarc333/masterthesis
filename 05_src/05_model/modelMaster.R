@@ -1,7 +1,7 @@
 dataPath <- "03_computedData/04_preparedData/"
 list.files(dataPath)
-fileName7 <- "Emb-100pc-FALSE.fst"
-fileName <- fileName7
+fileName8 <- "Emb-100pc-Binary.fst"
+fileName <- fileName8
 subsetSize <- "100pc"
 
 

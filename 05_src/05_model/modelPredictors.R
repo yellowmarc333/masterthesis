@@ -331,3 +331,105 @@ predictEmb <- function(dataPath, fileName, subsetSize) {
   return(predictionResult)
 }
 
+predictEmb_Binary <- function(dataPath, fileName, subsetSize) {
+  assertString(dataPath)
+  assertString(fileName)
+  
+  print("read in Data")
+  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+  label <- data$labelRaw
+  
+  indexes <- sample.int(nrow(data), size = round(nrow(data)* 0.9))
+  
+  trainData <- data[indexes,]
+  testData <- data[-indexes, ]
+  
+  trainData[, labelRaw := NULL]
+  testData[, labelRaw := NULL]
+  
+  trainLabelRaw <- label[indexes]
+  testLabelRaw <- label[-indexes]
+  
+  print(paste("in train are number of uniques:", 
+              length(unique(trainLabelRaw))))
+  print(paste("in test are number of uniques:", 
+              length(unique(testLabelRaw))))
+  
+  trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
+  testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
+  
+  nVocab = max(rbind(trainData,testData)) + 1
+  
+  model <- keras_model_sequential() %>% 
+    # Start off with an efficient embedding layer which maps
+    # the vocab indices into embedding_dims dimensions
+    layer_embedding(input_dim = nVocab,
+                    output_dim = 100, 
+                    input_length = ncol(trainData)) %>%
+    layer_dropout(0.2) %>%
+    
+    # Add a Convolution1D, which will learn filters
+    layer_conv_1d(filters = 100, kernel_size  = 2, 
+                  padding = "valid", activation = "relu", strides = 1
+    ) %>%
+    layer_dropout(0.2) %>%
+    layer_conv_1d(filters = 100, kernel_size = 3,
+                  padding = "same", activation = "relu",
+                  strides = 1,
+                  name = "conv2") %>%
+    layer_conv_1d(filters = 100, kernel_size = 4,
+                  padding = "same", activation = "relu",
+                  strides = 1,
+                  name = "conv3") %>%
+    layer_dropout(0.2) %>%
+    layer_conv_1d(filters = 100, kernel_size = 5,
+                  padding = "same", activation = "relu",
+                  strides = 1,
+                  name = "conv4") %>%
+    # Apply max pooling:
+    layer_dropout(0.2) %>%
+    layer_global_max_pooling_1d() %>%
+    
+    # Add a vanilla hidden layer:
+    layer_dense(units = 100) %>%
+    # Add a vanilla hidden layer:
+    layer_dense(units = 50) %>%
+    
+    # Apply 20% layer dropout
+    layer_dropout(0.2) %>%
+    layer_activation("relu") %>%
+    
+    # Project onto a single unit output layer, and squash it with a sigmoid
+    layer_dense(units = ncol(trainLabel),
+                activation = "softmax", 
+                name = "predictions")
+  
+  
+  # Compiling model
+  model %>% compile(
+    loss = 'binary_crossentropy',
+    optimizer = optimizer_rmsprop(lr = 0.001),
+    metrics = c('accuracy')
+  )
+  
+  print("fitting model")
+  
+  history <- model %>% fit(
+    x = as.matrix(trainData),
+    y = trainLabel,
+    epochs = 4,
+    batchsize = 32,
+    validation_data = list(as.matrix(testData), testLabel),
+    view_metrics = FALSE,
+    verbose = 2)
+  
+  # Look at training results
+  # summary(model)
+  # print(history)
+  # plot(history)
+  
+  predictionResult <- model %>% 
+    evaluate(as.matrix(testData), testLabel, batch_size = 32)
+  View(predictionResult)
+  return(predictionResult)
+}

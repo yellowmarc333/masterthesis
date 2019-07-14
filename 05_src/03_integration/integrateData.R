@@ -16,32 +16,17 @@ integrateData = function(inPath = "03_computedData/02_cleanedData/",
   
   # sample subsets and train indexes for 1, 10, 100 percent
   trainSubset100pc <- data[-valIndexes]
-  set.seed(100)
-  indexes100pc <- sample.int(nrow(trainSubset100pc), 
-                             floor(nrow(trainSubset100pc) * trainSize))
+
   set.seed(100)
   trainSubset1pc <- trainSubset100pc[sample.int(.N, size = round(.N * 0.01))]
-  indexes1pc <- sample.int(nrow(trainSubset1pc), 
-                             floor(nrow(trainSubset1pc) * trainSize))
+
   set.seed(100)
   trainSubset10pc <- trainSubset100pc[sample.int(.N, size = round(.N * 0.1))]
-  indexes10pc <- sample.int(nrow(trainSubset10pc), 
-                             floor(nrow(trainSubset10pc) * trainSize))
-
+ 
   write.fst(trainSubset100pc, path = paste0(outPath, "trainSubset100pc.fst"))
   write.fst(trainSubset10pc, path = paste0(outPath, "trainSubset10pc.fst"))
   write.fst(trainSubset1pc, path = paste0(outPath, "trainSubset1pc.fst"))
   
   write.fst(valData, path = paste0(outPath, "valData.fst"))
-  
-  write.fst(data.table(indexes100pc), 
-            path = paste0(outPath, "indexes100pc.fst"))
-  write.fst(data.table(indexes10pc), 
-            path = paste0(outPath, "indexes10pc.fst"))
-  write.fst(data.table(indexes1pc), 
-            path = paste0(outPath, "indexes1pc.fst"))
-  
-  print(indexes1pc[1:5])
-  print(indexes10pc[1:5])
-  print(indexes100pc[1:5])
+ 
 }

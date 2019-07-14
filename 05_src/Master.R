@@ -34,3 +34,10 @@ prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
 prepareDataEmb(inPath = "03_computedData/03_integratedData/",
                  outPath = "03_computedData/04_preparedData/", 
                  subsetSize = "100pc")
+
+
+# binary
+resultBinary <- pipelineEmbBinary(inPath = "03_computedData/03_integratedData/",
+                                  outPath = "03_computedData/04_preparedData/", 
+                                  subsetSize = "100pc",
+                                  binary = TRUE)

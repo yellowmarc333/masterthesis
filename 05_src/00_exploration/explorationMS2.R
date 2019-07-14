@@ -1,9 +1,17 @@
 # next steps/ to dos:
 
+# den gecleanten text anschauen und checken ob was übersehen wurde.
+# Glove nutzen: schauen wieviel übereinstimmende Terme und was machen mit
+#   denen, die nicht übereinstimmen, nochmal Glove lernen?
+# bei GloVe: keine terme removen die nur 1 mal vorkommen
+# bei BOW  ndoc > 2 hinzufuegen
 # word2vec problem, entweder die vecs sind schlecht,
 #     oder das unsupervised learning ist das problem
+#     -> binäres framework schreiben, momentan 0.67 accuracy, jetzt
+#         das tunen mit preproc und Glove ausprobieren
+#       dann framework schreiben wo alle binären accuracys ausgegeben werden
+#       
 # mache das sampling zum wegschreiben und das framework noch intelligenter
-# remove stopwords für wordtovec vlt?
 # lernrate auschecken (optimizer)
 # pretrained word vectors reinnehmen.
 # schau die im convolutional layers an und ob da alles gut gegangen ist
@@ -11,7 +19,6 @@
 # binary cross entropy > mse? auschecken?
 # find similarities to words to see if word2vec works. (write function)
 # generell: bei verschiedenen auswahlmöglichkeiten schauen was gut dokumentiert ist
-
 
 # ueberlegen wie explaining aussehen koennte.
 # methoden: multinomial naive bayes
@@ -30,6 +37,7 @@
 # naive bayes implementieren
 # word2vec verstehen
 
+# xxremove stopwords für wordtovec vlt?
 # xxcoden dass alle verfahren die gleiche hardgecodete subsets bekommen
 # xxword padding nachschauen wie richtig!
 # xximplementiere embedding NN mit

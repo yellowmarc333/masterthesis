@@ -21,7 +21,7 @@ prepareDataBOW = function(inPath = "03_computedData/02_cleanedData/",
   }
   
   tokens <- tokens(texts, what = "word", remove_numbers = FALSE, 
-                   remove_punct = FALSE, remove_symbols = FALSE, 
+                   remove_punct = TRUE, remove_symbols = TRUE, 
                    remove_hyphens = TRUE)
   # lower all cases
   tokens <- tokens_tolower(tokens)
@@ -44,9 +44,18 @@ prepareDataBOW = function(inPath = "03_computedData/02_cleanedData/",
   tokens.dfm <- quanteda::dfm_trim(tokens.dfm, min_docfreq = 2)
   tokens.dt <- as.data.table(quanteda::convert(tokens.dfm, to = "data.frame"))
   tokens.dt[, document := NULL]
-  tokens.dt.label <- data.table(labelRaw, tokens.dt)
+  result <- data.table(labelRaw, tokens.dt)
   
-  write.fst(tokens.dt.label, path = paste0(outPath, "BOW-", 
+  trainSize = 0.8
+  set.seed(100)
+  indexes <- sample.int(nrow(result), 
+                        floor(nrow(result) * trainSize))
+  
+  write.fst(indexes, path = paste0(outPath, "BOW-Indexes-", 
+                                   subsetSize,
+                                   "-", mergeSD, ".fst"))
+  
+  write.fst(result, path = paste0(outPath, "BOW-", 
                                            subsetSize, "-", mergeSD, ".fst"))
 }
 
@@ -78,7 +87,7 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
 
   # Create iterator over tokens
   tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
-                              remove_punct = FALSE, remove_symbols = FALSE, 
+                              remove_punct = TRUE, remove_symbols = TRUE, 
                               remove_hyphens = TRUE)
   
   # lower all cases
@@ -105,8 +114,17 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   tfidf = TfIdf$new()
   tfidf_fit = tfidf$fit_transform(x = dtm, tfidf)
   # fit model to train data and transform train data with fitted model
-  tfidf_data <- data.table(labelRaw = as.factor(label), as.matrix(tfidf_fit))
+  result <- data.table(labelRaw = as.factor(label), as.matrix(tfidf_fit))
 
+  trainSize = 0.8
+  set.seed(100)
+  indexes <- sample.int(nrow(result), 
+                        floor(nrow(result) * trainSize))
+  
+  write.fst(indexes, path = paste0(outPath, "TFIDF-Indexes-", 
+                                   subsetSize,
+                                   "-", mergeSD, ".fst"))
+  
   write.fst(tfidf_data, paste0(outPath, "TFIDF-", 
                                 subsetSize, "-",
                                 "-", mergeSD, ".fst"))
@@ -142,14 +160,14 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   
   # Create iterator over tokens
   tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
-                             remove_punct = TRUE, remove_symbols = TRUE, 
+                             remove_punct = FALSE, remove_symbols = FALSE, 
                              remove_hyphens = TRUE)
   
   # lower all cases
   tokens <- quanteda::tokens_tolower(tokens)
   
   # dont remove stopwords because are inducing meaning
-  tokens <- tokens_remove(tokens, c(stopwords("english")))
+  #tokens <- tokens_remove(tokens, c(stopwords("english")))
   
   # dont use wordstemming
   #tokens <- tokens_wordstem(tokens, language = "english")
@@ -264,6 +282,15 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   result = data.table(labelRaw = as.factor(subsetData$category),
                       t(wordVectorSums))
   
+  trainSize = 0.8
+  set.seed(100)
+  indexes <- sample.int(nrow(result), 
+                             floor(nrow(result) * trainSize))
+  
+  write.fst(indexes, path = paste0(outPath, "W2V-Indexes-", 
+                                  subsetSize, "-", word2VecSize,
+                                  "-", mergeSD, ".fst"))
+  
   write.fst(result, path = paste0(outPath, "W2V-", 
                                   subsetSize, "-", word2VecSize,
                                   "-", mergeSD, ".fst"))
@@ -277,10 +304,12 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
   assertString(outPath)
   subsetSize <- match.arg(subsetSize)
   assertFlag(mergeSD)
-  
+
   fileName <- paste0("trainSubset", subsetSize, ".fst")
   subsetData <- read.fst(path = paste0(inPath, fileName), 
                          as.data.table = TRUE)
+  
+
   
   N <- nrow(subsetData)
   
@@ -295,14 +324,14 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
 
   # Create iterator over tokens
   tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
-                             remove_punct = TRUE, remove_symbols = TRUE, 
+                             remove_punct = FALSE, remove_symbols = FALSE, 
                              remove_hyphens = TRUE)
 
   # lower all cases
   tokens <- quanteda::tokens_tolower(tokens)
   
   # dont remove stopwords because are inducing meaning
-  tokens <- quanteda::tokens_remove(tokens, c(stopwords("english")))
+  # tokens <- quanteda::tokens_remove(tokens, c(stopwords("english")))
   
   # dont use wordstemming
   #tokens <- tokens_wordstem(tokens, language = "english")
@@ -339,9 +368,194 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
   padded <- sequences %>%
     pad_sequences(maxlen = maxWords)
 
-  write.fst(data.table(labelRaw = as.factor(label), padded),
-            path = paste0(outPath, "Emb-", 
+  result <- data.table(labelRaw = as.factor(label), padded)
+  
+  trainSize = 0.8
+  set.seed(100)
+  indexes <- sample.int(nrow(result), 
+                        floor(nrow(result) * trainSize))
+  
+  write.fst(indexes, path = paste0(outPath, "Emb-Indexes-", 
+                                   subsetSize,
+                                   "-", mergeSD, ".fst"))
+  
+  write.fst(result, path = paste0(outPath, "Emb-", 
                                   subsetSize,
                                   "-", mergeSD, ".fst"))
 }
+
+
+
+pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/", 
+                          outPath = "03_computedData/04_preparedData/",
+                          subsetSize = c("1pc", "10pc", "100pc"),
+                          mergeSD = FALSE, 
+                          binary = FALSE){
+  assertString(inPath)
+  assertString(outPath)
+  subsetSize <- match.arg(subsetSize)
+  assertFlag(mergeSD)
+
+  fileName <- paste0("trainSubset", subsetSize, ".fst")
+  wholeData <- read.fst(path = paste0(inPath, fileName), 
+                         as.data.table = TRUE)
+  
+  categories <- unique(wholeData$category)
+  categoryPairs <- t(combn(categories, m = 2))
+  
+  result <- data.table(categoryPairs, accuracy = 0)
+  
+  for(row in seq_len(nrow(categoryPairs))){
+    print(paste("calculating row", categoryPairs[row, ]))
+    subsetData <- wholeData[category %in% categoryPairs[row ,],]
+    
+    N <- nrow(subsetData)
+    label <- subsetData$category
+    texts <- subsetData$headline
+    
+    # Create iterator over tokens
+    tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
+                               remove_punct = TRUE, remove_symbols = TRUE, 
+                               remove_hyphens = TRUE)
+    
+    # lower all cases
+    tokens <- quanteda::tokens_tolower(tokens)
+    
+    # dont remove stopwords because are inducing meaning
+    tokens <- quanteda::tokens_remove(tokens, c(stopwords("english")))
+    
+    # dont use wordstemming
+    #tokens <- tokens_wordstem(tokens, language = "english")
+    
+    # prune vocabulary
+    itoken <- text2vec::itoken(as.list(tokens), progressbar = FALSE)
+    vocab <- as.data.table(text2vec::create_vocabulary(itoken))
+    # select words which just occur 2 times or less
+    rem_wordsvocab <- vocab[term_count <= 2 , term]
+    tokens <- quanteda::tokens_remove(tokens, rem_wordsvocab)
+    
+    # here select max words as smallest number of length, that at least
+    # 0.999 of the Data points have (maybe complicated coded)
+    tableWords <- sort(table(sapply(tokens, length)), decreasing = TRUE)
+    cumsumWords <- cumsum(tableWords) / sum(tableWords)
+    sortedNumWords <- sort(as.integer(names(which(cumsumWords > 0.999))), 
+                           decreasing = FALSE)
+    maxWords <- max(sortedNumWords[1:2])
+    
+    tokens <- tokens[sapply(tokens, length) <= maxWords]
+    
+    # bringt tokens back to text format for keras tokenizer
+    tokens_text_list <- sapply(tokens, function(x) {
+      do.call(paste, as.list(x))
+    })
+    tokens_text <- unlist(tokens_text_list)
+    
+    # make integer sequences and pad them with keras
+    myKerasTokenizer = keras::text_tokenizer() %>%
+      keras::fit_text_tokenizer(x = tokens_text)
+    sequences <- keras::texts_to_sequences(tokenizer = myKerasTokenizer, 
+                                           texts = tokens_text)
+    
+    padded <- sequences %>%
+      pad_sequences(maxlen = maxWords)
+    
+    data <- data.table(labelRaw = as.factor(label), padded)
+    
+    label <- data$labelRaw
+    
+    indexes <- sample.int(nrow(data), size = round(nrow(data)* 0.9))
+    
+    trainData <- data[indexes,]
+    testData <- data[-indexes, ]
+    
+    trainData[, labelRaw := NULL]
+    testData[, labelRaw := NULL]
+    
+    trainLabelRaw <- label[indexes]
+    testLabelRaw <- label[-indexes]
+    
+    print(paste("in train are number of uniques:", 
+                length(unique(trainLabelRaw))))
+    print(paste("in test are number of uniques:", 
+                length(unique(testLabelRaw))))
+    
+    trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
+    testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
+    
+    nVocab = max(rbind(trainData,testData)) + 1
+    
+    model <- keras_model_sequential() %>% 
+      # Start off with an efficient embedding layer which maps
+      # the vocab indices into embedding_dims dimensions
+      layer_embedding(input_dim = nVocab,
+                      output_dim = 100, 
+                      input_length = ncol(trainData)) %>%
+      layer_dropout(0.2) %>%
+      
+      # Add a Convolution1D, which will learn filters
+      layer_conv_1d(filters = 100, kernel_size  = 2, 
+                    padding = "valid", activation = "relu", strides = 1
+      ) %>%
+      layer_dropout(0.2) %>%
+      layer_conv_1d(filters = 100, kernel_size = 3,
+                    padding = "same", activation = "relu",
+                    strides = 1,
+                    name = "conv2") %>%
+      layer_conv_1d(filters = 100, kernel_size = 4,
+                    padding = "same", activation = "relu",
+                    strides = 1,
+                    name = "conv3") %>%
+      layer_dropout(0.2) %>%
+      layer_conv_1d(filters = 100, kernel_size = 5,
+                    padding = "same", activation = "relu",
+                    strides = 1,
+                    name = "conv4") %>%
+      # Apply max pooling:
+      layer_dropout(0.2) %>%
+      layer_global_max_pooling_1d() %>%
+      
+      # Add a vanilla hidden layer:
+      layer_dense(units = 100) %>%
+      # Add a vanilla hidden layer:
+      layer_dense(units = 50) %>%
+      
+      # Apply 20% layer dropout
+      layer_dropout(0.2) %>%
+      layer_activation("relu") %>%
+      
+      # Project onto a single unit output layer, and squash it with a sigmoid
+      layer_dense(units = ncol(trainLabel),
+                  activation = "softmax", 
+                  name = "predictions")
+    
+    summary(model)
+    # Compiling model
+    model %>% compile(
+      loss = 'binary_crossentropy',
+      optimizer = optimizer_rmsprop(lr = 0.001),
+      metrics = c('accuracy')
+    )
+    
+    print(paste("fitting model", row))
+    
+    history <- model %>% fit(
+      x = as.matrix(trainData),
+      y = trainLabel,
+      epochs = 3,
+      batchsize = 32,
+      validation_data = list(as.matrix(testData), testLabel),
+      view_metrics = FALSE,
+      verbose = 2)
+    
+    
+    predictionResult <- model %>% 
+      evaluate(as.matrix(testData), testLabel, batch_size = 32)
+    
+    result[row, accuracy := predictionResult$acc]
+  }
+  
+  return(result)
+}
+
+
 

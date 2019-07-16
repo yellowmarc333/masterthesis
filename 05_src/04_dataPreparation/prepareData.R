@@ -1,4 +1,4 @@
-prepareDataBOW = function(inPath = "03_computedData/02_cleanedData/", 
+prepareDataBOW = function(inPath = "03_computedData/03_integratedData/", 
                        outPath = "03_computedData/04_preparedData/",
                        subsetSize = c("1pc", "10pc", "100pc"),
                        mergeSD = FALSE){
@@ -7,11 +7,9 @@ prepareDataBOW = function(inPath = "03_computedData/02_cleanedData/",
   subsetSize <- match.arg(subsetSize)
   assertFlag(mergeSD)
   
-  list.files(path = inPath)
   subsetData <- read.fst(path = paste0(inPath, "trainSubset10pc.fst"), 
                          as.data.table = TRUE)
   
-  label <- oneHotEncode(subsetData$category)
   labelRaw <- as.factor(subsetData$category)
   subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
   if (mergeSD) {
@@ -35,23 +33,27 @@ prepareDataBOW = function(inPath = "03_computedData/02_cleanedData/",
   # reduce to tokens > 0
   hasWords <- lengths(tokens) > 0
   tokens <- tokens[hasWords]
-  label = label[hasWords]
-  labelRaw = labelRaw[hasWords]
-  
 
   tokens.dfm <- dfm(tokens)
   
   tokens.dfm <- quanteda::dfm_trim(tokens.dfm, min_docfreq = 2)
   tokens.dt <- as.data.table(quanteda::convert(tokens.dfm, to = "data.frame"))
+  
+  labelIndexes <- as.integer(gsub(tokens.dt$document, 
+                                  pattern = "text", 
+                                  replacement = ""))
   tokens.dt[, document := NULL]
-  result <- data.table(labelRaw, tokens.dt)
+  
+  labelRed <- labelRaw[labelIndexes]
+  
+  result <- data.table(labelRaw = labelRed, tokens.dt)
   
   trainSize = 0.8
   set.seed(100)
   indexes <- sample.int(nrow(result), 
                         floor(nrow(result) * trainSize))
   
-  write.fst(indexes, path = paste0(outPath, "BOW-Indexes-", 
+  write.fst(data.table(indexes), path = paste0(outPath, "BOW-Indexes-", 
                                    subsetSize,
                                    "-", mergeSD, ".fst"))
   
@@ -113,19 +115,25 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   # define tfidf model
   tfidf = TfIdf$new()
   tfidf_fit = tfidf$fit_transform(x = dtm, tfidf)
-  # fit model to train data and transform train data with fitted model
-  result <- data.table(labelRaw = as.factor(label), as.matrix(tfidf_fit))
+
+  labelIndexes <- as.integer(gsub(names(tokens), 
+                                  pattern = "text", 
+                                  replacement = ""))
+  
+  labelRed <- label[labelIndexes]
+  
+  result <- data.table(labelRaw = as.factor(labelRed), as.matrix(tfidf_fit))
 
   trainSize = 0.8
   set.seed(100)
   indexes <- sample.int(nrow(result), 
                         floor(nrow(result) * trainSize))
   
-  write.fst(indexes, path = paste0(outPath, "TFIDF-Indexes-", 
+  write.fst(data.table(indexes), path = paste0(outPath, "TFIDF-Indexes-", 
                                    subsetSize,
                                    "-", mergeSD, ".fst"))
   
-  write.fst(tfidf_data, paste0(outPath, "TFIDF-", 
+  write.fst(result, paste0(outPath, "TFIDF-", 
                                 subsetSize, "-",
                                 "-", mergeSD, ".fst"))
   
@@ -171,7 +179,6 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   
   # dont use wordstemming
   #tokens <- tokens_wordstem(tokens, language = "english")
-  
   tokens <- as.list(tokens)
   
   # here select max words as smallest number of length, that at least
@@ -204,13 +211,14 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   
   wordVectors <- as.data.table(glove$components)
   
+  # write just the wordVectors
   write.fst(wordVectors, paste0(outPath, "WordVectors-", 
                                 subsetSize, "-", word2VecSize,
                                 "-", mergeSD, ".fst"))
   
   
-  testVector <- wordVectors[, trump]
-
+  # testVector <- wordVectors[, trump]
+  # 
   # cos_sim = sapply(data.table(wordVectors), function(x) {
   #   sum((x - testVector)^2)
   # })
@@ -259,7 +267,13 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   
   print("finished filling")
   
-  saveRDS(list(label = label,
+  labelIndexes <- as.integer(gsub(names(tokens), 
+                                  pattern = "text", 
+                                  replacement = ""))
+  
+  labelRed <- label[labelIndexes]
+  
+  saveRDS(list(label = labelRed,
                wordVectorArray = wordVectorArray,
                maxWords = maxWords,
                channels = channels),
@@ -279,7 +293,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
                              return(res)
                            })
   
-  result = data.table(labelRaw = as.factor(subsetData$category),
+  result = data.table(labelRaw = as.factor(labelRed),
                       t(wordVectorSums))
   
   trainSize = 0.8
@@ -287,7 +301,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   indexes <- sample.int(nrow(result), 
                              floor(nrow(result) * trainSize))
   
-  write.fst(indexes, path = paste0(outPath, "W2V-Indexes-", 
+  write.fst(data.table(indexes), path = paste0(outPath, "W2V-Indexes-", 
                                   subsetSize, "-", word2VecSize,
                                   "-", mergeSD, ".fst"))
   
@@ -300,6 +314,7 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
                           outPath = "03_computedData/04_preparedData/",
                           subsetSize = c("1pc", "10pc", "100pc"),
                           mergeSD = FALSE){
+
   assertString(inPath)
   assertString(outPath)
   subsetSize <- match.arg(subsetSize)
@@ -367,15 +382,21 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
   
   padded <- sequences %>%
     pad_sequences(maxlen = maxWords)
+  
+  labelIndexes <- as.integer(gsub(names(tokens_text), 
+                                  pattern = "text", 
+                                  replacement = ""))
 
-  result <- data.table(labelRaw = as.factor(label), padded)
+  labelRed <- label[labelIndexes]
+
+  result <- data.table(labelRaw = as.factor(labelRed), padded)
   
   trainSize = 0.8
   set.seed(100)
   indexes <- sample.int(nrow(result), 
                         floor(nrow(result) * trainSize))
   
-  write.fst(indexes, path = paste0(outPath, "Emb-Indexes-", 
+  write.fst(data.table(indexes), path = paste0(outPath, "Emb-Indexes-", 
                                    subsetSize,
                                    "-", mergeSD, ".fst"))
   
@@ -405,8 +426,11 @@ pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/",
   
   result <- data.table(categoryPairs, accuracy = 0)
   
-  for(row in seq_len(nrow(categoryPairs))){
-    print(paste("calculating row", categoryPairs[row, ]))
+  for (row in seq_len(nrow(categoryPairs))){
+    #if (row > 10) break
+    print(paste("calculating row", paste(categoryPairs[row, ])))
+    
+    # subsetData <- wholeData[category %in% c("WORLD NEWS", "MEDIA"),]
     subsetData <- wholeData[category %in% categoryPairs[row ,],]
     
     N <- nrow(subsetData)
@@ -440,7 +464,7 @@ pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/",
     cumsumWords <- cumsum(tableWords) / sum(tableWords)
     sortedNumWords <- sort(as.integer(names(which(cumsumWords > 0.999))), 
                            decreasing = FALSE)
-    maxWords <- max(sortedNumWords[1:2])
+    maxWords <- max(sortedNumWords[1:2], na.rm = TRUE)
     
     tokens <- tokens[sapply(tokens, length) <= maxWords]
     
@@ -459,7 +483,15 @@ pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/",
     padded <- sequences %>%
       pad_sequences(maxlen = maxWords)
     
-    data <- data.table(labelRaw = as.factor(label), padded)
+    labelIndexes <- as.integer(gsub(names(tokens_text), 
+                                    pattern = "text", 
+                                    replacement = ""))
+    
+    labelRed <- label[labelIndexes]
+    
+    
+    # here everything for the emb CNN is prepared
+    data <- data.table(labelRaw = as.factor(labelRed), padded)
     
     label <- data$labelRaw
     
@@ -474,10 +506,8 @@ pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/",
     trainLabelRaw <- label[indexes]
     testLabelRaw <- label[-indexes]
     
-    print(paste("in train are number of uniques:", 
-                length(unique(trainLabelRaw))))
-    print(paste("in test are number of uniques:", 
-                length(unique(testLabelRaw))))
+    if ( (length(unique(trainLabelRaw)) != 2) |
+        (length(unique(testLabelRaw)) != 2) ) next
     
     trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
     testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
@@ -528,7 +558,7 @@ pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/",
                   activation = "softmax", 
                   name = "predictions")
     
-    summary(model)
+    
     # Compiling model
     model %>% compile(
       loss = 'binary_crossentropy',
@@ -545,7 +575,7 @@ pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/",
       batchsize = 32,
       validation_data = list(as.matrix(testData), testLabel),
       view_metrics = FALSE,
-      verbose = 2)
+      verbose = 0)
     
     
     predictionResult <- model %>% 

@@ -23,13 +23,13 @@ prepareDataBOW(inPath = "03_computedData/03_integratedData/",
             outPath = "03_computedData/04_preparedData/", 
             subsetSize = "10pc", mergeSD = FALSE)
 
-prepareDataW2V(inPath = "03_computedData/03_integratedData/",
-               outPath = "03_computedData/04_preparedData/", 
-               subsetSize = "10pc", word2VecSize = 50)
-
 prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
                outPath = "03_computedData/04_preparedData/", 
                subsetSize = "10pc")
+
+prepareDataW2V(inPath = "03_computedData/03_integratedData/",
+               outPath = "03_computedData/04_preparedData/", 
+               subsetSize = "10pc", word2VecSize = 50)
 
 prepareDataEmb(inPath = "03_computedData/03_integratedData/",
                  outPath = "03_computedData/04_preparedData/", 
@@ -37,7 +37,7 @@ prepareDataEmb(inPath = "03_computedData/03_integratedData/",
 
 
 # binary
-resultBinary <- pipelineEmbBinary(inPath = "03_computedData/03_integratedData/",
+resultBinary2 <- pipelineEmbBinary(inPath = "03_computedData/03_integratedData/",
                                   outPath = "03_computedData/04_preparedData/", 
                                   subsetSize = "100pc",
                                   binary = TRUE)

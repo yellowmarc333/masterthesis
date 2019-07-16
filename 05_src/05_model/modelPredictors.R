@@ -1,17 +1,15 @@
 
 
-predictNN <- function(dataPath, fileName){
+predictNN <- function(dataPath, fileName, indexName){
   assertString(dataPath)
   assertString(fileName)
+  assertString(indexName)
 
   h2o.init(nthreads=-1, max_mem_size="16G")
   h2o.removeAll()
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
-  
-  indexes <- read.fst("03_computedData/03_integratedData/indexes10pc.fst")[[1]]
-  # in integrate data, the indexes were sampled before reducing some rows
-  # in prepare Data, therefore rereduce it here
-  indexes <- indexes[indexes %in% seq_len(nrow(data))]
+
+  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
   
   trainData <- data[indexes]
   testData <- data[-indexes]
@@ -19,6 +17,8 @@ predictNN <- function(dataPath, fileName){
   
   trainData.h2o <- as.h2o(trainData)
   testData.h2o <- as.h2o(testData)
+  
+  print("fitting model")
   model <- h2o.deeplearning(y = "labelRaw", training_frame = trainData.h2o, 
                                 model_id = "1")
   
@@ -41,16 +41,14 @@ predictNN <- function(dataPath, fileName){
 }
 
 
-predictXG <- function(dataPath, fileName, subsetSize){
+predictXG <- function(dataPath, fileName, indexName, subsetSize){
   assertString(dataPath)
   assertString(fileName)
+  assertString(indexName)
 
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
-  indexes <- read.fst(paste0("03_computedData/03_integratedData/",
-  "indexes", subsetSize, ".fst"))[[1]]
-  # in integrate data, the indexes were sampled before reducing some rows
-  # in prepare Data, therefore rereduce it here
-  indexes <- indexes[indexes %in% seq_len(nrow(data))]
+  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
+  
   trainData <- data[indexes]
   testData <- data[-indexes]
 
@@ -109,22 +107,21 @@ predictXG <- function(dataPath, fileName, subsetSize){
 }
 
 
-predictRF <- function(dataPath, fileName, subsetSize) {
+predictRF <- function(dataPath, fileName, indexName, subsetSize) {
   assertString(dataPath)
   assertString(fileName)
+  assertString(indexName)
 
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
   
-  indexes <- read.fst(paste0("03_computedData/03_integratedData/",
-                             "indexes", subsetSize, ".fst"))[[1]]  # in integrate data, the indexes were sampled before reducing some rows
-  # in prepare Data, therefore rereduce it here
-  indexes <- indexes[indexes %in% seq_len(nrow(data))]
+  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
   
   trainData <- data[indexes]
   testData <- data[-indexes]
   
   testLabel <- as.numeric(testData$labelRaw) - 1
   
+  print("fitting model")
   model = ranger::ranger(dependent.variable.name = "labelRaw", 
                          data = trainData,
                          importance = "impurity",
@@ -146,9 +143,10 @@ predictRF <- function(dataPath, fileName, subsetSize) {
 }
 
 
-predictCNN <- function(dataPath, fileName, subsetSize) {
+predictCNN <- function(dataPath, fileName, indexName, subsetSize) {
   assertString(dataPath)
   assertString(fileName)
+  assertString(indexName)
 
   print("read in Data")
   dataRDS <- readRDS(paste0(dataPath, fileName))
@@ -156,10 +154,7 @@ predictCNN <- function(dataPath, fileName, subsetSize) {
   label <- as.factor(dataRDS[["label"]])
   maxWords <- dataRDS[["maxWords"]]
   channels <- dataRDS[["channels"]]
-  indexes <- read.fst(paste0("03_computedData/03_integratedData/",
-                             "indexes", subsetSize, ".fst"))[[1]]  
-  # in integrate data, the indexes were sampled before reducing some rows
-  indexes <- indexes[indexes %in% seq_len(nrow(data))]
+  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
   
   trainData <- data[indexes, , ]
   testData <- data[-indexes, , ]
@@ -242,18 +237,16 @@ predictCNN <- function(dataPath, fileName, subsetSize) {
 }
 
 
-predictEmb <- function(dataPath, fileName, subsetSize) {
+predictEmb <- function(dataPath, fileName, indexName,  subsetSize) {
   assertString(dataPath)
   assertString(fileName)
+  assertString(indexName)
   
   print("read in Data")
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
   label <- data$labelRaw
 
-  indexes <- read.fst(paste0("03_computedData/03_integratedData/",
-                             "indexes", subsetSize, ".fst"))[[1]]  
-  # in integrate data, the indexes were sampled before reducing some rows
-  indexes <- indexes[indexes %in% seq_len(nrow(data))]
+  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
   
   trainData <- data[indexes, , ]
   testData <- data[-indexes, , ]
@@ -283,9 +276,25 @@ predictEmb <- function(dataPath, fileName, subsetSize) {
     layer_dropout(0.2) %>%
     
     # Add a Convolution1D, which will learn filters
-    layer_conv_1d(filters = 250, kernel_size  = 3, 
-      padding = "valid", activation = "relu", strides = 1
-    ) %>%
+    layer_conv_1d(filters = 100, kernel_size  = 2, 
+      padding = "valid", activation = "relu", strides = 1,
+      name = "conv1") %>%
+    layer_dropout(0.1) %>%
+    layer_conv_1d(filters = 100, kernel_size = 3,
+                  padding = "same", activation = "relu",
+                  strides = 1,
+                  name = "conv2") %>%
+    # layer_dropout(0.1) %>%
+    # layer_conv_1d(filters = 100, kernel_size = 4,
+    #               padding = "same", activation = "relu",
+    #               strides = 1,
+    #               name = "conv3") %>%
+    # layer_dropout(0.1) %>%
+    # layer_conv_1d(filters = 100, kernel_size = 5,
+    #               padding = "same", activation = "relu",
+    #               strides = 1,
+    #               name = "conv4") %>%
+    layer_dropout(0.1) %>%
     # Apply max pooling:
     layer_global_max_pooling_1d() %>%
     
@@ -314,122 +323,18 @@ predictEmb <- function(dataPath, fileName, subsetSize) {
   history <- model %>% fit(
     x = as.matrix(trainData),
     y = trainLabel,
-    epochs = 5,
+    epochs = 15,
     batchsize = 32,
     validation_data = list(as.matrix(testData), testLabel),
     view_metrics = FALSE,
     verbose = 2)
   
-  # Look at training results
-  # summary(model)
-  # print(history)
-  # plot(history)
-  
   predictionResult <- model %>% 
     evaluate(as.matrix(testData), testLabel, batch_size = 32)
-  View(predictionResult)
+
   return(predictionResult)
 }
 
-predictEmb_Binary <- function(dataPath, fileName, subsetSize) {
-  assertString(dataPath)
-  assertString(fileName)
-  
-  print("read in Data")
-  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
-  label <- data$labelRaw
-  
-  indexes <- sample.int(nrow(data), size = round(nrow(data)* 0.9))
-  
-  trainData <- data[indexes,]
-  testData <- data[-indexes, ]
-  
-  trainData[, labelRaw := NULL]
-  testData[, labelRaw := NULL]
-  
-  trainLabelRaw <- label[indexes]
-  testLabelRaw <- label[-indexes]
-  
-  print(paste("in train are number of uniques:", 
-              length(unique(trainLabelRaw))))
-  print(paste("in test are number of uniques:", 
-              length(unique(testLabelRaw))))
-  
-  trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
-  testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
-  
-  nVocab = max(rbind(trainData,testData)) + 1
-  
-  model <- keras_model_sequential() %>% 
-    # Start off with an efficient embedding layer which maps
-    # the vocab indices into embedding_dims dimensions
-    layer_embedding(input_dim = nVocab,
-                    output_dim = 100, 
-                    input_length = ncol(trainData)) %>%
-    layer_dropout(0.2) %>%
-    
-    # Add a Convolution1D, which will learn filters
-    layer_conv_1d(filters = 100, kernel_size  = 2, 
-                  padding = "valid", activation = "relu", strides = 1
-    ) %>%
-    layer_dropout(0.2) %>%
-    layer_conv_1d(filters = 100, kernel_size = 3,
-                  padding = "same", activation = "relu",
-                  strides = 1,
-                  name = "conv2") %>%
-    layer_conv_1d(filters = 100, kernel_size = 4,
-                  padding = "same", activation = "relu",
-                  strides = 1,
-                  name = "conv3") %>%
-    layer_dropout(0.2) %>%
-    layer_conv_1d(filters = 100, kernel_size = 5,
-                  padding = "same", activation = "relu",
-                  strides = 1,
-                  name = "conv4") %>%
-    # Apply max pooling:
-    layer_dropout(0.2) %>%
-    layer_global_max_pooling_1d() %>%
-    
-    # Add a vanilla hidden layer:
-    layer_dense(units = 100) %>%
-    # Add a vanilla hidden layer:
-    layer_dense(units = 50) %>%
-    
-    # Apply 20% layer dropout
-    layer_dropout(0.2) %>%
-    layer_activation("relu") %>%
-    
-    # Project onto a single unit output layer, and squash it with a sigmoid
-    layer_dense(units = ncol(trainLabel),
-                activation = "softmax", 
-                name = "predictions")
-  
-  
-  # Compiling model
-  model %>% compile(
-    loss = 'binary_crossentropy',
-    optimizer = optimizer_rmsprop(lr = 0.001),
-    metrics = c('accuracy')
-  )
-  
-  print("fitting model")
-  
-  history <- model %>% fit(
-    x = as.matrix(trainData),
-    y = trainLabel,
-    epochs = 4,
-    batchsize = 32,
-    validation_data = list(as.matrix(testData), testLabel),
-    view_metrics = FALSE,
-    verbose = 2)
-  
-  # Look at training results
-  # summary(model)
-  # print(history)
-  # plot(history)
-  
-  predictionResult <- model %>% 
-    evaluate(as.matrix(testData), testLabel, batch_size = 32)
-  View(predictionResult)
-  return(predictionResult)
-}
+
+
+

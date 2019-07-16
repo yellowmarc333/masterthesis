@@ -1,10 +1,9 @@
 # next steps/ to dos:
 
-# den gecleanten text anschauen und checken ob was übersehen wurde.
 # Glove nutzen: schauen wieviel übereinstimmende Terme und was machen mit
 #   denen, die nicht übereinstimmen, nochmal Glove lernen?
 # bei GloVe: keine terme removen die nur 1 mal vorkommen
-# bei BOW  ndoc > 2 hinzufuegen
+# bei BOW, tdidf  ndoc > 2 hinzufuegen
 # word2vec problem, entweder die vecs sind schlecht,
 #     oder das unsupervised learning ist das problem
 #     -> binäres framework schreiben, momentan 0.67 accuracy, jetzt
@@ -37,6 +36,7 @@
 # naive bayes implementieren
 # word2vec verstehen
 
+# xx den gecleanten text anschauen und checken ob was übersehen wurde.
 # xxremove stopwords für wordtovec vlt?
 # xxcoden dass alle verfahren die gleiche hardgecodete subsets bekommen
 # xxword padding nachschauen wie richtig!

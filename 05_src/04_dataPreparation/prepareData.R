@@ -7,7 +7,8 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   subsetSize <- match.arg(subsetSize)
   assertFlag(mergeSD)
   
-  subsetData <- read.fst(path = paste0(inPath, "trainSubset10pc.fst"), 
+  fileName <- paste0("trainSubset", subsetSize, ".fst")
+  subsetData <- read.fst(path = paste0(inPath, fileName), 
                          as.data.table = TRUE)
   
   labelRaw <- as.factor(subsetData$category)
@@ -34,11 +35,21 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   hasWords <- lengths(tokens) > 0
   tokens <- tokens[hasWords]
 
-  tokens.dfm <- dfm(tokens)
+  # Create vocabulary. Terms will be unigrams (simple words).
+  itoken <- text2vec::itoken(as.list(tokens), progressbar = FALSE)
+  vocab <- text2vec::create_vocabulary(itoken)
+  vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 2L)
   
-  tokens.dfm <- quanteda::dfm_trim(tokens.dfm, min_docfreq = 2)
-  tokens.dt <- as.data.table(quanteda::convert(tokens.dfm, to = "data.frame"))
+  # Use our filtered vocabulary
+  vectorizer <- text2vec::vocab_vectorizer(vocab)
+  # use window of 5 for context words
+  tokens.dfm <- as.data.frame(as.matrix(text2vec::create_dtm(
+    itoken, vectorizer, skip_grams_window = 2L)))
   
+  # tokens.dfm <- text2vec::create_tcm()
+  # tokens.dfm <- quanteda::dfm_trim(tokens.dfm, min_docfreq = 2)
+  # tokens.dt <- as.data.table(quanteda::convert(tokens.dfm, to = "matrix"))
+
   labelIndexes <- as.integer(gsub(tokens.dt$document, 
                                   pattern = "text", 
                                   replacement = ""))

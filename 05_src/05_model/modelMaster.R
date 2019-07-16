@@ -43,12 +43,19 @@ fileName6 <- "W2VArray-100pc-50-FALSE.rds"
 resultCN <- predictCNN(dataPath, fileName6, subsetSize = "100pc") # 0.208
 
 
-# BOW 100pc # 15-07
+
+
+# Emb 100pc # 15-07
 fileName7 <- "Emb-100pc-FALSE.fst "
 indexName7 <- "Emb-Indexes-100pc-FALSE.fst"
 resultEmb7 <- predictEmb(dataPath, fileName7,
                        indexName7, subsetSize = "10pc") # 0.551
 
+# Emb 100pc # 15-07
+fileName8 <- "BOW-100pc-FALSE.fst"
+indexName8 <- "BOW-Indexes-100pc-FALSE.fst"
+resultEmb8 <- predictXG(dataPath, fileName8,
+                         indexName8, subsetSize = "100pc") # 
 
 dateNow <- gsub(date(), pattern = " ",
                 replacement = "_")

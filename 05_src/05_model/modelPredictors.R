@@ -46,6 +46,7 @@ predictXG <- function(dataPath, fileName, indexName, subsetSize){
   assertString(fileName)
   assertString(indexName)
 
+  browser()
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
   

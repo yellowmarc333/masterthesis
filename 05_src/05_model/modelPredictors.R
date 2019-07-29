@@ -1,60 +1,62 @@
 
 
-predictNN <- function(dataPath, fileName, indexName){
-  assertString(dataPath)
-  assertString(fileName)
-  assertString(indexName)
-
-  h2o.init(nthreads=-1, max_mem_size="16G")
-  h2o.removeAll()
-  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
-
-  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
-  
-  trainData <- data[indexes]
-  testData <- data[-indexes]
-  testLabel <- as.character(testData$labelRaw)
-  
-  trainData.h2o <- as.h2o(trainData)
-  testData.h2o <- as.h2o(testData)
-  
-  print("fitting model")
-  model <- h2o.deeplearning(y = "labelRaw", training_frame = trainData.h2o, 
-                                model_id = "1")
-  
-  # predict testData and evaluate metrics
-  predict.h2o <- h2o.predict(object = model, newdata = testData.h2o)
-  predict.local <- as.data.table(predict.h2o)
-  
-  predictions <- as.character(predict.local[, predict])
-  predict.local[, predict := NULL]
-  
-  truth <- oneHotEncode(testData$labelRaw)
-  resultDiffProb <- (truth - predict.local)^2 
-  
-  meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
-  accuracy <- mean(testLabel == predictions)
-  
-  return(list(meanSquareError = meanSquareError,
-              accuracy = accuracy,
-              model = model))
-}
-
+# predictNN <- function(dataPath, fileName, indexName){
+#   assertString(dataPath)
+#   assertString(fileName)
+#   assertString(indexName)
+# 
+#   h2o.init(nthreads=-1, max_mem_size="16G")
+#   h2o.removeAll()
+#   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+# 
+#   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
+#   
+#   trainData <- data[indexes]
+#   testData <- data[-indexes]
+#   testLabel <- as.character(testData$labelRaw)
+#   
+#   trainData.h2o <- as.h2o(trainData)
+#   testData.h2o <- as.h2o(testData)
+#   
+#   print("fitting model")
+#   model <- h2o.deeplearning(y = "labelRaw", training_frame = trainData.h2o, 
+#                                 model_id = "1")
+#   
+#   # predict testData and evaluate metrics
+#   predict.h2o <- h2o.predict(object = model, newdata = testData.h2o)
+#   predict.local <- as.data.table(predict.h2o)
+#   
+#   predictions <- as.character(predict.local[, predict])
+#   predict.local[, predict := NULL]
+#   
+#   truth <- oneHotEncode(testData$labelRaw)
+#   resultDiffProb <- (truth - predict.local)^2 
+#   
+#   meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
+#   accuracy <- mean(testLabel == predictions)
+#   
+#   return(list(meanSquareError = meanSquareError,
+#               accuracy = accuracy,
+#               model = model))
+# }
+# 
 
 predictXG <- function(dataPath, fileName, indexName, subsetSize){
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
 
-  browser()
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
   
   trainData <- data[indexes]
   testData <- data[-indexes]
 
-  trainLabel <- as.numeric(trainData$labelRaw) - 1
-  testLabel <- as.numeric(testData$labelRaw) - 1
+  trainLabelRaw <- trainData$labelRaw
+  testLabelRaw <- testData$labelRaw
+  
+  trainLabel <- as.numeric(trainLabelRaw) - 1
+  testLabel <- as.numeric(testLabelRaw) - 1
   trainData[, labelRaw := NULL]
   testData[, labelRaw := NULL]
 
@@ -81,7 +83,7 @@ predictXG <- function(dataPath, fileName, indexName, subsetSize){
   numClass <- length(unique(trainLabel))
   eval_metric <- "mlogloss"
   objective <- "multi:softprob"
-  nrounds <- 20
+  nrounds <- 5
   
   print("training xgboost model")
   model = xgboost::xgb.train(eval_metric = eval_metric,
@@ -93,18 +95,48 @@ predictXG <- function(dataPath, fileName, indexName, subsetSize){
                              watchlist = watchlist)
 
   # evaluating predictions and eval metrics
-  predictions <- predict(model, newdata =  testMat, reshape = TRUE)
-  predictionsMax <- sapply(data.table(t(predictions)), which.max) - 1
-  
-  truth <- oneHotEncode(testLabel)
-  resultDiffProb <- (truth - predictions)^2    
-  
-  meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
-  accuracy <- mean(testLabel == predictionsMax)
+  predictions <- as.data.table(predict(model, 
+                                       newdata =  testMat,
+                                       reshape = TRUE))
+  names(predictions) <- levels(testLabelRaw)
+  predictionsMax <- apply(predictions, 1 , function(x) {
+    names(x[which.max(x)])
+  })
 
-  return(list(meanSquareError = meanSquareError,
-              accuracy = accuracy,
-              model = model))
+  # Prob vs Accuracy plot Data
+  predictionsMaxProb <- apply(predictions, 1 , function(x) {
+    x[which.max(x)]
+  })
+  correctBinary <- testLabelRaw == predictionsMax
+  ProbAccDT <- data.table(Prob = predictionsMaxProb,
+                          Correct = correctBinary)
+  
+  # mse, accuracy
+  truth <- to_categorical(testLabel)
+  resultDiffProb <- (truth - predictions)^2    
+  meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
+  accuracy <- mean(correctBinary)
+  
+  confusionMatrix <- matrix(table(factor(predictionsMax, 
+                                         levels =  levels(testLabelRaw)),
+                                  factor(testLabelRaw, 
+                                         levels =  levels(testLabelRaw))), 
+                            ncol = 40)
+  #names(confusionMatrix) <- levels(testLabelRaw)
+  row.names(confusionMatrix) <- levels(testLabelRaw)
+  print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
+  
+  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
+  names(accByClass) <-  levels(testLabelRaw)
+
+  return(list(acc = accuracy,
+              meanSquareError = meanSquareError,
+              confusionMatrix = confusionMatrix,
+              ProbAccDT = ProbAccDT,
+              accByClass = accByClass,
+              predictions = predictions,
+              testLabelRaw = testLabelRaw))
+
 }
 
 
@@ -114,33 +146,72 @@ predictRF <- function(dataPath, fileName, indexName, subsetSize) {
   assertString(indexName)
 
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
-  
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
   
   trainData <- data[indexes]
   testData <- data[-indexes]
   
-  testLabel <- as.numeric(testData$labelRaw) - 1
+  trainLabelRaw <- trainData$labelRaw
+  testLabelRaw <- testData$labelRaw
   
+  trainLabel <- as.numeric(trainLabelRaw) - 1
+  testLabel <- as.numeric(testLabelRaw) - 1
+  
+  rm(data)
+  gc()
+
   print("fitting model")
   model = ranger::ranger(dependent.variable.name = "labelRaw", 
                          data = trainData,
                          importance = "impurity",
-                         probability = TRUE)
+                         probability = TRUE, num.trees = 500)
 
-  predictions = predict(model, testData, type = "response")$predictions
+  predictions = as.data.table(predict(model, 
+                                      testData, 
+                                      type = "response")$predictions)
   
-  predictionsMax <- sapply(data.table(t(predictions)), which.max) - 1
+  # evaluating predictions and eval metrics
+  names(predictions) <- levels(testLabelRaw)
+  predictionsMax <- apply(predictions, 1 , function(x) {
+    names(x[which.max(x)])
+  })
   
-  truth <- oneHotEncode(testData$labelRaw)
+  # Prob vs Accuracy plot Data
+  predictionsMaxProb <- apply(predictions, 1 , function(x) {
+    x[which.max(x)]
+  })
+  correctBinary <- testLabelRaw == predictionsMax
+  ProbAccDT <- data.table(Prob = predictionsMaxProb,
+                          Correct = correctBinary)
+  
+  
+  # mse, accuracy
+  truth <- to_categorical(testLabel)
   resultDiffProb <- (truth - predictions)^2    
-  
   meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
-  accuracy <- mean(testLabel == predictionsMax)
+  accuracy <- mean(testLabelRaw == predictionsMax)
   
-  return(list(meanSquareError = meanSquareError,
-              accuracy = accuracy,
-              model = model))
+  confusionMatrix <- matrix(table(factor(predictionsMax, 
+                                         levels =  levels(testLabelRaw)),
+                                  factor(testLabelRaw, 
+                                         levels =  levels(testLabelRaw))), 
+                            ncol = 40)
+  #names(confusionMatrix) <- levels(testLabelRaw)
+  row.names(confusionMatrix) <- levels(testLabelRaw)
+  print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
+  
+  # accuracy by class
+  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
+  names(accByClass) <-  levels(testLabelRaw)
+  
+  return(list(acc = accuracy,
+              meanSquareError = meanSquareError,
+              confusionMatrix = confusionMatrix,
+              ProbAccDT = ProbAccDT,
+              accByClass = accByClass,
+              predictions = predictions,
+              testLabelRaw = testLabelRaw))
+  
 }
 
 
@@ -149,6 +220,7 @@ predictCNN <- function(dataPath, fileName, indexName, subsetSize) {
   assertString(fileName)
   assertString(indexName)
 
+ 
   print("read in Data")
   dataRDS <- readRDS(paste0(dataPath, fileName))
   data <- dataRDS[["wordVectorArray"]]
@@ -168,9 +240,15 @@ predictCNN <- function(dataPath, fileName, indexName, subsetSize) {
   print(paste("in test are number of uniques:", 
               length(unique(testLabelRaw))))
   
+  # setting up trainLabel
+  trainLabelNumeric <- as.numeric(trainLabelRaw) - 1
+  names(trainLabelNumeric) <- trainLabelRaw
+  trainLabel <- to_categorical(trainLabelNumeric)
   
-  trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
-  testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
+  # setting up testLabel
+  testLabelNumeric <- as.numeric(testLabelRaw) - 1
+  names(testLabelNumeric) <- testLabelRaw
+  testLabel <- to_categorical(testLabelNumeric)
   
   # building model with layers
   model <- keras_model_sequential()
@@ -181,7 +259,7 @@ predictCNN <- function(dataPath, fileName, indexName, subsetSize) {
                   data_format = "channels_last",
       filters = 50, kernel_size = 2, 
       padding = "same", activation = "relu", strides = 1,
-      name = "conv1"
+      name = "conv1"#, trainable = FALSE
     ) %>%
     layer_conv_1d(filters = 100, kernel_size = 3,
                   padding = "same", activation = "relu",
@@ -212,7 +290,7 @@ predictCNN <- function(dataPath, fileName, indexName, subsetSize) {
   # Compiling model
   model %>% compile(
     loss = 'categorical_crossentropy',
-    optimizer = optimizer_rmsprop(lr = 0.001),
+    optimizer = optimizer_adam(lr = 0.001),
     metrics = c('accuracy')
   )
 
@@ -221,21 +299,54 @@ predictCNN <- function(dataPath, fileName, indexName, subsetSize) {
   history <- model %>% fit(
     x = trainData,
     y = trainLabel,
-    epochs = 4,
+    epochs = 12,
     batchsize = 32,
     validation_data = list(testData, testLabel),
     view_metrics = FALSE,
     verbose = 2)
   
-  # Look at training results
-  # summary(model)
-  # print(history)
-  # plot(history)
+  evaluationResult <- model %>% 
+    evaluate(testData, testLabel, batch_size = 32)
   
-  predictionResult <- model %>% evaluate(testData, testLabel, batch_size = 32)
+  predictProb <- data.table(model %>% 
+                              predict(testData, testLabel, batch_size = 32))
+  names(predictProb) <- levels(trainLabelRaw)
+  # see for which class the prop is the highest
+  predictMax <- t(apply(predictProb, 1, function(x) {
+    return(names(x[which.max(x)]))
+  }))
+  levels(predictMax) <- levels(testLabelRaw)
+  confusionMatrix <- matrix(table(factor(predictMax, 
+                                         levels =  levels(testLabelRaw)),
+                                  factor(testLabelRaw, 
+                                         levels =  levels(testLabelRaw))), ncol = 40)
+
+  row.names(confusionMatrix) <- levels(testLabelRaw)
+  print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
-  return(predictionResult)
+  # Prob vs Accuracy plot Data
+  predictionsMaxProb <- as.vector(t(apply(predictProb, 1 ,
+                                          function(x) {
+                                            x[which.max(x)]
+                                          })))
+  correctBinary <- testLabelRaw == as.vector(predictMax)
+  ProbAccDT <- data.table(Prob = predictionsMaxProb,
+                          Correct = correctBinary)
+  
+  
+  
+  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
+  names(accByClass) <-  levels(trainLabelRaw)
+  
+  
+  return(list(acc = evaluationResult$acc,
+              loss = evaluationResult$loss,
+              confusionMatrix = confusionMatrix,
+              accByClass = accByClass,
+              predictions = predictProb,
+              testLabelRaw = testLabelRaw))
 }
+
 
 
 predictEmb <- function(dataPath, fileName, indexName,  subsetSize) {
@@ -263,8 +374,15 @@ predictEmb <- function(dataPath, fileName, indexName,  subsetSize) {
   print(paste("in test are number of uniques:", 
               length(unique(testLabelRaw))))
   
-  trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
-  testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
+  # setting up trainLabel
+  trainLabelNumeric <- as.numeric(trainLabelRaw) - 1
+  names(trainLabelNumeric) <- trainLabelRaw
+  trainLabel <- to_categorical(trainLabelNumeric)
+
+  # setting up testLabel
+  testLabelNumeric <- as.numeric(testLabelRaw) - 1
+  names(testLabelNumeric) <- testLabelRaw
+  testLabel <- to_categorical(testLabelNumeric)
   
   nVocab = max(rbind(trainData,testData)) + 1
   
@@ -324,18 +442,315 @@ predictEmb <- function(dataPath, fileName, indexName,  subsetSize) {
   history <- model %>% fit(
     x = as.matrix(trainData),
     y = trainLabel,
+    epochs = 7,
+    batchsize = 32,
+    validation_data = list(as.matrix(testData), testLabel),
+    view_metrics = FALSE,
+    verbose = 2)
+  
+  evaluationResult <- model %>% 
+    evaluate(as.matrix(testData), testLabel, batch_size = 32)
+  
+  predictProb <- data.table(model %>% 
+    predict(as.matrix(testData), testLabel, batch_size = 32))
+  names(predictProb) <- levels(trainLabelRaw)
+  # see for which class the prop is the highest
+  predictMax <- t(apply(predictProb, 1, function(x) {
+    return(names(x[which.max(x)]))
+  }))
+  
+  # Prob vs Accuracy plot Data
+  predictionsMaxProb <- as.vector(t(apply(predictProb, 1 ,
+                                          function(x) {
+                                            x[which.max(x)]
+                                          })))
+  correctBinary <- testLabelRaw == as.vector(predictMax)
+  ProbAccDT <- data.table(Prob = predictionsMaxProb,
+                          Correct = correctBinary)
+  
+  levels(predictMax) <- levels(testLabelRaw)
+  confusionMatrix <- matrix(table(factor(predictMax, 
+                                  levels =  levels(testLabelRaw)),
+                           factor(testLabelRaw, 
+                                  levels =  levels(testLabelRaw))), ncol = 40)
+  #names(confusionMatrix) <- levels(testLabelRaw)
+  row.names(confusionMatrix) <- levels(testLabelRaw)
+  print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
+        
+  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
+  names(accByClass) <-  levels(trainLabelRaw)
+
+  
+  return(list(acc = evaluationResult$acc,
+              loss = evaluationResult$loss,
+              confusionMatrix = confusionMatrix,
+              ProbAccDT = ProbAccDT,
+              accByClass = accByClass,
+              predictions = predictProb,
+              testLabelRaw = testLabelRaw))
+}
+
+
+predictLSTM <- function(dataPath, fileName, indexName,  subsetSize) {
+  assertString(dataPath)
+  assertString(fileName)
+  assertString(indexName)
+  
+  print("read in Data")
+  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+  label <- data$labelRaw
+  
+  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
+  
+  trainData <- data[indexes, , ]
+  testData <- data[-indexes, , ]
+  
+  trainData[, labelRaw := NULL]
+  testData[, labelRaw := NULL]
+  
+  trainLabelRaw <- label[indexes]
+  testLabelRaw <- label[-indexes]
+  
+  print(paste("in train are number of uniques:", 
+              length(unique(trainLabelRaw))))
+  print(paste("in test are number of uniques:", 
+              length(unique(testLabelRaw))))
+  
+  # setting up trainLabel
+  trainLabelNumeric <- as.numeric(trainLabelRaw) - 1
+  names(trainLabelNumeric) <- trainLabelRaw
+  trainLabel <- to_categorical(trainLabelNumeric)
+  
+  # setting up testLabel
+  testLabelNumeric <- as.numeric(testLabelRaw) - 1
+  names(testLabelNumeric) <- testLabelRaw
+  testLabel <- to_categorical(testLabelNumeric)
+  
+  nVocab = max(rbind(trainData,testData)) + 1
+  
+  model <- keras_model_sequential() %>% 
+    # Start off with an efficient embedding layer which maps
+    # the vocab indices into embedding_dims dimensions
+    layer_embedding(input_dim = nVocab,
+                    output_dim = 50, 
+                    input_length = ncol(trainData)) %>%
+    bidirectional(layer_lstm(units = 128)) %>%
+    layer_dropout(rate = 0.4) %>% 
+    
+    # Add a vanilla hidden layer:
+    layer_dense(units = 100) %>%
+    
+    # Apply 20% layer dropout
+    layer_dropout(0.2) %>%
+    layer_activation("relu") %>%
+    
+    # Project onto a single unit output layer, and squash it with a sigmoid
+    layer_dense(units = ncol(trainLabel),
+                activation = "softmax", 
+                name = "predictions")
+  
+  # Compiling model
+  model %>% compile(
+    loss = 'categorical_crossentropy',
+    optimizer = optimizer_rmsprop(lr = 0.001),
+    metrics = c('accuracy')
+  )
+  
+  print("fitting model")
+  
+  history <- model %>% fit(
+    x = as.matrix(trainData),
+    y = trainLabel,
     epochs = 15,
     batchsize = 32,
     validation_data = list(as.matrix(testData), testLabel),
     view_metrics = FALSE,
     verbose = 2)
   
-  predictionResult <- model %>% 
+  evaluationResult <- model %>% 
     evaluate(as.matrix(testData), testLabel, batch_size = 32)
+  
+  predictProb <- data.table(model %>% 
+                              predict(as.matrix(testData), testLabel, batch_size = 32))
+  names(predictProb) <- levels(trainLabelRaw)
+  # see for which class the prop is the highest
+  predictMax <- t(apply(predictProb, 1, function(x) {
+    return(names(x[which.max(x)]))
+  }))
+  
+  levels(predictMax) <- levels(testLabelRaw)
+  confusionMatrix <- matrix(table(factor(predictMax, 
+                                         levels =  levels(testLabelRaw)),
+                                  factor(testLabelRaw, 
+                                         levels =  levels(testLabelRaw))), ncol = 40)
+  #names(confusionMatrix) <- levels(testLabelRaw)
+  row.names(confusionMatrix) <- levels(testLabelRaw)
+  print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
+  
+  
+  # Prob vs Accuracy plot Data
+  predictionsMaxProb <- as.vector(t(apply(predictProb, 1 ,
+                                          function(x) {
+                                            x[which.max(x)]
+                                          })))
+  correctBinary <- testLabelRaw == as.vector(predictMax)
+  ProbAccDT <- data.table(Prob = predictionsMaxProb,
+                          Correct = correctBinary)
+  
+  
+  # accuracy by class
+  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
+  names(accByClass) <-  levels(trainLabelRaw)
+  
+  
+  return(list(acc = evaluationResult$acc,
+              loss = evaluationResult$loss,
+              confusionMatrix = confusionMatrix,
+              ProbAccDT = ProbAccDT,
+              accByClass = accByClass,
+              predictions = predictProb,
+              testLabelRaw = testLabelRaw))
+}
 
-  return(predictionResult)
+predictLSTMArray <- function(dataPath, fileName, indexName, subsetSize) {
+  assertString(dataPath)
+  assertString(fileName)
+  assertString(indexName)
+  
+  print("read in Data")
+  dataRDS <- readRDS(paste0(dataPath, fileName))
+  data <- dataRDS[["wordVectorArray"]]
+  label <- as.factor(dataRDS[["label"]])
+  maxWords <- dataRDS[["maxWords"]]
+  channels <- dataRDS[["channels"]]
+  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
+  
+  trainData <- data[indexes, , ]
+  testData <- data[-indexes, , ]
+  
+  trainLabelRaw <- label[indexes]
+  testLabelRaw <- label[-indexes]
+  
+  print(paste("in train are number of uniques:", 
+              length(unique(trainLabelRaw))))
+  print(paste("in test are number of uniques:", 
+              length(unique(testLabelRaw))))
+  
+  # setting up trainLabel
+  trainLabelNumeric <- as.numeric(trainLabelRaw) - 1
+  names(trainLabelNumeric) <- trainLabelRaw
+  trainLabel <- to_categorical(trainLabelNumeric)
+  
+  # setting up testLabel
+  testLabelNumeric <- as.numeric(testLabelRaw) - 1
+  names(testLabelNumeric) <- testLabelRaw
+  testLabel <- to_categorical(testLabelNumeric)
+  
+  model <- keras_model_sequential() %>%
+    # Add a Convolution1D, which will learn filters
+    # Word group filters of size filter_length:
+    layer_conv_1d(input_shape  = list(maxWords, channels),
+                  data_format = "channels_last",
+                  filters = 50, kernel_size = 2, 
+                  padding = "same", activation = "relu", strides = 1,
+                  name = "conv1"#, trainable = FALSE
+    ) %>%
+    bidirectional(layer_lstm(units = 128)) %>%
+    layer_dropout(rate = 0.4) %>% 
+    
+    # Add a vanilla hidden layer:
+    layer_dense(units = 100) %>%
+    
+    # Apply 20% layer dropout
+    layer_dropout(0.2) %>%
+    layer_activation("relu") %>%
+    
+    # Project onto a single unit output layer, and squash it with a sigmoid
+    layer_dense(units = ncol(trainLabel),
+                activation = "softmax", 
+                name = "predictions")
+  # Compiling model
+  model %>% compile(
+    loss = 'categorical_crossentropy',
+    optimizer = optimizer_adam(lr = 0.001),
+    metrics = c('accuracy')
+  )
+  
+  print("fitting model")
+  
+  history <- model %>% fit(
+    x = trainData,
+    y = trainLabel,
+    epochs = 7,
+    batchsize = 32,
+    validation_data = list(testData, testLabel),
+    view_metrics = FALSE,
+    verbose = 2)
+  
+  evaluationResult <- model %>% 
+    evaluate(testData, testLabel, batch_size = 32)
+  
+  predictProb <- data.table(model %>% 
+                              predict(testData, testLabel, batch_size = 32))
+  
+ 
+  names(predictProb) <- levels(trainLabelRaw)
+  # see for which class the prop is the highest
+  predictMax <- t(apply(predictProb, 1, function(x) {
+    return(names(x[which.max(x)]))
+  }))
+  levels(predictMax) <- levels(testLabelRaw)
+  confusionMatrix <- matrix(table(factor(predictMax, 
+                                         levels =  levels(testLabelRaw)),
+                                  factor(testLabelRaw, 
+                                         levels =  levels(testLabelRaw))), ncol = 40)
+ 
+  # Prob vs Accuracy plot Data
+  predictionsMaxProb <- as.vector(t(apply(predictProb, 1 ,
+                                          function(x) {
+                                            x[which.max(x)]
+                                          })))
+  correctBinary <- testLabelRaw == as.vector(predictMax)
+  ProbAccDT <- data.table(Prob = predictionsMaxProb,
+                          Correct = correctBinary)
+  
+  
+   #names(confusionMatrix) <- levels(testLabelRaw)
+  row.names(confusionMatrix) <- levels(testLabelRaw)
+  print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
+  
+  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
+  names(accByClass) <-  levels(trainLabelRaw)
+  
+  
+  return(list(acc = evaluationResult$acc,
+              loss = evaluationResult$loss,
+              confusionMatrix = confusionMatrix,
+              ProbAccDT = ProbAccDT,
+              accByClass = accByClass,
+              predictions = predictProb,
+              testLabelRaw = testLabelRaw))
 }
 
 
 
+
+
+ensembleMaxProb <- function(..., truth){
+  input <- list(...)
+  allProbs <- as.data.table(do.call(cbind, input))
+  
+  predictions <- apply(allProbs, 1, function(x) {
+    return(names(x[which.max(x)]))
+  })
+  if (length(truth) != length(predictions)) stop("different vector lengths")
+  accuracy <- mean(predictions == truth)
+  
+  confusionMatrix <- matrix(table(factor(predictions, levels = levels(truth)),
+                           factor(truth, levels = levels(truth))), ncol = 40)
+  row.names(confusionMatrix) <- levels(truth)
+  
+ return(list(acc = accuracy,
+             confusionMatrix = confusionMatrix))
+}
 

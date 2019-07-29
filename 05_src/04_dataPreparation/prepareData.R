@@ -38,26 +38,24 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   # Create vocabulary. Terms will be unigrams (simple words).
   itoken <- text2vec::itoken(as.list(tokens), progressbar = FALSE)
   vocab <- text2vec::create_vocabulary(itoken)
-  vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 2L)
+  vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 40L)
   
   # Use our filtered vocabulary
   vectorizer <- text2vec::vocab_vectorizer(vocab)
+
   # use window of 5 for context words
   tokens.dfm <- as.data.frame(as.matrix(text2vec::create_dtm(
-    itoken, vectorizer, skip_grams_window = 2L)))
-  
-  # tokens.dfm <- text2vec::create_tcm()
-  # tokens.dfm <- quanteda::dfm_trim(tokens.dfm, min_docfreq = 2)
-  # tokens.dt <- as.data.table(quanteda::convert(tokens.dfm, to = "matrix"))
-
-  labelIndexes <- as.integer(gsub(tokens.dt$document, 
+    itoken, vectorizer, skip_grams_window = 2L, )))
+  tokens.dt <- as.data.table(tokens.dfm)
+  rm(tokens.dfm)
+  labelIndexes <- as.integer(gsub(names(tokens), 
                                   pattern = "text", 
                                   replacement = ""))
-  tokens.dt[, document := NULL]
   
   labelRed <- labelRaw[labelIndexes]
   
   result <- data.table(labelRaw = labelRed, tokens.dt)
+  rm(tokens.dt)
   
   trainSize = 0.8
   set.seed(100)
@@ -71,6 +69,7 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   write.fst(result, path = paste0(outPath, "BOW-", 
                                            subsetSize, "-", mergeSD, ".fst"))
 }
+
 
 
 
@@ -222,6 +221,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   
   wordVectors <- as.data.table(glove$components)
   
+
   # write just the wordVectors
   write.fst(wordVectors, paste0(outPath, "WordVectors-", 
                                 subsetSize, "-", word2VecSize,
@@ -433,12 +433,21 @@ pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/",
                          as.data.table = TRUE)
   
   categories <- unique(wholeData$category)
-  categoryPairs <- t(combn(categories, m = 2))
+
+  categoryPairs <- matrix(c("EDUCATION", "COLLEGE",
+                            "ARTS & CULTURE", "ARTS",
+                            "STYLE", "STYLE & BEAUTY",
+                            "CULTURE & ARTS", "ARTS & CULTURE",
+                            "CULTURE & ARTS", "ARTS",
+                            "PARENTS", "PARENTING",
+                            "DIVORCE", "WEDDINGS",
+                            "WELLNESS", "HEALTHY LIVING",
+                            "GREEN", "HEALTHY LIVING", 
+                            "GREEN", "ENVIRONMENT"), ncol = 2, byrow = TRUE)
   
   result <- data.table(categoryPairs, accuracy = 0)
   
   for (row in seq_len(nrow(categoryPairs))){
-    #if (row > 10) break
     print(paste("calculating row", paste(categoryPairs[row, ])))
     
     # subsetData <- wholeData[category %in% c("WORLD NEWS", "MEDIA"),]
@@ -582,11 +591,11 @@ pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/",
     history <- model %>% fit(
       x = as.matrix(trainData),
       y = trainLabel,
-      epochs = 3,
+      epochs = 5,
       batchsize = 32,
       validation_data = list(as.matrix(testData), testLabel),
       view_metrics = FALSE,
-      verbose = 0)
+      verbose = 2)
     
     
     predictionResult <- model %>% 
@@ -599,4 +608,190 @@ pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/",
 }
 
 
+prepareDataGlove = function(inPath = "03_computedData/03_integratedData/", 
+                          outPath = "03_computedData/04_preparedData/",
+                          subsetSize = c("1pc", "10pc", "100pc"),
+                          word2VecSize = 50,
+                          mergeSD = FALSE){
+  assertString(inPath)
+  assertString(outPath)
+  subsetSize <- match.arg(subsetSize)
+  assertNumber(word2VecSize)
+  assertFlag(mergeSD)
+  
+  fileName <- paste0("trainSubset", subsetSize, ".fst")
+  subsetData <- read.fst(path = paste0(inPath, fileName), 
+                         as.data.table = TRUE)
+  
+  N <- nrow(subsetData)
+  
+  label <- subsetData$category
+  
+  subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
+  if (mergeSD) {
+    texts <- subsetData$HeadLShortD
+  } else {
+    texts <- subsetData$headline
+  }
+  
+  # Create iterator over tokens
+  tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
+                             remove_punct = FALSE, remove_symbols = FALSE, 
+                             remove_hyphens = TRUE)
+
+  # lower all cases
+  tokens <- quanteda::tokens_tolower(tokens)
+  
+  # remove some patterns that are not recognized by Glove later on.
+  rmPatterns = c("â", "ã", "â", "'s", "ê", "#")
+  for(pattern in rmPatterns){
+    tokens <- sapply(tokens, function(x) {
+      gsub(x, pattern = pattern, replacement = "",
+           fixed = TRUE)
+    })
+  }
+
+  
+  # dont remove stopwords because are inducing meaning
+  #tokens <- tokens_remove(tokens, c(stopwords("english")))
+  
+  # dont use wordstemming
+  #tokens <- tokens_wordstem(tokens, language = "english")
+  
+  # here select max words as smallest number of length, that at least
+  # 0.999 of the Data points have (maybe complicated coded)
+  tableWords <- sort(table(sapply(tokens, length)), decreasing = TRUE)
+  cumsumWords <- cumsum(tableWords) / sum(tableWords)
+  sortedNumWords <- sort(as.integer(names(which(cumsumWords > 0.999))), 
+                         decreasing = FALSE)
+  maxWords <- max(sortedNumWords[1:2])
+  
+  tokens <- tokens[sapply(tokens, length) <= maxWords]
+  
+  # Create vocabulary. Terms will be unigrams (simple words).
+  itoken <- text2vec::itoken(tokens, progressbar = FALSE)
+  vocab <- text2vec::create_vocabulary(itoken)
+  vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 2L)
+  
+  # Use our filtered vocabulary
+  vectorizer <- text2vec::vocab_vectorizer(vocab)
+  # use window of 5 for context words
+  tcm <- text2vec::create_tcm(itoken, vectorizer, skip_grams_window = 2L)
+  
+  # insert glove here
+  glove <- fread(paste0("02_initialData/glove.6B.", 
+                        word2VecSize, "d.txt"), quote="")
+  format(object.size(glove), units = "Gb")
+  # see how many words are in glove of the data words
+  commonWordsRatio <- round(mean(vocab$term %in% glove$V1), digits = 3)
+  print(paste("the data words and Glove have", commonWordsRatio, 
+              "in common"))
+  # reducing the vocab to the words that are not in glove
+  vocabRest <- vocab[!(vocab$term %in% glove$V1), ]
+  vocabGlove <- vocab[(vocab$term %in% glove$V1), ]
+  
+  wordVectorsRaw <- glove[V1 %in% vocabGlove$term, ]
+  wordVectorsNames <- wordVectorsRaw$V1
+  wordVectorsRaw[, V1 := NULL]
+  wordVectors <- as.data.table(t(wordVectorsRaw))
+  colnames(wordVectors) <- wordVectorsNames
+
+  # write just the wordVectors
+  write.fst(wordVectors, paste0(outPath, "Glove-", 
+                                subsetSize, "-", word2VecSize,
+                                "-", mergeSD, ".fst"))
+  rm(wordVectorsRaw, glove)
+
+  # testVector <- wordVectors[, dog]
+  # 
+  # cos_sim = sapply(data.table(wordVectors), function(x) {
+  #   sum((x - testVector)^2)
+  # })
+  # cos_sim = text2vec::sim2(x = t(wordVectors), y = t(testVector),
+  #                          method = "cosine",
+  #                norm = "l2")
+  # head(sort(cos_sim[,1], decreasing = TRUE), 20)
+  N_tokens <- length(tokens)
+
+  channels <- nrow(wordVectors)
+  
+  print("creating wordVectorArray")
+  wordVectorArray <- array(numeric(N_tokens* maxWords * channels),
+                           dim = c(N_tokens, maxWords, channels))
+  print("fill wordVectorArray")
+  
+  for(i in seq_along(tokens)) {
+    
+    if((i %% 1000) == 0) {
+      print(paste("filling", i, "/", N_tokens))
+    }
+    
+    tmpWords <- tokens[[i]]
+    existWords <- tmpWords[tmpWords %in% wordVectorsNames]
+    
+    if(length(existWords) == 0){
+      tmpMatrix <- matrix(numeric(channels* maxWords),
+                          ncol = channels)
+      
+    } else {
+      tmpMatrix <- as.matrix(t(wordVectors[, .SD, .SDcols = existWords]))
+    }
+    
+    # fill up rows with 0's for equal array length, when length < maxWords
+    if (nrow(tmpMatrix) != maxWords) {
+      tmpFillUp <- rbind(tmpMatrix,
+                         matrix(numeric((maxWords - nrow(tmpMatrix)) * 
+                                          channels),
+                                ncol = channels))
+    } else {
+      tmpFillUp <- tmpMatrix
+    }
+    wordVectorArray[i, , ] <- tmpFillUp
+    
+  }
+  
+  print("finished filling")
+  
+  labelIndexes <- as.integer(gsub(names(tokens), 
+                                  pattern = "text", 
+                                  replacement = ""))
+  
+  labelRed <- label[labelIndexes]
+  
+  saveRDS(list(label = labelRed,
+               wordVectorArray = wordVectorArray,
+               maxWords = maxWords,
+               channels = channels),
+          file = paste0(outPath, "GloveArray-", 
+                        subsetSize, "-", word2VecSize,
+                        "-", mergeSD, ".rds"))
+  
+  
+  
+  print("sum word vectors to text vectors")
+  
+  wordVectorSums <- vapply(tokens,FUN.VALUE = numeric(word2VecSize),
+                           function(x, data = wordVectors) {
+                             cols <- wordVectorsNames[wordVectorsNames %in% x]
+                             res <- rowSums(data[, .SD, .SDcols = cols])
+                             if(length(res) == 0) return(rep(0, word2VecSize))
+                             return(res)
+                           })
+  
+  result = data.table(labelRaw = as.factor(labelRed),
+                      t(wordVectorSums))
+  
+  trainSize = 0.8
+  set.seed(100)
+  indexes <- sample.int(nrow(result), 
+                        floor(nrow(result) * trainSize))
+  
+  write.fst(data.table(indexes), path = paste0(outPath, "Glove-Indexes-", 
+                                               subsetSize, "-", word2VecSize,
+                                               "-", mergeSD, ".fst"))
+  
+  write.fst(result, path = paste0(outPath, "Glove-", 
+                                  subsetSize, "-", word2VecSize,
+                                  "-", mergeSD, ".fst"))
+}
 

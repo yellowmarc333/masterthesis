@@ -1,41 +1,55 @@
 # next steps/ to dos:
 
-# Glove nutzen: schauen wieviel übereinstimmende Terme und was machen mit
-#   denen, die nicht übereinstimmen, nochmal Glove lernen?
-# bei GloVe: keine terme removen die nur 1 mal vorkommen
-# bei BOW, tdidf  ndoc > 2 hinzufuegen
-# word2vec problem, entweder die vecs sind schlecht,
-#     oder das unsupervised learning ist das problem
-#     -> binäres framework schreiben, momentan 0.67 accuracy, jetzt
-#         das tunen mit preproc und Glove ausprobieren
-#       dann framework schreiben wo alle binären accuracys ausgegeben werden
-#       
-# mache das sampling zum wegschreiben und das framework noch intelligenter
-# lernrate auschecken (optimizer)
-# pretrained word vectors reinnehmen.
-# schau die im convolutional layers an und ob da alles gut gegangen ist
-# für NN normalizierung rein
+#
+# checken auf wieviel Beobachtungen mehrere saetze sind
+# fasttext auschecken
+# bag of words vlt in einzelschritten computen
+# checken ob die conf matrix richtig berechnet hat. selbe accuracy
+# eventuell als kernthema: performances auf verschiedenen Trainingsgrößen
+#       evaluieren/einfluss von balancing, ensemble learner/vergleich von LSTM
+#       attention layer
+# verena fragen was tun wegen 's , bspw. John's
+# bei BOW, tdidf  ndoc > 2 hinzufuegen     
 # binary cross entropy > mse? auschecken?
-# find similarities to words to see if word2vec works. (write function)
+# write exploration function for wordvectors
 # generell: bei verschiedenen auswahlmöglichkeiten schauen was gut dokumentiert ist
-
 # ueberlegen wie explaining aussehen koennte.
 # methoden: multinomial naive bayes
 # balancing for training?
-# features: number of words, number of caps
-# lstm tutorial durchmachen (kerras vignetten)
-# recurrent neural net, hierarchical attention neural net
+# hierarchical attention neural net
 # markus und wdl datensätze im auge behalten
 # context2word in python implementieren
-# mehrere saetze als input haben eventuell beruecksichtigen
-# toxicity datensatz ziehen
 # bert auschecken
+# validation data muss genauso preprocessed sein wie train Data
 
 # liste für groll:
 # bamlls lesen
 # naive bayes implementieren
 # word2vec verstehen
 
+# xxlstm tutorial durchmachen (kerras vignetten)
+# xxmehrere saetze als input haben eventuell beruecksichtigen A: (springt den Rahmen)
+# xx simple ensemble embedden
+# xx confusionmatrix ausgeben + evaluation zwischen sicherheit und Richtig
+# xx  für xxcnn, xxxgboost, xxRF umsetzen
+# xxlernrate auschecken (optimizer) A: Adam perfomt gut, kleinere lernrate immer
+# xx  eine gute methode
+# xxpretrained word vectors reinnehmen. (glove genutzt)
+# xxschau die im convolutional layers an und ob da alles gut gegangen ist
+# xxfeatures: number of words, number of caps A: eher unrelevant
+# xxmache das sampling zum wegschreiben und das framework noch intelligenter
+# xx    done: jetzt werden die indizes an der richtigen stelle gesampelt
+# xxword2vec problem, entweder die vecs sind schlecht, A: die waren schlecht
+# xx    oder das unsupervised learning ist das problem
+# xx    -> binäres framework schreiben, momentan 0.67 accuracy, jetzt
+# xx        das tunen mit preproc und Glove ausprobieren
+# xx      dann framework schreiben wo alle binären accuracys ausgegeben werden
+# xxGlove nutzen: schauen wieviel übereinstimmende Terme und was machen mit
+# xx denen, die nicht übereinstimmen, nochmal Glove lernen? -
+# xx  A: gibt genug übereinstimmungen (0.967)
+# xxbei GloVe: keine terme removen die nur 1 mal vorkommen
+# xxbinary framework reduzieren auf eng beiandanderliegende Kategorien
+# xxbow 100% funkt nicht, 46gb vector, zu groß!
 # xx den gecleanten text anschauen und checken ob was übersehen wurde.
 # xxremove stopwords für wordtovec vlt?
 # xxcoden dass alle verfahren die gleiche hardgecodete subsets bekommen

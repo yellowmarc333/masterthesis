@@ -3,7 +3,7 @@ sourcedFiles = sourceAll()
 
 
 # increase vector memory
-R_MAX_VSIZE = 32 * 10^9 
+R_MAX_VSIZE = 50 * 10^9 
 R_MAX_NUM_DLLS = 500
 Sys.setenv('R_MAX_VSIZE'= R_MAX_VSIZE, "R_MAX_NUM_DLLS" = R_MAX_NUM_DLLS)
 print(paste0("Max vector memory is set to ", as.numeric((Sys.getenv('R_MAX_VSIZE'))) / (10^9), " Gb"))
@@ -40,7 +40,11 @@ prepareDataW2V(inPath = "03_computedData/03_integratedData/",
 
 prepareDataEmb(inPath = "03_computedData/03_integratedData/",
                  outPath = "03_computedData/04_preparedData/", 
-                 subsetSize = "100pc")
+                 subsetSize = "1pc")
+
+prepareDataGlove(inPath = "03_computedData/03_integratedData/",
+               outPath = "03_computedData/04_preparedData/", 
+               subsetSize = "100pc", word2VecSize = 50)
 
 
 # binary
@@ -48,3 +52,9 @@ resultBinary2 <- pipelineEmbBinary(inPath = "03_computedData/03_integratedData/"
                                   outPath = "03_computedData/04_preparedData/", 
                                   subsetSize = "100pc",
                                   binary = TRUE)
+write.fst(resultBinary2, path = paste0("03_computedData/05_modelData/",
+                                       "resultBinary2.fst"))
+
+
+
+

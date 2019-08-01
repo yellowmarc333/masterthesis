@@ -83,7 +83,7 @@ predictXG <- function(dataPath, fileName, indexName, subsetSize){
   numClass <- length(unique(trainLabel))
   eval_metric <- "mlogloss"
   objective <- "multi:softprob"
-  nrounds <- 5
+  nrounds <- 20
   
   print("training xgboost model")
   model = xgboost::xgb.train(eval_metric = eval_metric,
@@ -147,7 +147,7 @@ predictRF <- function(dataPath, fileName, indexName, subsetSize) {
 
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
-  
+
   trainData <- data[indexes]
   testData <- data[-indexes]
   

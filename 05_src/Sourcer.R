@@ -30,6 +30,7 @@ sourceAll = function() {
                   "05_src/04_dataPreparation/prepareData.R",
                   
                   "05_src/05_model/modelPredictors.R",
+                  "05_src/05_model/generalizedSampling.R",
                   
                   "05_src/09_utilities/oneHotEncode.R")
   

@@ -41,7 +41,7 @@
 # }
 # 
 
-predictXG <- function(dataPath, fileName, indexName, subsetSize){
+predictXG <- function(dataPath, fileName, indexName){
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
@@ -50,9 +50,13 @@ predictXG <- function(dataPath, fileName, indexName, subsetSize){
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
   
   trainData <- data[indexes]
+  if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                  method = "up", 
+                                                  label = "labelRaw")
+  trainLabelRaw <- trainData$labelRaw
+  
   testData <- data[-indexes]
 
-  trainLabelRaw <- trainData$labelRaw
   testLabelRaw <- testData$labelRaw
   
   trainLabel <- as.numeric(trainLabelRaw) - 1
@@ -126,6 +130,7 @@ predictXG <- function(dataPath, fileName, indexName, subsetSize){
   row.names(confusionMatrix) <- levels(testLabelRaw)
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
+  # accuracy by class
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
   names(accByClass) <-  levels(testLabelRaw)
 
@@ -140,7 +145,7 @@ predictXG <- function(dataPath, fileName, indexName, subsetSize){
 }
 
 
-predictRF <- function(dataPath, fileName, indexName, subsetSize) {
+predictRF <- function(dataPath, fileName, indexName) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
@@ -149,9 +154,13 @@ predictRF <- function(dataPath, fileName, indexName, subsetSize) {
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
   
   trainData <- data[indexes]
-  testData <- data[-indexes]
-  
+  if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                  method = "up", 
+                                                  label = "labelRaw")
   trainLabelRaw <- trainData$labelRaw
+  
+  testData <- data[-indexes]
+
   testLabelRaw <- testData$labelRaw
   
   trainLabel <- as.numeric(trainLabelRaw) - 1
@@ -215,7 +224,7 @@ predictRF <- function(dataPath, fileName, indexName, subsetSize) {
 }
 
 
-predictCNN <- function(dataPath, fileName, indexName, subsetSize) {
+predictCNN <- function(dataPath, fileName, indexName) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
@@ -349,24 +358,31 @@ predictCNN <- function(dataPath, fileName, indexName, subsetSize) {
 
 
 
-predictEmb <- function(dataPath, fileName, indexName,  subsetSize) {
+predictEmb <- function(dataPath, fileName, indexName,
+                       upsampling = FALSE) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
+  assertFlag(upsampling)
   
   print("read in Data")
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+
   label <- data$labelRaw
 
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
   
+
   trainData <- data[indexes, , ]
+  if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                  method = "up", 
+                                             label = "labelRaw")
+  trainLabelRaw <- trainData$labelRaw
   testData <- data[-indexes, , ]
   
   trainData[, labelRaw := NULL]
   testData[, labelRaw := NULL]
   
-  trainLabelRaw <- label[indexes]
   testLabelRaw <- label[-indexes]
   
   print(paste("in train are number of uniques:", 
@@ -491,7 +507,8 @@ predictEmb <- function(dataPath, fileName, indexName,  subsetSize) {
 }
 
 
-predictLSTM <- function(dataPath, fileName, indexName,  subsetSize) {
+predictLSTM <- function(dataPath, fileName, indexName,
+                        upSampling = FALSE) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
@@ -503,12 +520,16 @@ predictLSTM <- function(dataPath, fileName, indexName,  subsetSize) {
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
   
   trainData <- data[indexes, , ]
+  if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                  method = "up", 
+                                                  label = "labelRaw")
+  trainLabelRaw <- trainData$labelRaw
+  
   testData <- data[-indexes, , ]
   
   trainData[, labelRaw := NULL]
   testData[, labelRaw := NULL]
   
-  trainLabelRaw <- label[indexes]
   testLabelRaw <- label[-indexes]
   
   print(paste("in train are number of uniques:", 
@@ -536,6 +557,7 @@ predictLSTM <- function(dataPath, fileName, indexName,  subsetSize) {
                     input_length = ncol(trainData)) %>%
     bidirectional(layer_lstm(units = 128)) %>%
     layer_dropout(rate = 0.4) %>% 
+
     
     # Add a vanilla hidden layer:
     layer_dense(units = 100) %>%
@@ -561,7 +583,7 @@ predictLSTM <- function(dataPath, fileName, indexName,  subsetSize) {
   history <- model %>% fit(
     x = as.matrix(trainData),
     y = trainLabel,
-    epochs = 15,
+    epochs = 7,
     batchsize = 32,
     validation_data = list(as.matrix(testData), testLabel),
     view_metrics = FALSE,
@@ -612,7 +634,8 @@ predictLSTM <- function(dataPath, fileName, indexName,  subsetSize) {
               testLabelRaw = testLabelRaw))
 }
 
-predictLSTMArray <- function(dataPath, fileName, indexName, subsetSize) {
+predictLSTMArray <- function(dataPath, fileName, indexName,
+                             upSampling = FALSE) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
@@ -626,9 +649,13 @@ predictLSTMArray <- function(dataPath, fileName, indexName, subsetSize) {
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
   
   trainData <- data[indexes, , ]
+  if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                  method = "up", 
+                                                  label = "labelRaw")
+  trainLabelRaw <- trainData$labelRaw
+  
   testData <- data[-indexes, , ]
   
-  trainLabelRaw <- label[indexes]
   testLabelRaw <- label[-indexes]
   
   print(paste("in train are number of uniques:", 

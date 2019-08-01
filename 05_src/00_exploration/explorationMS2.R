@@ -1,31 +1,31 @@
 # next steps/ to dos:
 
-#
+# RF/XGboost auf embedded indexes ausprobieren
 # checken auf wieviel Beobachtungen mehrere saetze sind
-# fasttext auschecken
-# bag of words vlt in einzelschritten computen
+# bag of words vlt in einzelschritten computen (ndoc = 20 minimal)
 # checken ob die conf matrix richtig berechnet hat. selbe accuracy
 # eventuell als kernthema: performances auf verschiedenen Trainingsgrößen
 #       evaluieren/einfluss von balancing, ensemble learner/vergleich von LSTM
 #       attention layer
+# nach papern speziell cnn und lstm auf textclassification schauen
 # verena fragen was tun wegen 's , bspw. John's
-# bei BOW, tdidf  ndoc > 2 hinzufuegen     
+# bei BOW, tdidf  ndoc > 2 hinzufuegen (checken)
 # binary cross entropy > mse? auschecken?
 # write exploration function for wordvectors
 # generell: bei verschiedenen auswahlmöglichkeiten schauen was gut dokumentiert ist
 # ueberlegen wie explaining aussehen koennte.
 # methoden: multinomial naive bayes
 # balancing for training?
-# hierarchical attention neural net
-# markus und wdl datensätze im auge behalten
-# context2word in python implementieren
-# bert auschecken
 # validation data muss genauso preprocessed sein wie train Data
 
-# liste für groll:
+# [liste für groll:]
 # bamlls lesen
-# naive bayes implementieren
-# word2vec verstehen
+
+# [post masterarbeit]
+# bert auschecken/context2word in python implementieren
+# hierarchical attention neural net
+# markus und wdl datensätze im auge behalten
+# fasttext auschecken
 
 # xxlstm tutorial durchmachen (kerras vignetten)
 # xxmehrere saetze als input haben eventuell beruecksichtigen A: (springt den Rahmen)
@@ -95,7 +95,11 @@ py_config()
 py_numpy_available()
 library(keras)
 
-
-
+# balancing
+data <- read.fst("03_computedData/04_preparedData/Emb-10pc-FALSE.fst", 
+                 as.data.table = TRUE)
+test <- generalizedSampling(data = data, method = "down", 
+                    label = "labelRaw")
+table(test$labelRaw)
 
 

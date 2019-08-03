@@ -1,7 +1,6 @@
 # next steps/ to dos:
 
-# mergedSD reinnehmen und schauen wie das performt
-# worldpost wieder reinnehmen (groll kontaktieren bzgl der zusammenlegung)
+# kaggle threads nochmal durchlesen
 # colorpalette vom wdl code holen
 # encoding fehler checken!!!! â zb.
 # normales MLP mit keras implementieren
@@ -10,8 +9,6 @@
 #     das vlt sogar vor prepareData?s
 # bag of words vlt in einzelschritten computen (ndoc = 20 minimal) Wolle fragen
 # checken ob die conf matrix richtig berechnet hat. selbe accuracy
-# eventuell als kernthema: performances auf verschiedenen Trainingsgrößen
-#       evaluieren/ensemble learner/vergleich von LSTM/CNN attention layer
 # nach papern speziell cnn und lstm auf textclassification schauen
 # accuracy measure auschecken: binary cross entropy > mse?
 # write exploration function for wordvectors
@@ -30,6 +27,8 @@
 
 # [liste für groll:]
 # bamlls lesen
+# framework nachfragen (besonders vergleichbarkeit von BOW)
+# kategorien zusammenlegen Schema oder lassen?
 
 # [post masterarbeit]
 # bert auschecken/context2word in python implementieren
@@ -38,7 +37,7 @@
 # fasttext auschecken
 # verena fragen was tun wegen 's , bspw. John's
 
-
+# xxmergedSD reinnehmen und schauen wie das performt. A: performed nicht besser.
 # xxto lower: alle wörter werden eh großgeschrieben
 # xx confusionmatrix colnames namen.
 # xxbei BOW, tdidf  ndoc > 2 hinzufuegen (checken) A: ist drin

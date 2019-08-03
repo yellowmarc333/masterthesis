@@ -59,11 +59,11 @@ indexName <- "Glove-Indexes-10pc-50-FALSE.fst"
 resultLSTMArray10 <- predictLSTMArray(dataPath, fileName = fileName, 
                            indexName = indexName) # 0.496
 
-# Emb 10pc shortdescription #03-08
+# EmbLSTM 10pc shortdescription #03-08
 fileName <- "Emb-10pc-TRUE.fst"
 indexName <- "Emb-Indexes-10pc-TRUE.fst"
-resultEmbCNN10TRUE <- predictEmb(dataPath, fileName, 
-                             indexName) # 
+resultEmbLSTM10SD <- predictLSTM(dataPath, fileName, 
+                               indexName) # 0.4124
 
 #----------------------- 100 percent models --------------------------------####
 

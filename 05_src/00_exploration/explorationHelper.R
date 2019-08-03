@@ -1,4 +1,5 @@
-plotWordClouds <- function(catFilter = "POLITICS", nWords = 50) {
+plotWordClouds <- function(catFilter = "POLITICS", nWords = 50,
+                           returnData = FALSE) {
   
   dataRaw <- read.fst("03_computedData/01_importedData/News.fst",
                    as.data.table = TRUE)
@@ -37,6 +38,6 @@ plotWordClouds <- function(catFilter = "POLITICS", nWords = 50) {
     scale_size_area(max_size = 24) +
     theme_minimal()
   
-  return(ggObj)
-  
+  if (returnData) return(plotData)
+  else return(ggObj)
 }

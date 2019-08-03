@@ -44,30 +44,64 @@ ggObj
 
 wordCloud1 <- plotWordClouds(catFilter = "PARENTS", nWords = 50)
 wordCloud2 <- plotWordClouds(catFilter = "PARENTING", nWords = 50)
-
 wordCloudComb <- ggpubr::ggarrange(wordCloud1, wordCloud2,
                                    nrow = 1)
 
 wordCloud1 <- plotWordClouds(catFilter = "CULTURE & ARTS", nWords = 50)
 wordCloud2 <- plotWordClouds(catFilter = "ARTS & CULTURE", nWords = 50)
-
 wordCloudComb <- ggpubr::ggarrange(wordCloud1, wordCloud2,
                                    nrow = 1)
 
 wordCloud1 <- plotWordClouds(catFilter = "GREEN", nWords = 50)
 wordCloud2 <- plotWordClouds(catFilter = "ENVIRONMENT", nWords = 50)
-
 wordCloudComb <- ggpubr::ggarrange(wordCloud1, wordCloud2,
                                    nrow = 1)
 
 wordCloud1 <- plotWordClouds(catFilter = "STYLE", nWords = 50)
 wordCloud2 <- plotWordClouds(catFilter = "STYLE & BEAUTY", nWords = 50)
-
 wordCloudComb <- ggpubr::ggarrange(wordCloud1, wordCloud2,
                                    nrow = 1)
-wordCloudComb
+
+##### data
+word1 <- plotWordClouds(catFilter = "PARENTS", nWords = 50, 
+                             returnData = TRUE)
+word2 <- plotWordClouds(catFilter = "PARENTING", nWords = 50,
+                             returnData = TRUE)
+length(intersect(word1$term, word2$term))/50 # 0.74
+
+word1 <- plotWordClouds(catFilter = "WORLDPOST", nWords = 50, 
+                        returnData = TRUE)
+word2 <- plotWordClouds(catFilter = "THE WORLDPOST", nWords = 50,
+                        returnData = TRUE)
+length(intersect(word1$term, word2$term))/50 
+
+word1 <- plotWordClouds(catFilter = "CULTURE & ARTS", nWords = 50, 
+                        returnData = TRUE)
+word2 <- plotWordClouds(catFilter = "ARTS & CULTURE", nWords = 50,
+                        returnData = TRUE)
+length(intersect(word1$term, word2$term))/50 
+
+word1 <- plotWordClouds(catFilter = "STYLE", nWords = 50, 
+                        returnData = TRUE)
+word2 <- plotWordClouds(catFilter = "STYLE & BEAUTY", nWords = 50,
+                        returnData = TRUE)
+length(intersect(word1$term, word2$term))/50 #  0.52
 
 
+dataRaw <- read.fst("03_computedData/01_importedData/News.fst",
+                    as.data.table = TRUE)
+dataRaw[category == "WORLDPOST", ][1:5, headline]
+dataRaw[category == "THE WORLDPOST", ][1:5, headline]
+# nicht unterscheidbar
 
+dataRaw[category == "CULTURE & ARTS", ][1:5, headline]
+dataRaw[category == "ARTS & CULTURE", ][1:5, headline]
+# nicht unterscheidbar
 
+dataRaw[category == "STYLE", ][1:5, headline]
+dataRaw[category == "STYLE & BEAUTY", ][1:5, headline]
+# nicht unterscheidbar
 
+dataRaw[category == "PARENTS", ][1:5, headline]
+dataRaw[category == "PARENTING", ][1:5, headline]
+#nicht unterscheidbar

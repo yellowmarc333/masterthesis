@@ -590,7 +590,7 @@ predictLSTM <- function(dataPath, fileName, indexName,
   history <- model %>% fit(
     x = as.matrix(trainData),
     y = trainLabel,
-    epochs = 7,
+    epochs = 10,
     batchsize = 32,
     validation_data = list(as.matrix(testData), testLabel),
     view_metrics = FALSE,

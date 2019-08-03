@@ -1,5 +1,6 @@
 source("05_src/Sourcer.R")
 sourcedFiles = sourceAll()
+dataPath <- "03_computedData/04_preparedData/"
 
 
 # increase vector memory

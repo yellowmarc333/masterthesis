@@ -41,7 +41,7 @@
 # }
 # 
 
-predictXG <- function(dataPath, fileName, indexName){
+predictXG <- function(dataPath, fileName, indexName, upSampling = FALSE){
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
@@ -126,8 +126,9 @@ predictXG <- function(dataPath, fileName, indexName){
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))), 
                             ncol = 40)
-  #names(confusionMatrix) <- levels(testLabelRaw)
-  row.names(confusionMatrix) <- levels(testLabelRaw)
+  # naming rows and cols
+  rownames(confusionMatrix) <- levels(testLabelRaw)
+  colnames(confusionMatrix) <- levels(testLabelRaw)
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
   # accuracy by class
@@ -145,14 +146,14 @@ predictXG <- function(dataPath, fileName, indexName){
 }
 
 
-predictRF <- function(dataPath, fileName, indexName) {
+predictRF <- function(dataPath, fileName, indexName, upSampling = FALSE) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
 
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
-  
+
   trainData <- data[indexes]
   if(upSampling) trainData <- generalizedSampling(data = trainData, 
                                                   method = "up", 
@@ -205,8 +206,9 @@ predictRF <- function(dataPath, fileName, indexName) {
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))), 
                             ncol = 40)
-  #names(confusionMatrix) <- levels(testLabelRaw)
-  row.names(confusionMatrix) <- levels(testLabelRaw)
+  # naming rows and cols
+  rownames(confusionMatrix) <- levels(testLabelRaw)
+  colnames(confusionMatrix) <- levels(testLabelRaw)
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
   # accuracy by class
@@ -330,7 +332,10 @@ predictCNN <- function(dataPath, fileName, indexName) {
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))), ncol = 40)
 
-  row.names(confusionMatrix) <- levels(testLabelRaw)
+  # naming rows and cols
+  rownames(confusionMatrix) <- levels(testLabelRaw)
+  colnames(confusionMatrix) <- levels(testLabelRaw)
+  
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
   # Prob vs Accuracy plot Data
@@ -359,11 +364,11 @@ predictCNN <- function(dataPath, fileName, indexName) {
 
 
 predictEmb <- function(dataPath, fileName, indexName,
-                       upsampling = FALSE) {
+                       upSampling = FALSE) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
-  assertFlag(upsampling)
+  assertFlag(upSampling)
   
   print("read in Data")
   data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
@@ -489,9 +494,11 @@ predictEmb <- function(dataPath, fileName, indexName,
                                   levels =  levels(testLabelRaw)),
                            factor(testLabelRaw, 
                                   levels =  levels(testLabelRaw))), ncol = 40)
-  #names(confusionMatrix) <- levels(testLabelRaw)
-  row.names(confusionMatrix) <- levels(testLabelRaw)
-  print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
+  # naming rows and cols
+  rownames(confusionMatrix) <- levels(testLabelRaw)
+  colnames(confusionMatrix) <- levels(testLabelRaw)
+
+    print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
         
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
   names(accByClass) <-  levels(trainLabelRaw)
@@ -605,8 +612,10 @@ predictLSTM <- function(dataPath, fileName, indexName,
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))), ncol = 40)
-  #names(confusionMatrix) <- levels(testLabelRaw)
-  row.names(confusionMatrix) <- levels(testLabelRaw)
+  # naming rows and cols
+  rownames(confusionMatrix) <- levels(testLabelRaw)
+  colnames(confusionMatrix) <- levels(testLabelRaw)
+  
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
   
@@ -741,9 +750,10 @@ predictLSTMArray <- function(dataPath, fileName, indexName,
   ProbAccDT <- data.table(Prob = predictionsMaxProb,
                           Correct = correctBinary)
   
+  # naming rows and cols
+  rownames(confusionMatrix) <- levels(testLabelRaw)
+  colnames(confusionMatrix) <- levels(testLabelRaw)
   
-   #names(confusionMatrix) <- levels(testLabelRaw)
-  row.names(confusionMatrix) <- levels(testLabelRaw)
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
@@ -758,7 +768,6 @@ predictLSTMArray <- function(dataPath, fileName, indexName,
               predictions = predictProb,
               testLabelRaw = testLabelRaw))
 }
-
 
 
 

@@ -40,7 +40,7 @@ prepareDataW2V(inPath = "03_computedData/03_integratedData/",
 
 prepareDataEmb(inPath = "03_computedData/03_integratedData/",
                  outPath = "03_computedData/04_preparedData/", 
-                 subsetSize = "1pc")
+                 subsetSize = "10pc", mergeSD = TRUE)
 
 prepareDataGlove(inPath = "03_computedData/03_integratedData/",
                outPath = "03_computedData/04_preparedData/", 

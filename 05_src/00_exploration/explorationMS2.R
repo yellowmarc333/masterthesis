@@ -1,22 +1,32 @@
 # next steps/ to dos:
 
-# RF/XGboost auf embedded indexes ausprobieren
-# checken auf wieviel Beobachtungen mehrere saetze sind
-# bag of words vlt in einzelschritten computen (ndoc = 20 minimal)
+# mergedSD reinnehmen und schauen wie das performt
+# worldpost wieder reinnehmen (groll kontaktieren bzgl der zusammenlegung)
+# colorpalette vom wdl code holen
+# encoding fehler checken!!!! â zb.
+# normales MLP mit keras implementieren
+# gütemaß wahrscheinlichkeit der richtigen klasse implementieren
+# dokumentieren welche tokens entfernt wurden. (0 wörter auch entfernen)
+#     das vlt sogar vor prepareData?s
+# bag of words vlt in einzelschritten computen (ndoc = 20 minimal) Wolle fragen
 # checken ob die conf matrix richtig berechnet hat. selbe accuracy
 # eventuell als kernthema: performances auf verschiedenen Trainingsgrößen
-#       evaluieren/einfluss von balancing, ensemble learner/vergleich von LSTM
-#       attention layer
+#       evaluieren/ensemble learner/vergleich von LSTM/CNN attention layer
 # nach papern speziell cnn und lstm auf textclassification schauen
-# verena fragen was tun wegen 's , bspw. John's
-# bei BOW, tdidf  ndoc > 2 hinzufuegen (checken)
-# binary cross entropy > mse? auschecken?
+# accuracy measure auschecken: binary cross entropy > mse?
 # write exploration function for wordvectors
-# generell: bei verschiedenen auswahlmöglichkeiten schauen was gut dokumentiert ist
 # ueberlegen wie explaining aussehen koennte.
 # methoden: multinomial naive bayes
-# balancing for training?
+# attention layer implemtieren
 # validation data muss genauso preprocessed sein wie train Data
+
+# [exploration]
+# word clouds for biggest categorys (parents/parenting)
+# (arts and style, worldpost/The worldpost)
+# word clouds intersection of biggest categories
+# exploration function for word vectors (relate to wordclouds)
+# average words by category
+
 
 # [liste für groll:]
 # bamlls lesen
@@ -26,7 +36,15 @@
 # hierarchical attention neural net
 # markus und wdl datensätze im auge behalten
 # fasttext auschecken
+# verena fragen was tun wegen 's , bspw. John's
 
+
+# xxto lower: alle wörter werden eh großgeschrieben
+# xx confusionmatrix colnames namen.
+# xxbei BOW, tdidf  ndoc > 2 hinzufuegen (checken) A: ist drin
+# xx RF/XGboost auf embedded indexes ausprobieren. A: nur 0.22, schlecht
+# xx checken auf wieviel Beobachtungen mehrere saetze sind. A: 5%
+# xx balancing for training? A: macht accuracies schlechter (2x getestet)
 # xxlstm tutorial durchmachen (kerras vignetten)
 # xxmehrere saetze als input haben eventuell beruecksichtigen A: (springt den Rahmen)
 # xx simple ensemble embedden

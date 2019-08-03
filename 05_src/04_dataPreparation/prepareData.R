@@ -82,8 +82,6 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   subsetSize <- match.arg(subsetSize)
   assertFlag(mergeSD)
   
-
-  
   fileName <- paste0("trainSubset", subsetSize, ".fst")
   subsetData <- read.fst(path = paste0(inPath, fileName), 
                    as.data.table = TRUE)

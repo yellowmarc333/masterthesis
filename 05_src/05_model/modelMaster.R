@@ -7,14 +7,21 @@ list.files(dataPath)
 fileName <- "Emb-10pc-FALSE.fst"
 indexName <- "Emb-Indexes-10pc-FALSE.fst"
 resultEmbLSTM10 <- predictLSTM(dataPath, fileName, 
-                        indexName, upSampling = FALSE) # 0.424
+                        indexName) # 0.424
 
 # Emb 10pc #15-07
 fileName <- "Emb-10pc-FALSE.fst"
 indexName <- "Emb-Indexes-10pc-FALSE.fst"
 resultEmbCNN10 <- predictEmb(dataPath, fileName, 
-                        indexName,
-                        upsampling = TRUE) # 0.412
+                        indexName) # 0.412
+
+# Emb 10pc on RF and XGB #02.08
+fileName <- "Emb-10pc-FALSE.fst"
+indexName <- "Emb-Indexes-10pc-FALSE.fst"
+resultEmbRF10 <- predictRF(dataPath, fileName, 
+                             indexName) #0.221
+resultEmbXG10 <- predictXG(dataPath, fileName, 
+                           indexName) #0.218
 
 # TFIDF 10pc #15-07
 fileName1 <- "TFIDF-10pc--FALSE.fst" 
@@ -51,6 +58,12 @@ fileName <- "GloveArray-10pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-10pc-50-FALSE.fst"
 resultLSTMArray10 <- predictLSTMArray(dataPath, fileName = fileName, 
                            indexName = indexName) # 0.496
+
+# Emb 10pc shortdescription #03-08
+fileName <- "Emb-10pc-TRUE.fst"
+indexName <- "Emb-Indexes-10pc-TRUE.fst"
+resultEmbCNN10TRUE <- predictEmb(dataPath, fileName, 
+                             indexName) # 
 
 #----------------------- 100 percent models --------------------------------####
 

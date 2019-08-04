@@ -38,9 +38,7 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   # Create vocabulary. Terms will be unigrams (simple words).
   itoken <- text2vec::itoken(as.list(tokens), progressbar = FALSE)
   vocab <- text2vec::create_vocabulary(itoken)
-  vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 40L)
-  
-  # Use our filtered vocabulary
+  vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 20L)
   vectorizer <- text2vec::vocab_vectorizer(vocab)
 
   # use window of 5 for context words

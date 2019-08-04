@@ -87,7 +87,7 @@ predictXG <- function(dataPath, fileName, indexName, upSampling = FALSE){
   numClass <- length(unique(trainLabel))
   eval_metric <- "mlogloss"
   objective <- "multi:softprob"
-  nrounds <- 5
+  nrounds <- 20
   
   print("training xgboost model")
   model = xgboost::xgb.train(eval_metric = eval_metric,

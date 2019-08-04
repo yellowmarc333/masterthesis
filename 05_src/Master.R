@@ -45,7 +45,7 @@ prepareDataEmb(inPath = "03_computedData/03_integratedData/",
 
 prepareDataGlove(inPath = "03_computedData/03_integratedData/",
                outPath = "03_computedData/04_preparedData/", 
-               subsetSize = "100pc", word2VecSize = 50)
+               subsetSize = "100pc", word2VecSize = 50, mergeSD = TRUE)
 
 
 # binary

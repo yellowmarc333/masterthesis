@@ -657,14 +657,19 @@ predictLSTMArray <- function(dataPath, fileName, indexName,
   channels <- dataRDS[["channels"]]
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
   
-  trainData <- data[indexes, , ]
-  if(upSampling) trainData <- generalizedSampling(data = trainData, 
-                                                  method = "up", 
-                                                  label = "labelRaw")
-  trainLabelRaw <- trainData$labelRaw
+  rm(dataRDS)
+  gc()
   
+  trainData <- data[indexes, , ]
   testData <- data[-indexes, , ]
   
+  rm(data)
+  gc()
+  
+  if(upSampling) print("sampling does not work for 3dim arrays, 
+                       continue without")
+  
+  trainLabelRaw <- label[indexes]
   testLabelRaw <- label[-indexes]
   
   print(paste("in train are number of uniques:", 
@@ -672,12 +677,12 @@ predictLSTMArray <- function(dataPath, fileName, indexName,
   print(paste("in test are number of uniques:", 
               length(unique(testLabelRaw))))
   
-  # setting up trainLabel
+  print("setting up train and test Label")
   trainLabelNumeric <- as.numeric(trainLabelRaw) - 1
   names(trainLabelNumeric) <- trainLabelRaw
   trainLabel <- to_categorical(trainLabelNumeric)
   
-  # setting up testLabel
+
   testLabelNumeric <- as.numeric(testLabelRaw) - 1
   names(testLabelNumeric) <- testLabelRaw
   testLabel <- to_categorical(testLabelNumeric)
@@ -717,7 +722,7 @@ predictLSTMArray <- function(dataPath, fileName, indexName,
   history <- model %>% fit(
     x = trainData,
     y = trainLabel,
-    epochs = 7,
+    epochs = 20,
     batchsize = 32,
     validation_data = list(testData, testLabel),
     view_metrics = FALSE,

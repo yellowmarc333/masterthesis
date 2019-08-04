@@ -13,7 +13,7 @@
 # accuracy measure auschecken: binary cross entropy > mse?
 # write exploration function for wordvectors
 # ueberlegen wie explaining aussehen koennte.
-# methoden: multinomial naive bayes
+# methoden: multinomial naive bayes oder logReg (hat besser performed)
 # attention layer implemtieren
 # validation data muss genauso preprocessed sein wie train Data
 
@@ -27,8 +27,10 @@
 
 # [liste für groll:]
 # bamlls lesen
-# framework nachfragen (besonders vergleichbarkeit von BOW)
-# kategorien zusammenlegen Schema oder lassen?
+# framework nachfragen (besonders vergleichbarkeit von BOW auf 100% nicht rechenbar)
+# kategorien zusammenlegen Schema (vom menschen nicht auseinanderhaltbar, gemeinsame words)
+# human experiment
+# fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
 # [post masterarbeit]
 # bert auschecken/context2word in python implementieren

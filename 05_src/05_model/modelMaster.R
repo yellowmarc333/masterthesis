@@ -115,6 +115,12 @@ indexName <- "Glove-Indexes-100pc-50-FALSE.fst"
 resultLSTMArray <- predictLSTMArray(dataPath, fileName = fileName, 
                                     indexName = indexName) # 0.579
 
+# Array LSTM 100PC merge Shortdescription
+fileName <- "GloveArray-100pc-50-TRUE.rds"
+indexName <- "Glove-Indexes-100pc-50-TRUE.fst"
+resultLSTMGloveTRUE <- predictLSTMArray(dataPath, fileName = fileName, 
+                                    indexName = indexName) 
+
 #--------------------------- Ensembling ------------------------------------####
 
 accComparison <- data.table(category = names(resultEmbCNN10$accByClass),

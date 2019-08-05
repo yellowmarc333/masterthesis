@@ -30,6 +30,9 @@ print(paste("this equals", pointOccurance/N, "percent of news headlines"))
 categoryFreq <- data[, .(count = .N), by = category]
 categoryFreq[, labPos := cumsum(count) - 0.5*count]
 
+# from graf project
+colGeneratorWdl <- colorRampPalette(c("white", "grey", "yellow", "red", 
+                                   "mediumorchid1","green", "royalblue1","black"))
 
 ggObj <- ggplot(categoryFreq, aes(x = 2, y = count, fill = category)) +
   geom_bar(stat = "identity", color = "black") +

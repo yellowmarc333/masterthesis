@@ -1,13 +1,10 @@
 # next steps/ to dos:
 
-# kaggle threads nochmal durchlesen
-# colorpalette vom wdl code holen
 # encoding fehler checken!!!! â zb.
 # normales MLP mit keras implementieren
 # gütemaß wahrscheinlichkeit der richtigen klasse implementieren
 # dokumentieren welche tokens entfernt wurden. (0 wörter auch entfernen)
-#     das vlt sogar vor prepareData?s
-# bag of words vlt in einzelschritten computen (ndoc = 20 minimal) Wolle fragen
+#     das vlt sogar vor prepareData?
 # checken ob die conf matrix richtig berechnet hat. selbe accuracy
 # nach papern speziell cnn und lstm auf textclassification schauen
 # accuracy measure auschecken: binary cross entropy > mse?
@@ -39,6 +36,10 @@
 # fasttext auschecken
 # verena fragen was tun wegen 's , bspw. John's
 
+# xxcolorpalette vom wdl code holen
+# xxbag of words vlt in einzelschritten computen (ndoc = 20 minimal) Wolle fragen
+# xx      A: 32Gb auf omega verfuegbar
+# xxkaggle threads nochmal durchlesen
 # xxmergedSD reinnehmen und schauen wie das performt. A: performed nicht besser.
 # xxto lower: alle wörter werden eh großgeschrieben
 # xx confusionmatrix colnames namen.
@@ -101,6 +102,7 @@
 # xxrename column names from data in preparation (nicht notwendig)
 # xxadd error measurement of the network
 # xx3blue one brown deep learning serie anschauen + notizen
+
 
 
 install_keras(method = c("auto", "virtualenv", "conda"),

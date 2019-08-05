@@ -119,7 +119,7 @@ resultLSTMArray <- predictLSTMArray(dataPath, fileName = fileName,
 fileName <- "GloveArray-100pc-50-TRUE.rds"
 indexName <- "Glove-Indexes-100pc-50-TRUE.fst"
 resultLSTMGloveTRUE <- predictLSTMArray(dataPath, fileName = fileName, 
-                                    indexName = indexName) 
+                                    indexName = indexName) #0.635
 
 #--------------------------- Ensembling ------------------------------------####
 

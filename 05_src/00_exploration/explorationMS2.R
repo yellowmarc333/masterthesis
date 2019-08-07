@@ -25,8 +25,14 @@
 # [liste für groll:]
 # bamlls lesen
 # framework nachfragen (besonders vergleichbarkeit von BOW auf 100% nicht rechenbar)
+# 10% vorauswahl, dann auf 50% der Daten vergleichen (an forest anpassen). 
+# A: auf max anzahl der Daten benchmaken und dann für die Gewinner noch auf 
+#     maximaler Anzahl benchmarken + explaining. (kann 100% sein, kann 60% sein)
+# variable importance bei random forest. irgendwie auf NN übertragen.
 # kategorien zusammenlegen Schema (vom menschen nicht auseinanderhaltbar, gemeinsame words)
-# human experiment
+# kap 4 results: für 4 competion benchmarken
+# human experiment: herr kunert/ doebler kontaktieren. Im Notfall kommt das
+# in die conclusion rein.
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
 # [post masterarbeit]

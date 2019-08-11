@@ -1,9 +1,9 @@
 # next steps/ to dos:
 
-# 's , bspw. John's mit word tagging ersetzen
-# encoding fehler checken!!!! â zb.
+# RF mit sparse matrix berechnen
+# alle änderungen auf alle übertragen und checken (level error entferrnen)
 # normales MLP mit keras implementieren
-# gütemaß wahrscheinlichkeit der richtigen klasse implementieren
+# g?tema? wahrscheinlichkeit der richtigen klasse implementieren
 # dokumentieren welche tokens entfernt wurden. (0 wörter auch entfernen)
 #     das vlt sogar vor prepareData?
 # checken ob die conf matrix richtig berechnet hat. selbe accuracy
@@ -35,7 +35,9 @@
 # markus und wdl datensätze im auge behalten
 # fasttext auschecken
 
-
+# xx kategorien reduzieren: 40 auf 35
+# xxencoding fehler checken!!!! â zb.
+# xx's , bspw. John's mit word tagging ersetzen
 # xxcolorpalette vom wdl code holen
 # xxbag of words vlt in einzelschritten computen (ndoc = 20 minimal) Wolle fragen
 # xx      A: 32Gb auf omega verfuegbar

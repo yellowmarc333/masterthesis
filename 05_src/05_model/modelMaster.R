@@ -1,4 +1,3 @@
-dataPath <- "03_computedData/04_preparedData/"
 list.files(dataPath)
 
 #----------------------- 10 percent models ---------------------------------####
@@ -113,7 +112,7 @@ resultEmb2 <- predictCNN(dataPath, fileName,
 fileName <- "GloveArray-100pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-100pc-50-FALSE.fst"
 resultLSTMArray <- predictLSTMArray(dataPath, fileName = fileName, 
-                                    indexName = indexName) # 0.579
+                                    indexName = indexName) # 0.5712
 
 # Array LSTM 100PC merge Shortdescription
 fileName <- "GloveArray-100pc-50-TRUE.rds"

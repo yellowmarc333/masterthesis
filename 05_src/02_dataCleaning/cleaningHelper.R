@@ -3,30 +3,6 @@ cleanTerms <- function(object){
   # replace some terms that are later not found by global word vectors
   object <- gsub(pattern = "â€Š", replacement = " ",
                           x = object, fixed = TRUE )
-  object <- gsub(pattern = "phctcs", replacement = "photos",
-                          x = object, fixed = TRUE )
-  object <- gsub(pattern = "videc", replacement = "video",
-                          x = object, fixed = TRUE )
-  object <- gsub(pattern = "cver", replacement = "over",
-                          x = object, fixed = TRUE )
-  object <- gsub(pattern = "cbama", replacement = "obama",
-                          x = object, fixed = TRUE )
-  object <- gsub(pattern = "phctc", replacement = "photo",
-                          x = object, fixed = TRUE )
-  object <- gsub(pattern = "cther", replacement = "other",
-                          x = object, fixed = TRUE )
-  object <- gsub(pattern = "cnly", replacement = "only",
-                          x = object, fixed = TRUE )
-  object <- gsub(pattern = "cpen", replacement = "open",
-                          x = object, fixed = TRUE )
-  object <- gsub(pattern = "cwn", replacement = "own",
-                          x = object, fixed = TRUE )
-  object <- gsub(pattern = "cffice", replacement = "office",
-                          x = object, fixed = TRUE )
-  object <- gsub(pattern = "cbamacare", replacement = "obamacare",
-                          x = object, fixed = TRUE )
-  object <- gsub(pattern = "cnline", replacement = "online",
-                          x = object, fixed = TRUE )
   object <- gsub(pattern = "n't", replacement = " not",
                           x = object, fixed = TRUE )
   object <- gsub(pattern = "'re", replacement = " are",
@@ -63,6 +39,30 @@ cleanTerms <- function(object){
                  x = object, fixed = TRUE )
   object <- gsub(pattern = "trump's", replacement = "trump his",
                  x = object, fixed = TRUE )
+  object <- gsub(pattern = "phctcs", replacement = "photos",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "videc", replacement = "video",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "cver", replacement = "over",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "cbama", replacement = "obama",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "phctc", replacement = "photo",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "cther", replacement = "other",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "cnly", replacement = "only",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "cpen", replacement = "open",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "cwn", replacement = "own",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "cffice", replacement = "office",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "cbamacare", replacement = "obamacare",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "cnline", replacement = "online",
+                 x = object, fixed = TRUE )
   object <- gsub(pattern = "cscar", replacement = "oscar",
                  x = object, fixed = TRUE )
   object <- gsub(pattern = "crder", replacement = "order",
@@ -83,11 +83,22 @@ cleanTerms <- function(object){
                  x = object, fixed = TRUE )
   object <- gsub(pattern = "clympics", replacement = "olympics",
                  x = object, fixed = TRUE )
-  
+  object <- gsub(pattern = "divcrce", replacement = "divorce",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "reccrds", replacement = "records",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "divcrce", replacement = "divorce",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "reccrd", replacement = "record",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "ccean", replacement = "ocean",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "cctober", replacement = "october",
+                 x = object, fixed = TRUE )
 
   
   rmPatterns = c("â", "ã", "â", "ê", "#", "˜", "©", "™", "€")
-  for(pattern in rmPatterns){
+  for (pattern in rmPatterns) {
     object <- gsub(pattern = pattern, replacement = "",
                    x = object, fixed = TRUE)
   }

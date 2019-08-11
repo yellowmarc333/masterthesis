@@ -7,6 +7,12 @@ integrateData = function(inPath = "03_computedData/02_cleanedData/",
   data <- read.fst(paste0(inPath, "News.fst"), as.data.table = TRUE)
   # merge the worldpost and worldpost together
   data[category == "THE WORLDPOST", category := "WORLDPOST"]
+  data[category == "PARENTING", category := "PARENTS"]
+  data[category == "CULTURE & ARTS", category := "ARTS & CULTURE"]
+  data[category == "ARTS", category := "ARTS & CULTURE"]
+  data[category == "STYLE", category := "STYLE & BEAUTY"]
+  data[category == "GREEN", category := "GREEN & ENVIRONMENT"]
+  data[category == "ENVIRONMENT", category := "GREEN & ENVIRONMENT"]
   # set the ratio that the estimated amount of data points in the smallest 
   # class is 100.
   valSize <- round(nrow(data) / (min(table(data$category)) / 100))

@@ -22,8 +22,7 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   tokens <- tokens(texts, what = "word", remove_numbers = FALSE, 
                    remove_punct = TRUE, remove_symbols = TRUE, 
                    remove_hyphens = TRUE)
-  # lower all cases
-  tokens <- tokens_tolower(tokens)
+
   
   # remove stopwords
   tokens <- tokens_remove(tokens, c(stopwords("english")))
@@ -98,8 +97,7 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
                               remove_punct = TRUE, remove_symbols = TRUE, 
                               remove_hyphens = TRUE)
   
-  # lower all cases
-  tokens <- quanteda::tokens_tolower(tokens)
+
   
   # remove stopwords because are inducing meaning
   tokens <- tokens_remove(tokens, c(stopwords("english")))
@@ -177,8 +175,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
                              remove_punct = FALSE, remove_symbols = FALSE, 
                              remove_hyphens = TRUE)
   
-  # lower all cases
-  tokens <- quanteda::tokens_tolower(tokens)
+
   
   # dont remove stopwords because are inducing meaning
   #tokens <- tokens_remove(tokens, c(stopwords("english")))
@@ -349,8 +346,7 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
                              remove_punct = FALSE, remove_symbols = FALSE, 
                              remove_hyphens = TRUE)
 
-  # lower all cases
-  tokens <- quanteda::tokens_tolower(tokens)
+
   
   # dont remove stopwords because are inducing meaning
   # tokens <- quanteda::tokens_remove(tokens, c(stopwords("english")))
@@ -458,8 +454,7 @@ pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/",
                                remove_punct = TRUE, remove_symbols = TRUE, 
                                remove_hyphens = TRUE)
     
-    # lower all cases
-    tokens <- quanteda::tokens_tolower(tokens)
+
     
     # dont remove stopwords because are inducing meaning
     tokens <- quanteda::tokens_remove(tokens, c(stopwords("english")))
@@ -671,11 +666,12 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   # see how many words are in glove of the data words
   notFound <- as.data.table(vocab[!(vocab$term %in% glove$V1),])
   
-  browser()
-  
   commonWordsRatio <- round(mean(vocab$term %in% glove$V1), digits = 3)
   print(paste("the data words and Glove have", commonWordsRatio, 
               "in common"))
+  print(paste(sum(notFound$doc_count), "words can not be assigned to wordvecs"))
+  print(paste("from all", sum(sapply(tokens, length)), "words"))
+  
   # reducing the vocab to the words that are not in glove
   vocabRest <- vocab[!(vocab$term %in% glove$V1), ]
   vocabGlove <- vocab[(vocab$term %in% glove$V1), ]

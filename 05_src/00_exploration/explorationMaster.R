@@ -1,13 +1,12 @@
-data2 <- read.fst("03_computedData/02_cleanedData/News.fst",
+data <- read.fst("03_computedData/02_cleanedData/News.fst",
                  as.data.table = TRUE)
 
-sum(grepl(x = data2$headline, pattern = "€", fixed = TRUE))
-
-grep(x = data2$headline, pattern = "€", fixed = TRUE)
-View(data2[grep(x = headline, pattern = "â", fixed = TRUE), headline])
+# sum(grepl(x = data2$headline, pattern = "€", fixed = TRUE))
+# 
+# grep(x = data2$headline, pattern = "€", fixed = TRUE)
+# View(data2[grep(x = headline, pattern = "â", fixed = TRUE), headline])
 
 N <- nrow(data)
-
 label <- data$category
 
 texts <- as.character(data$headline)
@@ -17,8 +16,7 @@ tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE,
                            remove_punct = FALSE, remove_symbols = FALSE, 
                            remove_hyphens = TRUE)
 
-# lower all cases
-tokens <- quanteda::tokens_tolower(tokens)
+
 tokens <- as.list(tokens)
 
 # Create vocabulary. Terms will be unigrams (simple words).
@@ -26,7 +24,6 @@ itoken <- text2vec::itoken(tokens, progressbar = FALSE)
 vocab <- text2vec::create_vocabulary(itoken)
 vocab <- as.data.table(text2vec::prune_vocabulary(vocab, term_count_min = 2L))
 
-vocab[term == "â",]
 
 # how many headlines have 2 sentences
 pointOccurance <- vocab[term == ".", doc_count]
@@ -38,15 +35,11 @@ print(paste("this equals", pointOccurance/N, "percent of news headlines"))
 categoryFreq <- data[, .(count = .N), by = category]
 categoryFreq[, labPos := cumsum(count) - 0.5*count]
 
-# from graf project
-colGeneratorWdl <- colorRampPalette(c("white", "grey", "yellow", "red", 
-                                   "mediumorchid1","green", "royalblue1","black"))
-
 ggObj <- ggplot(categoryFreq, aes(x = 2, y = count, fill = category)) +
-  geom_bar(stat = "identity", color = "black") +
+  geom_bar(stat = "identity", fill = colGenerator(nrow(categoryFreq))) +
   coord_polar("y", start = 0) +
   geom_text(aes(y = labPos, label = count), color = "white")+
-  #scale_fill_manual(palette = "blues") +
+  #scale_fill_manual() +
   theme_void() +
   xlim(0.5, 2.5) 
 ggObj
@@ -84,12 +77,12 @@ word1 <- plotWordClouds(catFilter = "WORLDPOST", nWords = 50,
                         returnData = TRUE)
 word2 <- plotWordClouds(catFilter = "THE WORLDPOST", nWords = 50,
                         returnData = TRUE)
-length(intersect(word1$term, word2$term))/50 
+length(intersect(word1$term, word2$term))/50  # 0.46
 
 word1 <- plotWordClouds(catFilter = "CULTURE & ARTS", nWords = 50, 
                         returnData = TRUE)
 word2 <- plotWordClouds(catFilter = "ARTS & CULTURE", nWords = 50,
-                        returnData = TRUE)
+                        returnData = TRUE) #0.38
 length(intersect(word1$term, word2$term))/50 
 
 word1 <- plotWordClouds(catFilter = "STYLE", nWords = 50, 
@@ -98,8 +91,14 @@ word2 <- plotWordClouds(catFilter = "STYLE & BEAUTY", nWords = 50,
                         returnData = TRUE)
 length(intersect(word1$term, word2$term))/50 #  0.52
 
+word1 <- plotWordClouds(catFilter = "GREEN", nWords = 50, 
+                        returnData = TRUE)
+word2 <- plotWordClouds(catFilter = "ENVIRONMENT", nWords = 50,
+                        returnData = TRUE)
+length(intersect(word1$term, word2$term))/50 # 0.5
 
-dataRaw <- read.fst("03_computedData/01_importedData/News.fst",
+
+dataRaw <- read.fst("03_computedData/02_cleanedData/News.fst",
                     as.data.table = TRUE)
 dataRaw[category == "WORLDPOST", ][1:5, headline]
 dataRaw[category == "THE WORLDPOST", ][1:5, headline]
@@ -107,6 +106,7 @@ dataRaw[category == "THE WORLDPOST", ][1:5, headline]
 
 dataRaw[category == "CULTURE & ARTS", ][1:5, headline]
 dataRaw[category == "ARTS & CULTURE", ][1:5, headline]
+dataRaw[category == "ARTS", ][1:5, headline]
 # nicht unterscheidbar
 
 dataRaw[category == "STYLE", ][1:5, headline]
@@ -115,4 +115,8 @@ dataRaw[category == "STYLE & BEAUTY", ][1:5, headline]
 
 dataRaw[category == "PARENTS", ][1:5, headline]
 dataRaw[category == "PARENTING", ][1:5, headline]
+#nicht unterscheidbar
+
+dataRaw[category == "GREEN", ][1:5, headline]
+dataRaw[category == "ENVIRONMENT", ][1:5, headline]
 #nicht unterscheidbar

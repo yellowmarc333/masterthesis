@@ -41,3 +41,9 @@ plotWordClouds <- function(catFilter = "POLITICS", nWords = 50,
   if (returnData) return(plotData)
   else return(ggObj)
 }
+
+
+
+colGenerator <- colorRampPalette(c("white", "grey", "yellow", "red",
+                                   "mediumorchid1", "green", 
+                                   "royalblue1", "black"))

@@ -1,7 +1,7 @@
 source("05_src/Sourcer.R")
 sourcedFiles = sourceAll()
 dataPath <- "03_computedData/04_preparedData/"
-
+computedDataPath <- "03_computedData/"
 
 # increase vector memory
 R_MAX_VSIZE = 50 * 10^9 
@@ -10,7 +10,7 @@ Sys.setenv('R_MAX_VSIZE'= R_MAX_VSIZE, "R_MAX_NUM_DLLS" = R_MAX_NUM_DLLS)
 print(paste0("Max vector memory is set to ", as.numeric((Sys.getenv('R_MAX_VSIZE'))) / (10^9), " Gb"))
 
 # init directory
-computedDataPath <- "03_computedData/"
+
 
 # 01 IMPORT
 importData(inPath = "02_initialData/", 
@@ -27,6 +27,11 @@ integrateData(inPath = "03_computedData/02_cleanedData/",
              trainSize = 0.6)
 
 # 04 DATA PREPARATION
+prepareDataGlove(inPath = "03_computedData/03_integratedData/",
+                 outPath = "03_computedData/04_preparedData/", 
+                 subsetSize = "10pc", word2VecSize = 50, mergeSD = FALSE)
+
+
 prepareDataBOW(inPath = "03_computedData/03_integratedData/",
             outPath = "03_computedData/04_preparedData/", 
             subsetSize = "100pc", mergeSD = FALSE)
@@ -41,11 +46,9 @@ prepareDataW2V(inPath = "03_computedData/03_integratedData/",
 
 prepareDataEmb(inPath = "03_computedData/03_integratedData/",
                  outPath = "03_computedData/04_preparedData/", 
-                 subsetSize = "10pc", mergeSD = TRUE)
+                 subsetSize = "10pc", mergeSD = FALSE)
 
-prepareDataGlove(inPath = "03_computedData/03_integratedData/",
-               outPath = "03_computedData/04_preparedData/", 
-               subsetSize = "100pc", word2VecSize = 50, mergeSD = TRUE)
+
 
 
 # binary

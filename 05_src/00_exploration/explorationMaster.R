@@ -1,5 +1,11 @@
-data <- read.fst("03_computedData/01_importedData/News.fst",
+data2 <- read.fst("03_computedData/02_cleanedData/News.fst",
                  as.data.table = TRUE)
+
+sum(grepl(x = data2$headline, pattern = "€", fixed = TRUE))
+
+grep(x = data2$headline, pattern = "€", fixed = TRUE)
+View(data2[grep(x = headline, pattern = "â", fixed = TRUE), headline])
+
 N <- nrow(data)
 
 label <- data$category
@@ -19,6 +25,8 @@ tokens <- as.list(tokens)
 itoken <- text2vec::itoken(tokens, progressbar = FALSE)
 vocab <- text2vec::create_vocabulary(itoken)
 vocab <- as.data.table(text2vec::prune_vocabulary(vocab, term_count_min = 2L))
+
+vocab[term == "â",]
 
 # how many headlines have 2 sentences
 pointOccurance <- vocab[term == ".", doc_count]

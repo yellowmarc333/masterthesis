@@ -618,7 +618,7 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   fileName <- paste0("trainSubset", subsetSize, ".fst")
   subsetData <- read.fst(path = paste0(inPath, fileName), 
                          as.data.table = TRUE)
-  
+
   N <- nrow(subsetData)
   
   label <- subsetData$category
@@ -634,19 +634,9 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
                              remove_punct = FALSE, remove_symbols = FALSE, 
                              remove_hyphens = TRUE)
-
-  # lower all cases
-  tokens <- quanteda::tokens_tolower(tokens)
   
-  # remove some patterns that are not recognized by Glove later on.
-  rmPatterns = c("â", "ã", "â", "'s", "ê", "#")
-  for(pattern in rmPatterns){
-    tokens <- sapply(tokens, function(x) {
-      gsub(x, pattern = pattern, replacement = "",
-           fixed = TRUE)
-    })
-  }
 
+  tokens <- as.list(tokens)
   
   # dont remove stopwords because are inducing meaning
   #tokens <- tokens_remove(tokens, c(stopwords("english")))
@@ -679,6 +669,10 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
                         word2VecSize, "d.txt"), quote="")
   format(object.size(glove), units = "Gb")
   # see how many words are in glove of the data words
+  notFound <- as.data.table(vocab[!(vocab$term %in% glove$V1),])
+  
+  browser()
+  
   commonWordsRatio <- round(mean(vocab$term %in% glove$V1), digits = 3)
   print(paste("the data words and Glove have", commonWordsRatio, 
               "in common"))

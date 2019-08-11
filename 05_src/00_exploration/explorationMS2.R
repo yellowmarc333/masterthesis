@@ -1,5 +1,6 @@
 # next steps/ to dos:
 
+# 's , bspw. John's mit word tagging ersetzen
 # encoding fehler checken!!!! â zb.
 # normales MLP mit keras implementieren
 # gütemaß wahrscheinlichkeit der richtigen klasse implementieren
@@ -9,7 +10,6 @@
 # nach papern speziell cnn und lstm auf textclassification schauen
 # accuracy measure auschecken: binary cross entropy > mse?
 # write exploration function for wordvectors
-# ueberlegen wie explaining aussehen koennte.
 # methoden: multinomial naive bayes oder logReg (hat besser performed)
 # attention layer implemtieren
 # validation data muss genauso preprocessed sein wie train Data
@@ -34,7 +34,7 @@
 # hierarchical attention neural net
 # markus und wdl datensätze im auge behalten
 # fasttext auschecken
-# verena fragen was tun wegen 's , bspw. John's
+
 
 # xxcolorpalette vom wdl code holen
 # xxbag of words vlt in einzelschritten computen (ndoc = 20 minimal) Wolle fragen

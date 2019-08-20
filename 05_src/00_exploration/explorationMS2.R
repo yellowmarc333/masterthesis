@@ -1,5 +1,6 @@
 # next steps/ to dos:
 
+# interater reliability auschecken
 # encoding fehler checken!!!! â zb.
 # normales MLP mit keras implementieren
 # gütemaß wahrscheinlichkeit der richtigen klasse implementieren

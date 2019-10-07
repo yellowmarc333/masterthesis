@@ -61,10 +61,12 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   
   write.fst(data.table(indexes), path = paste0(outPath, "BOW-Indexes-", 
                                    subsetSize,
-                                   "-", mergeSD, ".fst"))
+                                   "-", mergeSD, ".fst"),
+            compress = 0)
   
   write.fst(result, path = paste0(outPath, "BOW-", 
-                                           subsetSize, "-", mergeSD, ".fst"))
+                                           subsetSize, "-", mergeSD, ".fst"),
+            compress = 0)
 }
 
 
@@ -135,11 +137,13 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   
   write.fst(data.table(indexes), path = paste0(outPath, "TFIDF-Indexes-", 
                                    subsetSize,
-                                   "-", mergeSD, ".fst"))
+                                   "-", mergeSD, ".fst"),
+            compress = 0)
   
   write.fst(result, paste0(outPath, "TFIDF-", 
                                 subsetSize, "-",
-                                "-", mergeSD, ".fst"))
+                                "-", mergeSD, ".fst"),
+            compress = 0)
   
 }
 
@@ -218,7 +222,8 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   # write just the wordVectors
   write.fst(wordVectors, paste0(outPath, "WordVectors-", 
                                 subsetSize, "-", word2VecSize,
-                                "-", mergeSD, ".fst"))
+                                "-", mergeSD, ".fst"),
+            compress = 0)
   
   
   # testVector <- wordVectors[, trump]
@@ -307,11 +312,13 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   
   write.fst(data.table(indexes), path = paste0(outPath, "W2V-Indexes-", 
                                   subsetSize, "-", word2VecSize,
-                                  "-", mergeSD, ".fst"))
+                                  "-", mergeSD, ".fst"),
+            compress = 0)
   
   write.fst(result, path = paste0(outPath, "W2V-", 
                                   subsetSize, "-", word2VecSize,
-                                  "-", mergeSD, ".fst"))
+                                  "-", mergeSD, ".fst"),
+            compress = 0)
 }
 
 prepareDataEmb = function(inPath = "03_computedData/03_integratedData/", 
@@ -401,11 +408,13 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
   
   write.fst(data.table(indexes), path = paste0(outPath, "Emb-Indexes-", 
                                    subsetSize,
-                                   "-", mergeSD, ".fst"))
+                                   "-", mergeSD, ".fst"),
+            compress = 0)
   
   write.fst(result, path = paste0(outPath, "Emb-", 
                                   subsetSize,
-                                  "-", mergeSD, ".fst"))
+                                  "-", mergeSD, ".fst"),
+            compress = 0)
 }
 
 
@@ -630,7 +639,6 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
                              remove_punct = FALSE, remove_symbols = FALSE, 
                              remove_hyphens = TRUE)
   
-
   tokens <- as.list(tokens)
   
   # dont remove stopwords because are inducing meaning
@@ -663,6 +671,7 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   glove <- fread(paste0("02_initialData/glove.6B.", 
                         word2VecSize, "d.txt"), quote="")
   format(object.size(glove), units = "Gb")
+  
   # see how many words are in glove of the data words
   notFound <- as.data.table(vocab[!(vocab$term %in% glove$V1),])
   
@@ -685,7 +694,8 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   # write just the wordVectors
   write.fst(wordVectors, paste0(outPath, "Glove-", 
                                 subsetSize, "-", word2VecSize,
-                                "-", mergeSD, ".fst"))
+                                "-", mergeSD, ".fst"),
+            compress = 0)
   rm(wordVectorsRaw, glove)
 
   # testVector <- wordVectors[, dog]
@@ -774,10 +784,12 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   
   write.fst(data.table(indexes), path = paste0(outPath, "Glove-Indexes-", 
                                                subsetSize, "-", word2VecSize,
-                                               "-", mergeSD, ".fst"))
+                                               "-", mergeSD, ".fst"),
+            compress = 0)
   
   write.fst(result, path = paste0(outPath, "Glove-", 
                                   subsetSize, "-", word2VecSize,
-                                  "-", mergeSD, ".fst"))
+                                  "-", mergeSD, ".fst"),
+            compress = 0)
 }
 

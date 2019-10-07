@@ -226,7 +226,7 @@ predictRF <- function(dataPath, fileName, indexName, upSampling = FALSE) {
 }
 
 
-predictCNN <- function(dataPath, fileName, indexName) {
+predictCNN <- function(dataPath, fileName, indexName, epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
@@ -310,7 +310,7 @@ predictCNN <- function(dataPath, fileName, indexName) {
   history <- model %>% fit(
     x = trainData,
     y = trainLabel,
-    epochs = 12,
+    epochs = epochs,
     batchsize = 32,
     validation_data = list(testData, testLabel),
     view_metrics = FALSE,
@@ -330,7 +330,8 @@ predictCNN <- function(dataPath, fileName, indexName) {
   confusionMatrix <- matrix(table(factor(predictMax, 
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
-                                         levels =  levels(testLabelRaw))), ncol = 40)
+                                         levels =  levels(testLabelRaw))), 
+                            ncol = length(levels(testLabelRaw)))
 
   # naming rows and cols
   rownames(confusionMatrix) <- levels(testLabelRaw)
@@ -364,7 +365,7 @@ predictCNN <- function(dataPath, fileName, indexName) {
 
 
 predictEmb <- function(dataPath, fileName, indexName,
-                       upSampling = FALSE) {
+                       upSampling = FALSE, epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
@@ -463,7 +464,7 @@ predictEmb <- function(dataPath, fileName, indexName,
   history <- model %>% fit(
     x = as.matrix(trainData),
     y = trainLabel,
-    epochs = 7,
+    epochs = epochs,
     batchsize = 32,
     validation_data = list(as.matrix(testData), testLabel),
     view_metrics = FALSE,
@@ -493,7 +494,8 @@ predictEmb <- function(dataPath, fileName, indexName,
   confusionMatrix <- matrix(table(factor(predictMax, 
                                   levels =  levels(testLabelRaw)),
                            factor(testLabelRaw, 
-                                  levels =  levels(testLabelRaw))), ncol = 40)
+                                  levels =  levels(testLabelRaw))),
+                           ncol = length(levels(testLabelRaw)))
   # naming rows and cols
   rownames(confusionMatrix) <- levels(testLabelRaw)
   colnames(confusionMatrix) <- levels(testLabelRaw)
@@ -515,7 +517,7 @@ predictEmb <- function(dataPath, fileName, indexName,
 
 
 predictLSTM <- function(dataPath, fileName, indexName,
-                        upSampling = FALSE) {
+                        upSampling = FALSE, epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
@@ -590,7 +592,7 @@ predictLSTM <- function(dataPath, fileName, indexName,
   history <- model %>% fit(
     x = as.matrix(trainData),
     y = trainLabel,
-    epochs = 10,
+    epochs = epochs,
     batchsize = 32,
     validation_data = list(as.matrix(testData), testLabel),
     view_metrics = FALSE,
@@ -611,7 +613,8 @@ predictLSTM <- function(dataPath, fileName, indexName,
   confusionMatrix <- matrix(table(factor(predictMax, 
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
-                                         levels =  levels(testLabelRaw))), ncol = 40)
+                                         levels =  levels(testLabelRaw))),
+                            ncol = length(levels(testLabelRaw)))
   # naming rows and cols
   rownames(confusionMatrix) <- levels(testLabelRaw)
   colnames(confusionMatrix) <- levels(testLabelRaw)
@@ -644,7 +647,7 @@ predictLSTM <- function(dataPath, fileName, indexName,
 }
 
 predictLSTMArray <- function(dataPath, fileName, indexName,
-                             upSampling = FALSE) {
+                             upSampling = FALSE, epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
@@ -722,7 +725,7 @@ predictLSTMArray <- function(dataPath, fileName, indexName,
   history <- model %>% fit(
     x = trainData,
     y = trainLabel,
-    epochs = 20,
+    epochs = epochs,
     batchsize = 32,
     validation_data = list(testData, testLabel),
     view_metrics = FALSE,
@@ -744,7 +747,8 @@ predictLSTMArray <- function(dataPath, fileName, indexName,
   confusionMatrix <- matrix(table(factor(predictMax, 
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
-                                         levels =  levels(testLabelRaw))), ncol = 40)
+                                         levels =  levels(testLabelRaw))),
+                            ncol = length(levels(testLabelRaw)))
  
   # Prob vs Accuracy plot Data
   predictionsMaxProb <- as.vector(t(apply(predictProb, 1 ,
@@ -787,8 +791,10 @@ ensembleMaxProb <- function(..., truth){
   if (length(truth) != length(predictions)) stop("different vector lengths")
   accuracy <- mean(predictions == truth)
   
+  # todo: fix hardcoding here
   confusionMatrix <- matrix(table(factor(predictions, levels = levels(truth)),
-                           factor(truth, levels = levels(truth))), ncol = 40)
+                           factor(truth, levels = levels(truth))), 
+                           ncol = 35)
   row.names(confusionMatrix) <- levels(truth)
   
  return(list(acc = accuracy,

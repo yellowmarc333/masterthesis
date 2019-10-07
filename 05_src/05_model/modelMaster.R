@@ -1,18 +1,19 @@
+dataPath <- "03_computedData/04_preparedData/"
 list.files(dataPath)
 
 #----------------------- 10 percent models ---------------------------------####
 
-# LSTM 10pc #26-07
+# LSTM 10pc #06-10
 fileName <- "Emb-10pc-FALSE.fst"
 indexName <- "Emb-Indexes-10pc-FALSE.fst"
 resultEmbLSTM10 <- predictLSTM(dataPath, fileName, 
-                        indexName) # 0.424
+                        indexName, epochs = 8) # 0.424
 
-# Emb 10pc #15-07
+# Emb 10pc #06-10
 fileName <- "Emb-10pc-FALSE.fst"
 indexName <- "Emb-Indexes-10pc-FALSE.fst"
 resultEmbCNN10 <- predictEmb(dataPath, fileName, 
-                        indexName) # 0.412
+                        indexName, epochs = 8) # 0.412
 
 # Emb 10pc on RF and XGB #02.08
 fileName <- "Emb-10pc-FALSE.fst"
@@ -51,12 +52,12 @@ resultCN <- predictCNN(dataPath, fileName5) # 0.15
 fileName <- "GloveArray-10pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-10pc-50-FALSE.fst"
 resultCNNGlove10 <- predictCNN(dataPath, fileName = fileName, 
-                           indexName = indexName) # 0.47
+                           indexName = indexName, epochs = 10) # 0.47, less categories: 0.49
 # Array LSTM 10PC
 fileName <- "GloveArray-10pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-10pc-50-FALSE.fst"
 resultLSTMArray10 <- predictLSTMArray(dataPath, fileName = fileName, 
-                           indexName = indexName) # 0.496
+                           indexName = indexName, epochs = 10) # 0.496, less categories: 0.523
 
 # EmbLSTM 10pc shortdescription #03-08
 fileName <- "Emb-10pc-TRUE.fst"
@@ -90,23 +91,23 @@ resultRF4 <- predictRF(dataPath, fileName4) #
 fileName6 <- "W2VArray-100pc-50-FALSE.rds"
 resultCN <- predictCNN(dataPath, fileName6) # 0.208
 
-# LSTM 100pc #26-07
+# LSTM 100pc #06-10
 fileName <- "Emb-100pc-FALSE.fst"
 indexName <- "Emb-Indexes-100pc-FALSE.fst"
 resultLSTM2 <- predictLSTM(dataPath, fileName, 
-                         indexName) # 0.5746
+                         indexName, epochs = 20) # 0.600
 
-# Emb 100pc # 15-07
+# Emb 100pc # 06-10
 fileName7 <- "Emb-100pc-FALSE.fst"
 indexName7 <- "Emb-Indexes-100pc-FALSE.fst"
 resultEmb7 <- predictEmb(dataPath, fileName7,
-                       indexName7) # 0.551
+                       indexName7, epochs = 15) # 0.580
 
-# Array Glove 100pc # 15-07
+# Array Glove 100pc # 06-10
 fileName <- "GloveArray-100pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-100pc-50-FALSE.fst"
 resultEmb2 <- predictCNN(dataPath, fileName,
-                         indexName) #0.554
+                         indexName) #0.554, 06-10 0.5774
 
 # Array LSTM 100PC
 fileName <- "GloveArray-100pc-50-FALSE.rds"
@@ -130,7 +131,8 @@ accComparison <- data.table(category = names(resultEmbCNN10$accByClass),
                             RF10 = resultRF10$accByClass)
 View(accComparison)
 write.fst(accComparison, 
-          path = "03_computedData/06_evaluatedData/accComparison.fst")
+          path = "03_computedData/06_evaluatedData/accComparison.fst",
+          compress = 0)
 
 ensembeRes1 <- ensembleMaxProb(resultXG2$predictions, 
                                resultRF2$predictions,

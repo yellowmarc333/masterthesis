@@ -1,9 +1,10 @@
 # next steps/ to dos:
 
+# sourcetree problem lösen
 # RF mit sparse matrix berechnen
 # alle änderungen auf alle übertragen und checken (level error entferrnen)
 # normales MLP mit keras implementieren
-# g?tema? wahrscheinlichkeit der richtigen klasse implementieren
+# guetemass wahrscheinlichkeit der richtigen klasse implementieren
 # dokumentieren welche tokens entfernt wurden. (0 wörter auch entfernen)
 #     das vlt sogar vor prepareData?
 # checken ob die conf matrix richtig berechnet hat. selbe accuracy
@@ -34,6 +35,9 @@
 # hierarchical attention neural net
 # markus und wdl datensätze im auge behalten
 # fasttext auschecken
+
+
+# xx o nach c problem entfernen
 
 # xx kategorien reduzieren: 40 auf 35
 # xxencoding fehler checken!!!! â zb.
@@ -125,4 +129,4 @@ test <- generalizedSampling(data = data, method = "down",
                     label = "labelRaw")
 table(test$labelRaw)
 
-
+notFound <- fread("03_computedData/02_cleanedData/notFound.csv")

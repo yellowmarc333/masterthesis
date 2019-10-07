@@ -17,7 +17,7 @@ importData = function(inPath = "02_initialData/",
   data <- ldply(lapply(input, function(x) t(unlist(fromJSON(x)))))
   data <- as.data.table(data)
 
-  #replace some symbols that are not utf-8 encoding and lead to encoding errors
+  # #replace some symbols that are not utf-8 encoding and lead to encoding errors
   data[, headline := gsub(pattern = "’", replacement = "'",
                           x = headline, fixed = TRUE )]
   data[, headline := gsub(pattern = "‘", replacement = "'",
@@ -27,8 +27,6 @@ importData = function(inPath = "02_initialData/",
   data[, headline := gsub(pattern = "”", replacement = "'",
                           x = headline, fixed = TRUE )]
   data[, headline := gsub(pattern = "“", replacement = "'",
-                          x = headline, fixed = TRUE )]
-  data[, headline := gsub(pattern = "―", replacement = "-",
                           x = headline, fixed = TRUE )]
   data[, headline := gsub(pattern = "—", replacement = "-",
                           x = headline, fixed = TRUE )]
@@ -41,18 +39,6 @@ importData = function(inPath = "02_initialData/",
   data[, headline := gsub(pattern = "…", replacement = "...",
                           x = headline, fixed = TRUE )]
   data[, headline := gsub(pattern = "\u2028", replacement = "",
-                          x = headline, fixed = TRUE )]
-  data[, headline := gsub(pattern = "  ", replacement = " ",
-                          x = headline, fixed = TRUE )]
-  data[, headline := gsub(pattern = " ", replacement = " ",
-                          x = headline, fixed = TRUE )]
-  data[, headline := gsub(pattern = "S", replacement = "S",
-                          x = headline, fixed = TRUE )]
-  data[, headline := gsub(pattern = "A", replacement = "A",
-                          x = headline, fixed = TRUE )]
-  data[, headline := gsub(pattern = "C", replacement = "C",
-                          x = headline, fixed = TRUE )]
-  data[, headline := gsub(pattern = "O", replacement = "C",
                           x = headline, fixed = TRUE )]
   data[, headline := gsub(pattern = "é", replacement = "e",
                           x = headline, fixed = TRUE )]
@@ -67,7 +53,8 @@ importData = function(inPath = "02_initialData/",
   data[, headline := gsub(pattern = "Â", replacement = "A",
                           x = headline, fixed = TRUE )]
   
-
-  fwrite(x = data, file = paste0(outPath, "News.csv"))
-  write.fst(data, path = paste0(outPath, "News.fst"), uniform_encoding = TRUE)
+  
+  #fwrite(x = data, file = paste0(outPath, "News.csv"))
+  # compression argument prevents converting error from o to c
+  write.fst(data, path = paste0(outPath, "News.fst"), compress = 0)
 }

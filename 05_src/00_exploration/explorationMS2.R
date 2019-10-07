@@ -1,6 +1,6 @@
 # next steps/ to dos:
 
-# sourcetree problem lösen
+
 # RF mit sparse matrix berechnen
 # alle änderungen auf alle übertragen und checken (level error entferrnen)
 # normales MLP mit keras implementieren
@@ -36,7 +36,7 @@
 # markus und wdl datensätze im auge behalten
 # fasttext auschecken
 
-
+# xxsourcetree problem lösen
 # xx o nach c problem entfernen
 
 # xx kategorien reduzieren: 40 auf 35

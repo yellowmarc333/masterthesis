@@ -1,7 +1,7 @@
 # next steps/ to dos:
 
 
-# RF mit sparse matrix berechnen
+# RF mit sparse matrix berechnen (irgendwas funktioniert noch nicht)
 # alle änderungen auf alle übertragen und checken (level error entferrnen)
 # normales MLP mit keras implementieren
 # guetemass wahrscheinlichkeit der richtigen klasse implementieren

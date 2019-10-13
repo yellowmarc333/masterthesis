@@ -30,12 +30,17 @@ resultRF1 <- predictRF(dataPath, fileName1) #
 
 
 # BOW 10pc # 15-07
-fileName <- "BOW-10pc-FALSE.fst" 
-indexName <- "BOW-Indexes-10pc-FALSE.fst"
+fileName <- "BOW-10pc-TRUE-FALSE.rds"
+indexName <- "BOW-Indexes-10pc-TRUE-FALSE.fst"
+labelName <- "BOW-Label-10pc-TRUE-FALSE.fst"
 resultXG10 <- predictXG(dataPath, fileName,
                        indexName) # 0.399
-resultRF10 <- predictRF(dataPath, fileName,
-                       indexName) # 0.443
+resultRF10 <- predictRF(dataPath, fileName, 
+                       indexName, labelName, sparse = TRUE) # 0.426
+fileName <- "BOW-10pc-FALSE.fst"
+indexName <- "BOW-Indexes-10pc-TRUE-FALSE.fst"
+resultRF10 <- predictRF(dataPath, fileName, 
+                        indexName) # 0.443
 
 
 # Sums of word2vec 10PC
@@ -67,19 +72,14 @@ resultEmbLSTM10SD <- predictLSTM(dataPath, fileName,
 
 #----------------------- 100 percent models --------------------------------####
 
-# BOW 100pc # 26-07
-fileName <- "BOW-100pc-FALSE.fst" 
-indexName <- "BOW-Indexes-100pc-FALSE.fst"
-resultXG100 <- predictXG(dataPath, fileName,
-                       indexName) # 
-saveRDS(resultXG100,
-        file = paste0("03_computedData/05_modelData/",
-                      "resultXG100.RDS"))
-resultRF100 <- predictRF(dataPath, fileName,
-                       indexName) # 
-saveRDS(resultRF100,
-        file = paste0("03_computedData/05_modelData/",
-                      "resultRF100.RDS"))
+
+# BOW 100pc # 13-10
+fileName <- "BOW-100pc-TRUE-FALSE.rds"
+indexName <- "BOW-Indexes-100pc-TRUE-FALSE.fst"
+labelName <- "BOW-Label-100pc-TRUE-FALSE.fst"
+resultRF100 <- predictRF(dataPath, fileName, 
+                        indexName, labelName, sparse = TRUE) # 
+
 
 
 # Sums of word2vec 100PC

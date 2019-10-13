@@ -1,7 +1,7 @@
 prepareDataBOW = function(inPath = "03_computedData/03_integratedData/", 
                        outPath = "03_computedData/04_preparedData/",
                        subsetSize = c("1pc", "10pc", "100pc"),
-                       mergeSD = FALSE){
+                       saveSparse = FALSE, mergeSD = FALSE){
   assertString(inPath)
   assertString(outPath)
   subsetSize <- match.arg(subsetSize)
@@ -40,33 +40,52 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 20L)
   vectorizer <- text2vec::vocab_vectorizer(vocab)
 
-  # use window of 5 for context words
-  tokens.dfm <- as.data.frame(as.matrix(text2vec::create_dtm(
-    itoken, vectorizer, skip_grams_window = 2L, )))
-  tokens.dt <- as.data.table(tokens.dfm)
-  rm(tokens.dfm)
+  
   labelIndexes <- as.integer(gsub(names(tokens), 
                                   pattern = "text", 
                                   replacement = ""))
   
   labelRed <- labelRaw[labelIndexes]
-  
-  result <- data.table(labelRaw = labelRed, tokens.dt)
-  rm(tokens.dt)
+  newN <- length(labelRed)
   
   trainSize = 0.8
   set.seed(100)
-  indexes <- sample.int(nrow(result), 
-                        floor(nrow(result) * trainSize))
+  indexes <- sample.int(newN, floor(newN * trainSize))
   
+  tokens.sparse <- text2vec::create_dtm(
+    itoken, vectorizer, skip_grams_window = 2L)
+  # use window of 5 for context words
+  if(!saveSparse) {
+    tokens.dfm <- as.data.frame(tokens.sparse)
+    tokens.dt <- as.data.table(tokens.dfm)
+    rm(tokens.sparse)
+    rm(tokens.dfm)
+    
+    result <- data.table(labelRaw = labelRed, tokens.dt)
+    rm(tokens.dt)
+    
+    write.fst(result, path = paste0(outPath, "BOW-", 
+                                    subsetSize, "-", saveSparse,
+                                    "-", mergeSD, ".fst"),
+              compress = 0)
+  } else {
+    saveRDS(tokens.sparse, file = paste0(outPath, "BOW-", 
+                                    subsetSize, "-", saveSparse,
+                                    "-", mergeSD, ".rds"),
+              compress = FALSE)
+    write.fst(data.table(labelRaw = labelRed), path = paste0(outPath, 
+                                                             "BOW-Label-", 
+                                    subsetSize, "-", saveSparse,
+                                    "-", mergeSD, ".fst"),
+              compress = 0)
+  }
+ 
+  # write indexes in both cases of saveSparse
   write.fst(data.table(indexes), path = paste0(outPath, "BOW-Indexes-", 
-                                   subsetSize,
-                                   "-", mergeSD, ".fst"),
+                                               subsetSize, "-", saveSparse,
+                                               "-", mergeSD, ".fst"),
             compress = 0)
   
-  write.fst(result, path = paste0(outPath, "BOW-", 
-                                           subsetSize, "-", mergeSD, ".fst"),
-            compress = 0)
 }
 
 

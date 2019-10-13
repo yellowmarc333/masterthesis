@@ -146,74 +146,155 @@ predictXG <- function(dataPath, fileName, indexName, upSampling = FALSE){
 }
 
 
-predictRF <- function(dataPath, fileName, indexName, upSampling = FALSE) {
+predictRF <- function(dataPath, fileName, indexName, labelName = NULL,
+                      upSampling = FALSE, sparse = FALSE) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
 
-  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+
+  # loading indexis for train/test split
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
+  
+  if(!sparse){
+    data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+    trainData <- data[indexes,]
+    if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                    method = "up", 
+                                                    label = "labelRaw")
+    trainLabelRaw <- trainData$labelRaw
+    testData <- data[-indexes, ]
+    testLabelRaw <- testData$labelRaw
+    
+    trainLabel <- as.numeric(trainLabelRaw) - 1
+    testLabel <- as.numeric(testLabelRaw) - 1
+    
+    print("fitting model with data.table")
+    model = ranger::ranger(dependent.variable.name = "labelRaw", 
+                           data = trainData,
+                           importance = "impurity",
+                           probability = TRUE, num.trees = 500)
+    
+    predictions = as.data.table(predict(model, 
+                                        testData, 
+                                        type = "response")$predictions)
+    
+    # evaluating predictions and eval metrics
+    names(predictions) <- levels(testLabelRaw)
+    
+    predictionsMax <- apply(predictions, 1 , function(x) {
+      names(x[which.max(x)])
+    })
+    
+    # Prob vs Accuracy plot Data
+    predictionsMaxProb <- apply(predictions, 1 , function(x) {
+      x[which.max(x)]
+    })
+    correctBinary <- testLabelRaw == predictionsMax
+    ProbAccDT <- data.table(Prob = predictionsMaxProb,
+                            Correct = correctBinary)
+    
+    
+    # mse, accuracy
+    # this one is in order. needs to be rearranged for a comparison with
+    # predictions
+    truth <- to_categorical(testLabel)[, orderOfNames]
+    resultDiffProb <- (truth - predictions)^2    
+    meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
+    accuracy <- mean(testLabelRaw == predictionsMax)
+    
+    confusionMatrix <- matrix(table(factor(predictionsMax, 
+                                           levels =  levels(testLabelRaw)),
+                                    factor(testLabelRaw, 
+                                           levels =  levels(testLabelRaw))), 
+                              ncol = length(levels(testLabelRaw)))
+    # naming rows and cols
+    rownames(confusionMatrix) <- levels(testLabelRaw)
+    colnames(confusionMatrix) <- levels(testLabelRaw)
+    print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
+    
+    # accuracy by class
+    accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
+    names(accByClass) <-  levels(testLabelRaw)
+    
+  }
+  
+  if(sparse){
+    data <- readRDS(paste0(dataPath, fileName))
+    label <- read.fst(paste0(dataPath, labelName), as.data.table = TRUE)
+    trainData <- data[indexes,]
+    trainLabelRaw <- label[indexes]$labelRaw
+    testData <- data[-indexes, ]
+    testLabelRaw <- label[-indexes]$labelRaw
 
-  trainData <- data[indexes]
-  if(upSampling) trainData <- generalizedSampling(data = trainData, 
-                                                  method = "up", 
-                                                  label = "labelRaw")
-  trainLabelRaw <- trainData$labelRaw
+    # because of naming transition use not "-1"
+    trainLabel <- Matrix::Matrix(data = as.numeric(trainLabelRaw),
+                                 sparse = TRUE, ncol = 1)
+    dimnames(trainLabel)[[2]] <- "trainLabel"
+    testLabel <- as.numeric(testLabelRaw)
+    
+    trainSparse <- cbind(trainLabel, trainData)
+    testSparse <- cbind(testLabel, testData)
+    
+    
+    print("fitting model with sparse")
+    model = ranger::ranger(dependent.variable.name = "trainLabel", 
+                           data = trainSparse,
+                           importance = "impurity",
+                           probability = TRUE, num.trees = 500,
+                           classification = TRUE, verbose = TRUE)
+    # when calc. with a sparse matrix, the column names are ordered along
+    # the true classes of the first training examples
+    orderOfNames <- as.integer(colnames(model$predictions))
+    
+    predictions = as.data.table(predict(model, 
+                                        testData, 
+                                        type = "response")$predictions)
+    
+    # evaluating predictions and eval metrics
+    names(predictions) <- levels(testLabelRaw)[orderOfNames]
+    
+    rm(data)
+    gc()
+    
+    
+    predictionsMax <- apply(predictions, 1 , function(x) {
+      names(x[which.max(x)])
+    })
+    
+    # Prob vs Accuracy plot Data
+    predictionsMaxProb <- apply(predictions, 1 , function(x) {
+      x[which.max(x)]
+    })
+    correctBinary <- testLabelRaw == predictionsMax
+    ProbAccDT <- data.table(Prob = predictionsMaxProb,
+                            Correct = correctBinary)
+    
+    
+    # mse, accuracy
+    # this one is in order. needs to be rearranged for a comparison with
+    # predictions ToDo: check this one
+    truth <- to_categorical(testLabel)[, orderOfNames]
+    resultDiffProb <- (truth - predictions)^2    
+    meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
+    accuracy <- mean(testLabelRaw == predictionsMax)
+    
+    confusionMatrix <- matrix(table(factor(predictionsMax, 
+                                           levels =  levels(testLabelRaw)),
+                                    factor(testLabelRaw, 
+                                           levels =  levels(testLabelRaw))), 
+                              ncol = length(levels(testLabelRaw)))
+    # naming rows and cols
+    rownames(confusionMatrix) <- levels(testLabelRaw)
+    colnames(confusionMatrix) <- levels(testLabelRaw)
+    print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
+    
+    # accuracy by class
+    accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
+    names(accByClass) <-  levels(testLabelRaw)
+    
+  }
   
-  testData <- data[-indexes]
-
-  testLabelRaw <- testData$labelRaw
-  
-  trainLabel <- as.numeric(trainLabelRaw) - 1
-  testLabel <- as.numeric(testLabelRaw) - 1
-  
-  rm(data)
-  gc()
-
-  print("fitting model")
-  model = ranger::ranger(dependent.variable.name = "labelRaw", 
-                         data = trainData,
-                         importance = "impurity",
-                         probability = TRUE, num.trees = 500)
-
-  predictions = as.data.table(predict(model, 
-                                      testData, 
-                                      type = "response")$predictions)
-  
-  # evaluating predictions and eval metrics
-  names(predictions) <- levels(testLabelRaw)
-  predictionsMax <- apply(predictions, 1 , function(x) {
-    names(x[which.max(x)])
-  })
-  
-  # Prob vs Accuracy plot Data
-  predictionsMaxProb <- apply(predictions, 1 , function(x) {
-    x[which.max(x)]
-  })
-  correctBinary <- testLabelRaw == predictionsMax
-  ProbAccDT <- data.table(Prob = predictionsMaxProb,
-                          Correct = correctBinary)
-  
-  
-  # mse, accuracy
-  truth <- to_categorical(testLabel)
-  resultDiffProb <- (truth - predictions)^2    
-  meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
-  accuracy <- mean(testLabelRaw == predictionsMax)
-  
-  confusionMatrix <- matrix(table(factor(predictionsMax, 
-                                         levels =  levels(testLabelRaw)),
-                                  factor(testLabelRaw, 
-                                         levels =  levels(testLabelRaw))), 
-                            ncol = 40)
-  # naming rows and cols
-  rownames(confusionMatrix) <- levels(testLabelRaw)
-  colnames(confusionMatrix) <- levels(testLabelRaw)
-  print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
-  
-  # accuracy by class
-  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
-  names(accByClass) <-  levels(testLabelRaw)
   
   return(list(acc = accuracy,
               meanSquareError = meanSquareError,

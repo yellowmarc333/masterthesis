@@ -1,9 +1,9 @@
 # next steps/ to dos:
 
-
-# RF mit sparse matrix berechnen (irgendwas funktioniert noch nicht)
-# alle änderungen auf alle übertragen und checken (level error entferrnen)
+# validation/test bei xgboost und RF checken (muss gleich sein) (wird watchlist eigentlich gebraucht)
 # normales MLP mit keras implementieren
+# preparation functions und predictors durchgehen und schauen dass überall same
+# validation data muss genauso preprocessed sein wie train Data
 # guetemass wahrscheinlichkeit der richtigen klasse implementieren
 # dokumentieren welche tokens entfernt wurden. (0 wörter auch entfernen)
 #     das vlt sogar vor prepareData?
@@ -12,8 +12,7 @@
 # accuracy measure auschecken: binary cross entropy > mse?
 # write exploration function for wordvectors
 # methoden: multinomial naive bayes oder logReg (hat besser performed)
-# attention layer implemtieren
-# validation data muss genauso preprocessed sein wie train Data
+
 
 # [exploration]
 # word clouds for biggest categorys (parents/parenting)
@@ -24,20 +23,17 @@
 
 
 # [liste für groll:]
-# bamlls lesen
 # framework nachfragen (besonders vergleichbarkeit von BOW auf 100% nicht rechenbar)
 # kategorien zusammenlegen Schema (vom menschen nicht auseinanderhaltbar, gemeinsame words)
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
-# [post masterarbeit]
-# bert auschecken/context2word in python implementieren
-# hierarchical attention neural net
-# markus und wdl datensätze im auge behalten
-# fasttext auschecken
-
+# xxSparse auf tfidf prepare
+# xxxgb mit sparse matrix berechnen (auf mac übertragen)
+# xxrf sparse einrichten
 # xxsourcetree problem lösen
 # xx o nach c problem entfernen
+# ab neuAnfang
 
 # xx kategorien reduzieren: 40 auf 35
 # xxencoding fehler checken!!!! â zb.
@@ -109,7 +105,12 @@
 # xxadd error measurement of the network
 # xx3blue one brown deep learning serie anschauen + notizen
 
-
+# [post masterarbeit]
+# attention layer implemtieren
+# bert auschecken/context2word in python implementieren
+# hierarchical attention neural net
+# markus und wdl datensätze im auge behalten
+# fasttext auschecken
 
 install_keras(method = c("auto", "virtualenv", "conda"),
               conda = "auto", version = "default", tensorflow = "default",

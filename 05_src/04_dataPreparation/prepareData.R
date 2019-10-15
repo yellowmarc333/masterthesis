@@ -94,7 +94,7 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
 prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/", 
                           outPath = "03_computedData/04_preparedData/",
                           subsetSize = c("1pc", "10pc", "100pc"),
-                          mergeSD = FALSE){
+                          saveSparse = FALSE, mergeSD = FALSE){
   assertString(inPath)
   assertString(outPath)
   subsetSize <- match.arg(subsetSize)
@@ -118,8 +118,6 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
                               remove_punct = TRUE, remove_symbols = TRUE, 
                               remove_hyphens = TRUE)
   
-
-  
   # remove stopwords because are inducing meaning
   tokens <- tokens_remove(tokens, c(stopwords("english")))
   
@@ -141,27 +139,48 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   tfidf = TfIdf$new()
   tfidf_fit = tfidf$fit_transform(x = dtm, tfidf)
 
+  tokens.sparse <- tfidf_fit
+ 
   labelIndexes <- as.integer(gsub(names(tokens), 
                                   pattern = "text", 
                                   replacement = ""))
-  
   labelRed <- label[labelIndexes]
+  newN <- length(labelRed)
   
-  result <- data.table(labelRaw = as.factor(labelRed), as.matrix(tfidf_fit))
-
   trainSize = 0.8
   set.seed(100)
-  indexes <- sample.int(nrow(result), 
-                        floor(nrow(result) * trainSize))
+  indexes <- sample.int(newN, floor(newN * trainSize))
+
   
+  if(!saveSparse) {
+    tokens.dfm <- as.data.frame(as.matrix(tokens.sparse))
+    tokens.dt <- as.data.table(tokens.dfm)
+    rm(tokens.sparse)
+    rm(tokens.dfm)
+    
+    result <- data.table(labelRaw = labelRed, tokens.dt)
+    rm(tokens.dt)
+    
+    write.fst(result, path = paste0(outPath, "TFIDF-", 
+                                    subsetSize, "-", saveSparse,
+                                    "-", mergeSD, ".fst"),
+              compress = 0)
+  } else {
+    saveRDS(tokens.sparse, file = paste0(outPath, "TFIDF-", 
+                                         subsetSize, "-", saveSparse,
+                                         "-", mergeSD, ".rds"),
+            compress = FALSE)
+    write.fst(data.table(labelRaw = as.factor(labelRed)), 
+              path = paste0(outPath, "TFIDF-Label-", 
+                            subsetSize, "-", saveSparse,
+                            "-", mergeSD, ".fst"),
+              compress = 0)
+  }
+  
+  # write indexes in both cases of saveSparse
   write.fst(data.table(indexes), path = paste0(outPath, "TFIDF-Indexes-", 
-                                   subsetSize,
-                                   "-", mergeSD, ".fst"),
-            compress = 0)
-  
-  write.fst(result, paste0(outPath, "TFIDF-", 
-                                subsetSize, "-",
-                                "-", mergeSD, ".fst"),
+                                               subsetSize, "-", saveSparse,
+                                               "-", mergeSD, ".fst"),
             compress = 0)
   
 }

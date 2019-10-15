@@ -41,51 +41,92 @@
 # }
 # 
 
-predictXG <- function(dataPath, fileName, indexName, upSampling = FALSE){
+predictXG <- function(dataPath, fileName, indexName, labelName,
+                      upSampling = FALSE, sparse = FALSE){
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
 
-  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
   
-  trainData <- data[indexes]
-  if(upSampling) trainData <- generalizedSampling(data = trainData, 
-                                                  method = "up", 
-                                                  label = "labelRaw")
-  trainLabelRaw <- trainData$labelRaw
-  
-  testData <- data[-indexes]
-
-  testLabelRaw <- testData$labelRaw
-  
-  trainLabel <- as.numeric(trainLabelRaw) - 1
-  testLabel <- as.numeric(testLabelRaw) - 1
-  trainData[, labelRaw := NULL]
-  testData[, labelRaw := NULL]
-
-  print(paste("in train are number of uniques:", length(unique(trainLabel))))
-  print(paste("in test are number of uniques:", length(unique(testLabel))))
-  
-  # create watchlist
-  watchIndexes <- sample.int(nrow(trainData), 
-                             size = round(nrow(trainData) * 0.8))
-  watchTrain <- trainData[watchIndexes]
-  watchTest <- trainData[-watchIndexes]
-  watchTrainLabel <- trainLabel[watchIndexes]
-  watchTestLabel <- trainLabel[-watchIndexes]
+  if(!sparse) {
+    data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
     
-  watchTrainMat <- xgb.DMatrix(data = as.matrix(watchTrain), 
-                               label = watchTrainLabel)
-  watchTestMat <- xgb.DMatrix(as.matrix(watchTest), 
-                              label = watchTestLabel)
-  testMat = xgb.DMatrix(as.matrix(testData), label = testLabel)
-  
-  watchlist = list(dtrain = watchTrainMat, dtest = watchTestMat)
+    trainData <- data[indexes]
+    if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                    method = "up", 
+                                                    label = "labelRaw")
+    trainLabelRaw <- trainData$labelRaw
+    
+    testData <- data[-indexes]
+    
+    testLabelRaw <- testData$labelRaw
+    
+    trainLabel <- as.numeric(trainLabelRaw) - 1
+    testLabel <- as.numeric(testLabelRaw) - 1
+    trainData[, labelRaw := NULL]
+    testData[, labelRaw := NULL]
+    
+    print(paste("in train are number of uniques:", length(unique(trainLabel))))
+    print(paste("in test are number of uniques:", length(unique(testLabel))))
+    
+    # create watchlist
+    watchIndexes <- sample.int(nrow(trainData), 
+                               size = round(nrow(trainData) * 0.8))
+    watchTrain <- trainData[watchIndexes]
+    watchTest <- trainData[-watchIndexes]
+    watchTrainLabel <- trainLabel[watchIndexes]
+    watchTestLabel <- trainLabel[-watchIndexes]
+    
+    watchTrainMat <- xgb.DMatrix(data = as.matrix(watchTrain), 
+                                 label = watchTrainLabel)
+    watchTestMat <- xgb.DMatrix(as.matrix(watchTest), 
+                                label = watchTestLabel)
+    testMat = xgb.DMatrix(as.matrix(testData), label = testLabel)
+    
+    watchlist = list(dtrain = watchTrainMat, dtest = watchTestMat)
+    
+  }
+ 
+  if(sparse) {
+    data <- readRDS(paste0(dataPath, fileName))
+    label <- read.fst(paste0(dataPath, labelName), as.data.table = TRUE)
+    
+    trainData <- data[indexes,]
+    trainLabelRaw <- label$labelRaw[indexes]
+    numClass <- length(unique(trainLabelRaw))
+    
+    testData <- data[-indexes,]
+    testLabelRaw <- label$labelRaw[-indexes]
+    
+    trainLabel <- as.numeric(trainLabelRaw) - 1
+    testLabel <- as.numeric(testLabelRaw) - 1
+    
+    print(paste("in train are number of uniques:", numClass))
+    print(paste("in test are number of uniques:", length(unique(testLabelRaw))))
+    
+    # create watchlist
+    watchIndexes <- sample.int(nrow(trainData), 
+                               size = round(nrow(trainData) * 0.8))
+    watchTrain <- trainData[watchIndexes,]
+    watchTest <- trainData[-watchIndexes, ]
+    watchTrainLabel <- trainLabel[watchIndexes]
+    watchTestLabel <- trainLabel[-watchIndexes]
+    
+    watchTrainMat <- xgb.DMatrix(data = watchTrain, 
+                                 label = watchTrainLabel)
+    watchTestMat <- xgb.DMatrix(watchTest, 
+                                label = watchTestLabel)
+    testMat = xgb.DMatrix(testData, label = testLabel)
+    
+    watchlist = list(dtrain = watchTrainMat, dtest = watchTestMat)
+    
+    
+  }
   
   # add Parameters
-  numClass <- length(unique(trainLabel))
-  eval_metric <- "mlogloss"
+  numClass <- numClass
+  eval_metric <- "merror"
   objective <- "multi:softprob"
   nrounds <- 20
   
@@ -97,7 +138,7 @@ predictXG <- function(dataPath, fileName, indexName, upSampling = FALSE){
                              nrounds = nrounds, 
                              verbose = 1, 
                              watchlist = watchlist)
-
+  
   # evaluating predictions and eval metrics
   predictions <- as.data.table(predict(model, 
                                        newdata =  testMat,
@@ -106,7 +147,7 @@ predictXG <- function(dataPath, fileName, indexName, upSampling = FALSE){
   predictionsMax <- apply(predictions, 1 , function(x) {
     names(x[which.max(x)])
   })
-
+  
   # Prob vs Accuracy plot Data
   predictionsMaxProb <- apply(predictions, 1 , function(x) {
     x[which.max(x)]
@@ -125,7 +166,7 @@ predictXG <- function(dataPath, fileName, indexName, upSampling = FALSE){
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))), 
-                            ncol = 40)
+                            ncol = numClass)
   # naming rows and cols
   rownames(confusionMatrix) <- levels(testLabelRaw)
   colnames(confusionMatrix) <- levels(testLabelRaw)
@@ -134,7 +175,8 @@ predictXG <- function(dataPath, fileName, indexName, upSampling = FALSE){
   # accuracy by class
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
   names(accByClass) <-  levels(testLabelRaw)
-
+  
+  
   return(list(acc = accuracy,
               meanSquareError = meanSquareError,
               confusionMatrix = confusionMatrix,

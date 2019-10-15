@@ -23,24 +23,26 @@ resultEmbRF10 <- predictRF(dataPath, fileName,
 resultEmbXG10 <- predictXG(dataPath, fileName, 
                            indexName) #0.218
 
-# TFIDF 10pc #15-07
-fileName1 <- "TFIDF-10pc--FALSE.fst" 
-resultXG1 <- predictXG(dataPath, fileName1) # 
-resultRF1 <- predictRF(dataPath, fileName1) # 
+# TFIDF 10pc #15-10
+fileName <- "TFIDF-10pc-TRUE-FALSE.rds"
+indexName <- "TFIDF-Indexes-10pc-TRUE-FALSE.fst"
+labelName <- "TFIDF-Label-10pc-TRUE-FALSE.fst"
+resultXG_TDIDF10 <- predictXG(dataPath, fileName,
+                        indexName, labelName, sparse = TRUE) # 0.404
+resultRF_TDIDF10 <- predictRF(dataPath, fileName, 
+                        indexName, labelName, sparse = TRUE) # 
 
 
-# BOW 10pc # 15-07
+
+# BOW 10pc # 15-10
 fileName <- "BOW-10pc-TRUE-FALSE.rds"
 indexName <- "BOW-Indexes-10pc-TRUE-FALSE.fst"
 labelName <- "BOW-Label-10pc-TRUE-FALSE.fst"
 resultXG10 <- predictXG(dataPath, fileName,
-                       indexName) # 0.399
+                       indexName, labelName, sparse = TRUE) # 0.413
 resultRF10 <- predictRF(dataPath, fileName, 
                        indexName, labelName, sparse = TRUE) # 0.426
-fileName <- "BOW-10pc-FALSE.fst"
-indexName <- "BOW-Indexes-10pc-TRUE-FALSE.fst"
-resultRF10 <- predictRF(dataPath, fileName, 
-                        indexName) # 0.443
+
 
 
 # Sums of word2vec 10PC

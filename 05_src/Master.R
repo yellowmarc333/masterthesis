@@ -31,7 +31,7 @@ prepareDataBOW(inPath = "03_computedData/03_integratedData/",
 
 prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
                outPath = "03_computedData/04_preparedData/", 
-               subsetSize = "10pc")
+               subsetSize = "100pc", saveSparse = TRUE)
 
 prepareDataGlove(inPath = "03_computedData/03_integratedData/",
                  outPath = "03_computedData/04_preparedData/", 

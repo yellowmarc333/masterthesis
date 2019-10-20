@@ -1,0 +1,150 @@
+\documentclass[a4paper,11pt]{article}
+
+\parindent0cm
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage[ngerman]{babel}
+\usepackage[left=3cm,right=2.5cm,top=2cm,bottom=2cm]{geometry}
+\renewcommand{\baselinestretch}{1.5}\normalsize % Zeilenabstand 1.5
+\usepackage[utf8]{inputenc}
+
+
+\begin{document}
+
+\begin{titlepage}
+
+\vspace*{3cm}
+
+
+\begin{figure}[t]
+\begin{flushright}
+\includegraphics[width = 7cm,  keepaspectratio]{Images/TULogo.png}
+\label{fig2}
+
+\end{flushright}
+\end{figure}
+\vspace*{3cm}
+
+
+\begin{center}
+
+\vspace*{2cm}
+
+\title{Masterthesis}
+
+
+
+{\huge Masterthesis}\\
+ {\huge{\textbf{Multilabel-Klassifizierung \\
+ von Nachrichten Schlagzeilen}}\\}
+ \vspace{0.2cm}
+ {\large  Vergleich zwischen neuronalen Netzen und baumbasierten Algorithmen auf verschiedenen Repräsentationen von Wörtern\\}
+\vspace*{5cm}
+
+
+{\large  Fakultät Statistik\\
+Lehrstuhl Statistical Methods for Big Data }
+\vspace*{0.5cm}
+
+ \begin{large}
+ Betreuer: Prof. Dr. Andreas Groll\\
+  \end{large}
+
+  \begin{large}
+Verfasser: Marc Schmieder\\
+\date{October 2019}\\
+   \vspace*{2cm}
+
+ \end{large}
+\end{center}
+\newpage
+%\large
+\thispagestyle{empty}
+\tableofcontents
+\newpage
+\end{titlepage}
+
+
+
+
+
+
+
+
+
+\section{Einleitung}
+
+\begin{itemize}
+    \item 
+\end{itemize}{}
+
+\section{Datensatz und Problemstellung}
+\subsection{Initialer Datensatz}
+\begin{itemize}
+    \item Ursprung, alle spalten
+\end{itemize}{}
+
+\subsection{Bereinigung des Datensatzes}
+\begin{itemize}
+    \item Veränderung am Datensatz: klassenmerging (einzelne Beispiele) 
+    \item gsub replacements, lowercase
+    \item spaltenreduktion (nur category, headline)
+\end{itemize}{}
+
+\subsection{Exploration des bereinigten Datensatzes}
+\begin{itemize}
+    \item verteilung der der klassen
+    \item anzahl words by category
+    \item word clouds exemplarisch
+\end{itemize}{}
+
+\subsection{Klassifikationsproblem}
+
+\begin{itemize}
+    \item 35 Klassen multiclass
+    \item betrachtete evaluationsmaße
+\end{itemize}{}
+
+
+\section{Statistische Methoden}
+
+\subsection{Repräsentationen der Wörter und Sätze}
+\subsubsection{Bag-Of-Words}
+\subsubsection{Term Frequency Inverse Document frequency}
+\subsubsection{Sequentielle Darstellung}
+\subsubsection{Word-To-Vec Überwacht, Summe von Word-To-Vec}
+\subsubsection{Glove Embeddings}
+
+
+\subsubsection{Algorithmen und Verfahren}
+
+\subsubsection{Extreme Gradient Boosting}
+\subsubsection{Random Forest}
+\subsubsection{Neuronales Netz: Multi-Layer-Perception}
+\subsubsection{Neuronales Netz: Convolutional Neural Net}
+\subsubsection{Neuronales Netz: Long-Short-Term-Memory Neural Net}
+
+
+\section{Statistische Auswertung}
+\begin{itemize}
+    \item grafik über kombination von word embeddings und Algorithmen (was kann mit was verwendet werden)
+\end{itemize}{}
+
+
+\subsection{Vorauswahl der Verfahren}
+
+
+
+
+\end{document}
+
+

@@ -457,195 +457,6 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
 
 
 
-pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/", 
-                          outPath = "03_computedData/04_preparedData/",
-                          subsetSize = c("1pc", "10pc", "100pc"),
-                          mergeSD = FALSE, 
-                          binary = FALSE){
-  assertString(inPath)
-  assertString(outPath)
-  subsetSize <- match.arg(subsetSize)
-  assertFlag(mergeSD)
-
-  fileName <- paste0("trainSubset", subsetSize, ".fst")
-  wholeData <- read.fst(path = paste0(inPath, fileName), 
-                         as.data.table = TRUE)
-  
-  categories <- unique(wholeData$category)
-
-  categoryPairs <- matrix(c("EDUCATION", "COLLEGE",
-                            "ARTS & CULTURE", "ARTS",
-                            "STYLE", "STYLE & BEAUTY",
-                            "CULTURE & ARTS", "ARTS & CULTURE",
-                            "CULTURE & ARTS", "ARTS",
-                            "PARENTS", "PARENTING",
-                            "DIVORCE", "WEDDINGS",
-                            "WELLNESS", "HEALTHY LIVING",
-                            "GREEN", "HEALTHY LIVING", 
-                            "GREEN", "ENVIRONMENT"), ncol = 2, byrow = TRUE)
-  
-  result <- data.table(categoryPairs, accuracy = 0)
-  
-  for (row in seq_len(nrow(categoryPairs))){
-    print(paste("calculating row", paste(categoryPairs[row, ])))
-    
-    # subsetData <- wholeData[category %in% c("WORLD NEWS", "MEDIA"),]
-    subsetData <- wholeData[category %in% categoryPairs[row ,],]
-    
-    N <- nrow(subsetData)
-    label <- subsetData$category
-    texts <- subsetData$headline
-    
-    # Create iterator over tokens
-    tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
-                               remove_punct = TRUE, remove_symbols = TRUE, 
-                               remove_hyphens = TRUE)
-    
-
-    
-    # dont remove stopwords because are inducing meaning
-    tokens <- quanteda::tokens_remove(tokens, c(stopwords("english")))
-    
-    # dont use wordstemming
-    #tokens <- tokens_wordstem(tokens, language = "english")
-    
-    # prune vocabulary
-    itoken <- text2vec::itoken(as.list(tokens), progressbar = FALSE)
-    vocab <- as.data.table(text2vec::create_vocabulary(itoken))
-    # select words which just occur 2 times or less
-    rem_wordsvocab <- vocab[term_count <= 2 , term]
-    tokens <- quanteda::tokens_remove(tokens, rem_wordsvocab)
-    
-    # here select max words as smallest number of length, that at least
-    # 0.999 of the Data points have (maybe complicated coded)
-    tableWords <- sort(table(sapply(tokens, length)), decreasing = TRUE)
-    cumsumWords <- cumsum(tableWords) / sum(tableWords)
-    sortedNumWords <- sort(as.integer(names(which(cumsumWords > 0.999))), 
-                           decreasing = FALSE)
-    maxWords <- max(sortedNumWords[1:2], na.rm = TRUE)
-    
-    tokens <- tokens[sapply(tokens, length) <= maxWords]
-    
-    # bringt tokens back to text format for keras tokenizer
-    tokens_text_list <- sapply(tokens, function(x) {
-      do.call(paste, as.list(x))
-    })
-    tokens_text <- unlist(tokens_text_list)
-    
-    # make integer sequences and pad them with keras
-    myKerasTokenizer = keras::text_tokenizer() %>%
-      keras::fit_text_tokenizer(x = tokens_text)
-    sequences <- keras::texts_to_sequences(tokenizer = myKerasTokenizer, 
-                                           texts = tokens_text)
-    
-    padded <- sequences %>%
-      pad_sequences(maxlen = maxWords)
-    
-    labelIndexes <- as.integer(gsub(names(tokens_text), 
-                                    pattern = "text", 
-                                    replacement = ""))
-    
-    labelRed <- label[labelIndexes]
-    
-    
-    # here everything for the emb CNN is prepared
-    data <- data.table(labelRaw = as.factor(labelRed), padded)
-    
-    label <- data$labelRaw
-    
-    indexes <- sample.int(nrow(data), size = round(nrow(data)* 0.9))
-    
-    trainData <- data[indexes,]
-    testData <- data[-indexes, ]
-    
-    trainData[, labelRaw := NULL]
-    testData[, labelRaw := NULL]
-    
-    trainLabelRaw <- label[indexes]
-    testLabelRaw <- label[-indexes]
-    
-    if ( (length(unique(trainLabelRaw)) != 2) |
-        (length(unique(testLabelRaw)) != 2) ) next
-    
-    trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
-    testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
-    
-    nVocab = max(rbind(trainData,testData)) + 1
-    
-    model <- keras_model_sequential() %>% 
-      # Start off with an efficient embedding layer which maps
-      # the vocab indices into embedding_dims dimensions
-      layer_embedding(input_dim = nVocab,
-                      output_dim = 100, 
-                      input_length = ncol(trainData)) %>%
-      layer_dropout(0.2) %>%
-      
-      # Add a Convolution1D, which will learn filters
-      layer_conv_1d(filters = 100, kernel_size  = 2, 
-                    padding = "valid", activation = "relu", strides = 1
-      ) %>%
-      layer_dropout(0.2) %>%
-      layer_conv_1d(filters = 100, kernel_size = 3,
-                    padding = "same", activation = "relu",
-                    strides = 1,
-                    name = "conv2") %>%
-      layer_conv_1d(filters = 100, kernel_size = 4,
-                    padding = "same", activation = "relu",
-                    strides = 1,
-                    name = "conv3") %>%
-      layer_dropout(0.2) %>%
-      layer_conv_1d(filters = 100, kernel_size = 5,
-                    padding = "same", activation = "relu",
-                    strides = 1,
-                    name = "conv4") %>%
-      # Apply max pooling:
-      layer_dropout(0.2) %>%
-      layer_global_max_pooling_1d() %>%
-      
-      # Add a vanilla hidden layer:
-      layer_dense(units = 100) %>%
-      # Add a vanilla hidden layer:
-      layer_dense(units = 50) %>%
-      
-      # Apply 20% layer dropout
-      layer_dropout(0.2) %>%
-      layer_activation("relu") %>%
-      
-      # Project onto a single unit output layer, and squash it with a sigmoid
-      layer_dense(units = ncol(trainLabel),
-                  activation = "softmax", 
-                  name = "predictions")
-    
-    
-    # Compiling model
-    model %>% compile(
-      loss = 'binary_crossentropy',
-      optimizer = optimizer_rmsprop(lr = 0.001),
-      metrics = c('accuracy')
-    )
-    
-    print(paste("fitting model", row))
-    
-    history <- model %>% fit(
-      x = as.matrix(trainData),
-      y = trainLabel,
-      epochs = 5,
-      batchsize = 32,
-      validation_data = list(as.matrix(testData), testLabel),
-      view_metrics = FALSE,
-      verbose = 2)
-    
-    
-    predictionResult <- model %>% 
-      evaluate(as.matrix(testData), testLabel, batch_size = 32)
-    
-    result[row, accuracy := predictionResult$acc]
-  }
-  
-  return(result)
-}
-
-
 prepareDataGlove = function(inPath = "03_computedData/03_integratedData/", 
                           outPath = "03_computedData/04_preparedData/",
                           subsetSize = c("1pc", "10pc", "100pc"),
@@ -831,3 +642,191 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
             compress = 0)
 }
 
+
+pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/", 
+                             outPath = "03_computedData/04_preparedData/",
+                             subsetSize = c("1pc", "10pc", "100pc"),
+                             mergeSD = FALSE, 
+                             binary = FALSE){
+  assertString(inPath)
+  assertString(outPath)
+  subsetSize <- match.arg(subsetSize)
+  assertFlag(mergeSD)
+  
+  fileName <- paste0("trainSubset", subsetSize, ".fst")
+  wholeData <- read.fst(path = paste0(inPath, fileName), 
+                        as.data.table = TRUE)
+  
+  categories <- unique(wholeData$category)
+  
+  categoryPairs <- matrix(c("EDUCATION", "COLLEGE",
+                            "ARTS & CULTURE", "ARTS",
+                            "STYLE", "STYLE & BEAUTY",
+                            "CULTURE & ARTS", "ARTS & CULTURE",
+                            "CULTURE & ARTS", "ARTS",
+                            "PARENTS", "PARENTING",
+                            "DIVORCE", "WEDDINGS",
+                            "WELLNESS", "HEALTHY LIVING",
+                            "GREEN", "HEALTHY LIVING", 
+                            "GREEN", "ENVIRONMENT"), ncol = 2, byrow = TRUE)
+  
+  result <- data.table(categoryPairs, accuracy = 0)
+  
+  for (row in seq_len(nrow(categoryPairs))){
+    print(paste("calculating row", paste(categoryPairs[row, ])))
+    
+    # subsetData <- wholeData[category %in% c("WORLD NEWS", "MEDIA"),]
+    subsetData <- wholeData[category %in% categoryPairs[row ,],]
+    
+    N <- nrow(subsetData)
+    label <- subsetData$category
+    texts <- subsetData$headline
+    
+    # Create iterator over tokens
+    tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
+                               remove_punct = TRUE, remove_symbols = TRUE, 
+                               remove_hyphens = TRUE)
+    
+    
+    
+    # dont remove stopwords because are inducing meaning
+    tokens <- quanteda::tokens_remove(tokens, c(stopwords("english")))
+    
+    # dont use wordstemming
+    #tokens <- tokens_wordstem(tokens, language = "english")
+    
+    # prune vocabulary
+    itoken <- text2vec::itoken(as.list(tokens), progressbar = FALSE)
+    vocab <- as.data.table(text2vec::create_vocabulary(itoken))
+    # select words which just occur 2 times or less
+    rem_wordsvocab <- vocab[term_count <= 2 , term]
+    tokens <- quanteda::tokens_remove(tokens, rem_wordsvocab)
+    
+    # here select max words as smallest number of length, that at least
+    # 0.999 of the Data points have (maybe complicated coded)
+    tableWords <- sort(table(sapply(tokens, length)), decreasing = TRUE)
+    cumsumWords <- cumsum(tableWords) / sum(tableWords)
+    sortedNumWords <- sort(as.integer(names(which(cumsumWords > 0.999))), 
+                           decreasing = FALSE)
+    maxWords <- max(sortedNumWords[1:2], na.rm = TRUE)
+    
+    tokens <- tokens[sapply(tokens, length) <= maxWords]
+    
+    # bringt tokens back to text format for keras tokenizer
+    tokens_text_list <- sapply(tokens, function(x) {
+      do.call(paste, as.list(x))
+    })
+    tokens_text <- unlist(tokens_text_list)
+    
+    # make integer sequences and pad them with keras
+    myKerasTokenizer = keras::text_tokenizer() %>%
+      keras::fit_text_tokenizer(x = tokens_text)
+    sequences <- keras::texts_to_sequences(tokenizer = myKerasTokenizer, 
+                                           texts = tokens_text)
+    
+    padded <- sequences %>%
+      pad_sequences(maxlen = maxWords)
+    
+    labelIndexes <- as.integer(gsub(names(tokens_text), 
+                                    pattern = "text", 
+                                    replacement = ""))
+    
+    labelRed <- label[labelIndexes]
+    
+    
+    # here everything for the emb CNN is prepared
+    data <- data.table(labelRaw = as.factor(labelRed), padded)
+    
+    label <- data$labelRaw
+    
+    indexes <- sample.int(nrow(data), size = round(nrow(data)* 0.9))
+    
+    trainData <- data[indexes,]
+    testData <- data[-indexes, ]
+    
+    trainData[, labelRaw := NULL]
+    testData[, labelRaw := NULL]
+    
+    trainLabelRaw <- label[indexes]
+    testLabelRaw <- label[-indexes]
+    
+    if ( (length(unique(trainLabelRaw)) != 2) |
+         (length(unique(testLabelRaw)) != 2) ) next
+    
+    trainLabel <- to_categorical(as.numeric(label[indexes]) - 1)
+    testLabel <- to_categorical(as.numeric(label[-indexes]) - 1)
+    
+    nVocab = max(rbind(trainData,testData)) + 1
+    
+    model <- keras_model_sequential() %>% 
+      # Start off with an efficient embedding layer which maps
+      # the vocab indices into embedding_dims dimensions
+      layer_embedding(input_dim = nVocab,
+                      output_dim = 100, 
+                      input_length = ncol(trainData)) %>%
+      layer_dropout(0.2) %>%
+      
+      # Add a Convolution1D, which will learn filters
+      layer_conv_1d(filters = 100, kernel_size  = 2, 
+                    padding = "valid", activation = "relu", strides = 1
+      ) %>%
+      layer_dropout(0.2) %>%
+      layer_conv_1d(filters = 100, kernel_size = 3,
+                    padding = "same", activation = "relu",
+                    strides = 1,
+                    name = "conv2") %>%
+      layer_conv_1d(filters = 100, kernel_size = 4,
+                    padding = "same", activation = "relu",
+                    strides = 1,
+                    name = "conv3") %>%
+      layer_dropout(0.2) %>%
+      layer_conv_1d(filters = 100, kernel_size = 5,
+                    padding = "same", activation = "relu",
+                    strides = 1,
+                    name = "conv4") %>%
+      # Apply max pooling:
+      layer_dropout(0.2) %>%
+      layer_global_max_pooling_1d() %>%
+      
+      # Add a vanilla hidden layer:
+      layer_dense(units = 100) %>%
+      # Add a vanilla hidden layer:
+      layer_dense(units = 50) %>%
+      
+      # Apply 20% layer dropout
+      layer_dropout(0.2) %>%
+      layer_activation("relu") %>%
+      
+      # Project onto a single unit output layer, and squash it with a sigmoid
+      layer_dense(units = ncol(trainLabel),
+                  activation = "softmax", 
+                  name = "predictions")
+    
+    
+    # Compiling model
+    model %>% compile(
+      loss = 'binary_crossentropy',
+      optimizer = optimizer_rmsprop(lr = 0.001),
+      metrics = c('accuracy')
+    )
+    
+    print(paste("fitting model", row))
+    
+    history <- model %>% fit(
+      x = as.matrix(trainData),
+      y = trainLabel,
+      epochs = 5,
+      batchsize = 32,
+      validation_data = list(as.matrix(testData), testLabel),
+      view_metrics = FALSE,
+      verbose = 2)
+    
+    
+    predictionResult <- model %>% 
+      evaluate(as.matrix(testData), testLabel, batch_size = 32)
+    
+    result[row, accuracy := predictionResult$acc]
+  }
+  
+  return(result)
+}

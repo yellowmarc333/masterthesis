@@ -1,33 +1,36 @@
 # next steps/ to dos:
 
-# validation/test bei xgboost und RF checken (muss gleich sein) (wird watchlist eigentlich gebraucht)
-# normales MLP mit keras implementieren
-# preparation functions und predictors durchgehen und schauen dass überall same
-# validation data muss genauso preprocessed sein wie train Data
-# guetemass wahrscheinlichkeit der richtigen klasse implementieren
-# dokumentieren welche tokens entfernt wurden. (0 wörter auch entfernen)
-#     das vlt sogar vor prepareData?
-# checken ob die conf matrix richtig berechnet hat. selbe accuracy
-# nach papern speziell cnn und lstm auf textclassification schauen
-# accuracy measure auschecken: binary cross entropy > mse?
-# write exploration function for wordvectors
+# [vor runter schreiben von methoden]
 # methoden: multinomial naive bayes oder logReg (hat besser performed)
+# normales MLP mit keras implementieren on bag of words
+# validation data muss genauso preprocessed sein wie train Data
+# preparation functions und predictors durchgehen und schauen dass überall same
+# dokumentieren welche tokens entfernt wurden. (0 wörter auch entfernen)
+#     das vlt sogar vor prepareData? dies auch in latex aufnehmen
+# accuracy measure auschecken: binary cross entropy > mse?
+
+# [vor finaler modellrechnung]
+# - framework muss 100%ig abgeklärt sein
 
 
 # [exploration]
 # word clouds for biggest categorys (parents/parenting)
 # (arts and style, worldpost/The worldpost)
-# word clouds intersection of biggest categories
 # exploration function for word vectors (relate to wordclouds)
-# average words by category
-
 
 # [liste für groll:]
-# framework nachfragen (besonders vergleichbarkeit von BOW auf 100% nicht rechenbar)
+# wie wird die anzahl der epochen/ nrounds gewählt (ist ja schon tuning)
+# guetemass wahrscheinlichkeit der richtigen klasse implementieren
+# validation/test bei xgboost und RF checken (muss gleich sein) (wird watchlist eigentlich gebraucht)
+#     im falle RF wird ja auf vollen 90% trainiert, auf 10% predicted
+#     im falle XG wird auf 80% von 90% trainiert, auf 10% predicted
+#     watchlist ist nur zum tunen.
+# framework update (RF und XGBoost watchlist/outofbag, aber gleiche trainingsmenge?) ist rechenbar
 # kategorien zusammenlegen Schema (vom menschen nicht auseinanderhaltbar, gemeinsame words)
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xxchecken ob die conf matrix richtig berechnet hat. selbe accuracy
 # xxSparse auf tfidf prepare
 # xxxgb mit sparse matrix berechnen (auf mac übertragen)
 # xxrf sparse einrichten

@@ -7,13 +7,13 @@ list.files(dataPath)
 fileName <- "Emb-10pc-FALSE.fst"
 indexName <- "Emb-Indexes-10pc-FALSE.fst"
 resultEmbLSTM10 <- predictLSTM(dataPath, fileName, 
-                        indexName, epochs = 8) # 0.424
+                        indexName, epochs = 1) # 0.424
 
 # Emb 10pc #06-10
 fileName <- "Emb-10pc-FALSE.fst"
 indexName <- "Emb-Indexes-10pc-FALSE.fst"
 resultEmbCNN10 <- predictEmb(dataPath, fileName, 
-                        indexName, epochs = 8) # 0.412
+                        indexName, epochs = 1) # 0.412
 
 # Emb 10pc on RF and XGB #02.08
 fileName <- "Emb-10pc-FALSE.fst"
@@ -38,10 +38,10 @@ resultRF_TDIDF10 <- predictRF(dataPath, fileName,
 fileName <- "BOW-10pc-TRUE-FALSE.rds"
 indexName <- "BOW-Indexes-10pc-TRUE-FALSE.fst"
 labelName <- "BOW-Label-10pc-TRUE-FALSE.fst"
-resultXG10 <- predictXG(dataPath, fileName,
-                       indexName, labelName, sparse = TRUE) # 0.413
-resultRF10 <- predictRF(dataPath, fileName, 
-                       indexName, labelName, sparse = TRUE) # 0.426
+resultXG10 <- predictXG(dataPath, fileName, indexName, 
+                       labelName, sparse = TRUE, nrounds = 2) # 0.413
+resultRF10 <- predictRF(dataPath, fileName, indexName, 
+                       labelName, sparse = TRUE, num.trees = 50) # 0.426
 
 
 
@@ -59,12 +59,12 @@ resultCN <- predictCNN(dataPath, fileName5) # 0.15
 fileName <- "GloveArray-10pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-10pc-50-FALSE.fst"
 resultCNNGlove10 <- predictCNN(dataPath, fileName = fileName, 
-                           indexName = indexName, epochs = 10) # 0.47, less categories: 0.49
+                           indexName = indexName, epochs = 12) # 0.47, less categories: 0.49
 # Array LSTM 10PC
 fileName <- "GloveArray-10pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-10pc-50-FALSE.fst"
 resultLSTMArray10 <- predictLSTMArray(dataPath, fileName = fileName, 
-                           indexName = indexName, epochs = 10) # 0.496, less categories: 0.523
+                           indexName = indexName, epochs = 1) # 0.496, less categories: 0.523
 
 # EmbLSTM 10pc shortdescription #03-08
 fileName <- "Emb-10pc-TRUE.fst"

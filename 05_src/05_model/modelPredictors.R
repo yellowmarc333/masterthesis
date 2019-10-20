@@ -42,7 +42,7 @@
 # 
 
 predictXG <- function(dataPath, fileName, indexName, labelName,
-                      upSampling = FALSE, sparse = FALSE){
+                      upSampling = FALSE, sparse = FALSE, nrounds = 20){
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
@@ -128,7 +128,7 @@ predictXG <- function(dataPath, fileName, indexName, labelName,
   numClass <- numClass
   eval_metric <- "merror"
   objective <- "multi:softprob"
-  nrounds <- 20
+  nrounds <- nrounds
   
   print("training xgboost model")
   model = xgboost::xgb.train(eval_metric = eval_metric,
@@ -167,6 +167,13 @@ predictXG <- function(dataPath, fileName, indexName, labelName,
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))), 
                             ncol = numClass)
+  
+  confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
+  
+  # checking accuracy of model and from confusion matrix
+  print(paste("model accuracy is", accuracy,
+              "and confusion matrix accuracy is", confAcc))
+  
   # naming rows and cols
   rownames(confusionMatrix) <- levels(testLabelRaw)
   colnames(confusionMatrix) <- levels(testLabelRaw)
@@ -189,7 +196,7 @@ predictXG <- function(dataPath, fileName, indexName, labelName,
 
 
 predictRF <- function(dataPath, fileName, indexName, labelName = NULL,
-                      upSampling = FALSE, sparse = FALSE) {
+                      upSampling = FALSE, sparse = FALSE, num.trees = 500) {
   assertString(dataPath)
   assertString(fileName)
   assertString(indexName)
@@ -215,7 +222,7 @@ predictRF <- function(dataPath, fileName, indexName, labelName = NULL,
     model = ranger::ranger(dependent.variable.name = "labelRaw", 
                            data = trainData,
                            importance = "impurity",
-                           probability = TRUE, num.trees = 500)
+                           probability = TRUE, num.trees = num.trees)
     
     predictions = as.data.table(predict(model, 
                                         testData, 
@@ -250,6 +257,14 @@ predictRF <- function(dataPath, fileName, indexName, labelName = NULL,
                                     factor(testLabelRaw, 
                                            levels =  levels(testLabelRaw))), 
                               ncol = length(levels(testLabelRaw)))
+    
+    confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
+    
+    # checking accuracy of model and from confusion matrix
+    print(paste("model accuracy is", accuracy,
+                "and confusion matrix accuracy is", confAcc))
+    
+    
     # naming rows and cols
     rownames(confusionMatrix) <- levels(testLabelRaw)
     colnames(confusionMatrix) <- levels(testLabelRaw)
@@ -283,7 +298,7 @@ predictRF <- function(dataPath, fileName, indexName, labelName = NULL,
     model = ranger::ranger(dependent.variable.name = "trainLabel", 
                            data = trainSparse,
                            importance = "impurity",
-                           probability = TRUE, num.trees = 500,
+                           probability = TRUE, num.trees = num.trees,
                            classification = TRUE, verbose = TRUE)
     # when calc. with a sparse matrix, the column names are ordered along
     # the true classes of the first training examples
@@ -326,6 +341,14 @@ predictRF <- function(dataPath, fileName, indexName, labelName = NULL,
                                     factor(testLabelRaw, 
                                            levels =  levels(testLabelRaw))), 
                               ncol = length(levels(testLabelRaw)))
+    
+    confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
+    
+    # checking accuracy of model and from confusion matrix
+    print(paste("model accuracy is", accuracy,
+                "and confusion matrix accuracy is", confAcc))
+    
+    
     # naming rows and cols
     rownames(confusionMatrix) <- levels(testLabelRaw)
     colnames(confusionMatrix) <- levels(testLabelRaw)
@@ -456,6 +479,12 @@ predictCNN <- function(dataPath, fileName, indexName, epochs = 12) {
                                          levels =  levels(testLabelRaw))), 
                             ncol = length(levels(testLabelRaw)))
 
+  confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
+  
+  # checking accuracy of model and from confusion matrix
+  print(paste("model accuracy is", evaluationResult$acc,
+              "and confusion matrix accuracy is", confAcc))
+  
   # naming rows and cols
   rownames(confusionMatrix) <- levels(testLabelRaw)
   colnames(confusionMatrix) <- levels(testLabelRaw)
@@ -619,6 +648,13 @@ predictEmb <- function(dataPath, fileName, indexName,
                            factor(testLabelRaw, 
                                   levels =  levels(testLabelRaw))),
                            ncol = length(levels(testLabelRaw)))
+  
+  confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
+  
+  # checking accuracy of model and from confusion matrix
+  print(paste("model accuracy is", evaluationResult$acc,
+              "and confusion matrix accuracy is", confAcc))
+  
   # naming rows and cols
   rownames(confusionMatrix) <- levels(testLabelRaw)
   colnames(confusionMatrix) <- levels(testLabelRaw)
@@ -738,6 +774,13 @@ predictLSTM <- function(dataPath, fileName, indexName,
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))),
                             ncol = length(levels(testLabelRaw)))
+  
+  confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
+  
+  # checking accuracy of model and from confusion matrix
+  print(paste("model accuracy is", evaluationResult$acc,
+              "and confusion matrix accuracy is", confAcc))
+  
   # naming rows and cols
   rownames(confusionMatrix) <- levels(testLabelRaw)
   colnames(confusionMatrix) <- levels(testLabelRaw)
@@ -873,6 +916,12 @@ predictLSTMArray <- function(dataPath, fileName, indexName,
                                          levels =  levels(testLabelRaw))),
                             ncol = length(levels(testLabelRaw)))
  
+  confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
+  
+  # checking accuracy of model and from confusion matrix
+  print(paste("model accuracy is", evaluationResult$acc,
+              "and confusion matrix accuracy is", confAcc))
+  
   # Prob vs Accuracy plot Data
   predictionsMaxProb <- as.vector(t(apply(predictProb, 1 ,
                                           function(x) {

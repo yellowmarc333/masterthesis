@@ -61,7 +61,7 @@ Lehrstuhl Statistical Methods for Big Data }
 
   \begin{large}
 Verfasser: Marc Schmieder\\
-\date{October 2019}\\
+\date{October 2019}
    \vspace*{2cm}
 
  \end{large}
@@ -72,8 +72,6 @@ Verfasser: Marc Schmieder\\
 \tableofcontents
 \newpage
 \end{titlepage}
-
-
 
 
 
@@ -117,7 +115,7 @@ Verfasser: Marc Schmieder\\
 
 \section{Statistische Methoden}
 
-\subsection{Repräsentationen der Wörter und Sätze}
+\subsection{Repräsentationen der Wörter und Sätze (mit preprocessing der tokens}
 \subsubsection{Bag-Of-Words}
 \subsubsection{Term Frequency Inverse Document frequency}
 \subsubsection{Sequentielle Darstellung}
@@ -125,7 +123,7 @@ Verfasser: Marc Schmieder\\
 \subsubsection{Glove Embeddings}
 
 
-\subsubsection{Algorithmen und Verfahren}
+\subsection{Algorithmen und Verfahren}
 
 \subsubsection{Extreme Gradient Boosting}
 \subsubsection{Random Forest}
@@ -133,15 +131,45 @@ Verfasser: Marc Schmieder\\
 \subsubsection{Neuronales Netz: Convolutional Neural Net}
 \subsubsection{Neuronales Netz: Long-Short-Term-Memory Neural Net}
 
-
-\section{Statistische Auswertung}
 \begin{itemize}
     \item grafik über kombination von word embeddings und Algorithmen (was kann mit was verwendet werden)
 \end{itemize}{}
 
 
+\section{Statistische Auswertung}
+
 \subsection{Vorauswahl der Verfahren}
 
+\begin{itemize}
+    \item grafik mit framework zu train/test/validation
+    \item außerdem welche tokens entfernt wurden.
+    \item tabelle mit allem was ich ausprobiert habe
+\end{itemize}{}
+
+\subsection{Anwendung der Modelle}
+\subsubsection{Performanzmaße}
+
+\begin{itemize}
+    \item accuracy, mse etc
+    \item accuracy by class comparison
+    \item confidence vs accuracy plots
+    \item maß wie sicher ist sich das Verfahren, wenn es die richtige klasse ist?
+\end{itemize}{}
+
+\subsubsection{Explaining der besten Modelle}
+
+\begin{itemize}
+    \item beobachtungen verändern, wörter wegnehmen, hinzufügen, reihenfolge ändern und schauen ob das verfahren stabil /sensitiv zur reihenfolge
+    \item nachbarklassen identifizieren
+    \item convolutional filters holen und ähnlichkeiten zu combinationen aus word vectors erhalten
+\end{itemize}{}
+
+\subsubsection{Anpassung des besten Modell auf den gesamten Datensatz}
+
+\section{Zusammenfassung}
+
+\subsection{Ergebnisse}
+\subsection{Fazit und Ausblick}
 
 
 

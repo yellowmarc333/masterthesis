@@ -32,7 +32,10 @@ resultXG_TDIDF10 <- predictXG(dataPath, fileName,
 resultRF_TDIDF10 <- predictRF(dataPath, fileName, 
                         indexName, labelName, sparse = TRUE) # 
 
-
+fileName <- "TFIDF-10pc-FALSE-FALSE.fst"
+indexName <- "TFIDF-Indexes-10pc-FALSE-FALSE.fst"
+resultMLP_TDIDF10 <- predictMLP(dataPath, fileName, 
+                              indexName, epochs = 15) # 0.4949
 
 # BOW 10pc # 15-10
 fileName <- "BOW-10pc-TRUE-FALSE.rds"
@@ -42,7 +45,10 @@ resultXG10 <- predictXG(dataPath, fileName, indexName,
                        labelName, sparse = TRUE, nrounds = 2) # 0.413
 resultRF10 <- predictRF(dataPath, fileName, indexName, 
                        labelName, sparse = TRUE, num.trees = 50) # 0.426
-
+fileName <- "BOW-10pc-FALSE-FALSE.fst"
+indexName <- "BOW-Indexes-10pc-FALSE-FALSE.fst"
+resultMLP10 <- predictMLP(dataPath, fileName, indexName, 
+                          epochs = 12) # 0.491
 
 
 # Sums of word2vec 10PC
@@ -59,12 +65,12 @@ resultCN <- predictCNN(dataPath, fileName5) # 0.15
 fileName <- "GloveArray-10pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-10pc-50-FALSE.fst"
 resultCNNGlove10 <- predictCNN(dataPath, fileName = fileName, 
-                           indexName = indexName, epochs = 12) # 0.47, less categories: 0.49
+                           indexName = indexName, epochs = 12) # 0.49
 # Array LSTM 10PC
 fileName <- "GloveArray-10pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-10pc-50-FALSE.fst"
 resultLSTMArray10 <- predictLSTMArray(dataPath, fileName = fileName, 
-                           indexName = indexName, epochs = 1) # 0.496, less categories: 0.523
+                           indexName = indexName, epochs = 1) # 0.523
 
 # EmbLSTM 10pc shortdescription #03-08
 fileName <- "Emb-10pc-TRUE.fst"

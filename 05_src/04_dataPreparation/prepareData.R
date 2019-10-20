@@ -33,11 +33,12 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   # reduce to tokens > 0
   hasWords <- lengths(tokens) > 0
   tokens <- tokens[hasWords]
+  print(paste("removed tokes with 0 words. In total", sum(!hasWords)))
 
   # Create vocabulary. Terms will be unigrams (simple words).
   itoken <- text2vec::itoken(as.list(tokens), progressbar = FALSE)
   vocab <- text2vec::create_vocabulary(itoken)
-  vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 20L)
+  vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 2L)
   vectorizer <- text2vec::vocab_vectorizer(vocab)
 
   
@@ -56,12 +57,12 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
     itoken, vectorizer, skip_grams_window = 2L)
   # use window of 5 for context words
   if(!saveSparse) {
-    tokens.dfm <- as.data.frame(tokens.sparse)
+    tokens.dfm <- as.data.frame(as.matrix(tokens.sparse))
     tokens.dt <- as.data.table(tokens.dfm)
     rm(tokens.sparse)
     rm(tokens.dfm)
     
-    result <- data.table(labelRaw = labelRed, tokens.dt)
+    result <- data.table(labelRaw = as.factor(labelRed), tokens.dt)
     rm(tokens.dt)
     
     write.fst(result, path = paste0(outPath, "BOW-", 
@@ -73,7 +74,7 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
                                     subsetSize, "-", saveSparse,
                                     "-", mergeSD, ".rds"),
               compress = FALSE)
-    write.fst(data.table(labelRaw = labelRed), path = paste0(outPath, 
+    write.fst(data.table(labelRaw = as.factor(labelRed)), path = paste0(outPath, 
                                                              "BOW-Label-", 
                                     subsetSize, "-", saveSparse,
                                     "-", mergeSD, ".fst"),
@@ -124,7 +125,13 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   # use wordstemming
   #tokens <- tokens_wordstem(tokens, language = "english")
   
+  # reduce to tokens > 0
+  hasWords <- lengths(tokens) > 0
+  tokens <- tokens[hasWords]
+  print(paste("removed tokes with 0 words. In total", sum(!hasWords)))
+  
   tokens <- as.list(tokens)
+  
   
   # Create vocabulary. Terms will be unigrams (simple words).
   itoken <- text2vec::itoken(tokens, progressbar = FALSE)
@@ -158,7 +165,8 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
     rm(tokens.sparse)
     rm(tokens.dfm)
     
-    result <- data.table(labelRaw = labelRed, tokens.dt)
+    result <- data.table(labelRaw = as.factor(labelRed),
+                         tokens.dt)
     rm(tokens.dt)
     
     write.fst(result, path = paste0(outPath, "TFIDF-", 
@@ -234,7 +242,10 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
                          decreasing = FALSE)
   maxWords <- max(sortedNumWords[1:2])
   
-  tokens <- tokens[sapply(tokens, length) <= maxWords]
+  filter <- sapply(tokens, length) <= maxWords
+  tokens <- tokens[filter]
+  
+  print(paste("removed tokes with 0 words. In total", sum(!filter)))
   
   # Create vocabulary. Terms will be unigrams (simple words).
   itoken <- text2vec::itoken(tokens, progressbar = FALSE)
@@ -414,7 +425,10 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
                          decreasing = FALSE)
   maxWords <- max(sortedNumWords[1:2])
   
-  tokens <- tokens[sapply(tokens, length) <= maxWords]
+  filter <- sapply(tokens, length) <= maxWords
+  tokens <- tokens[filter]
+  
+  print(paste("removed tokes with 0 words. In total", sum(!filter)))
   
   # bringt tokens back to text format for keras tokenizer
   tokens_text_list <- sapply(tokens, function(x) {
@@ -504,7 +518,10 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
                          decreasing = FALSE)
   maxWords <- max(sortedNumWords[1:2])
   
-  tokens <- tokens[sapply(tokens, length) <= maxWords]
+  filter <- sapply(tokens, length) <= maxWords
+  tokens <- tokens[filter]
+  
+  print(paste("removed tokes with 0 words. In total", sum(!filter)))
   
   # Create vocabulary. Terms will be unigrams (simple words).
   itoken <- text2vec::itoken(tokens, progressbar = FALSE)

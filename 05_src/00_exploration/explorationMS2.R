@@ -2,11 +2,8 @@
 
 # [vor runter schreiben von methoden]
 # methoden: multinomial naive bayes oder logReg (hat besser performed)
-# normales MLP mit keras implementieren on bag of words
 # validation data muss genauso preprocessed sein wie train Data
 # preparation functions und predictors durchgehen und schauen dass überall same
-# dokumentieren welche tokens entfernt wurden. (0 wörter auch entfernen)
-#     das vlt sogar vor prepareData? dies auch in latex aufnehmen
 # accuracy measure auschecken: binary cross entropy > mse?
 
 # [vor finaler modellrechnung]
@@ -30,6 +27,10 @@
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xxdokumentieren welche tokens entfernt wurden. (0 wörter auch entfernen)
+#     xxgeht nicht vor prepareData da vom embedding abhängig? 
+#     xxwird geprinted in prepare fct's.
+# xxnormales MLP mit keras implementieren on bag of words/TFIDF
 # xxchecken ob die conf matrix richtig berechnet hat. selbe accuracy
 # xxSparse auf tfidf prepare
 # xxxgb mit sparse matrix berechnen (auf mac übertragen)

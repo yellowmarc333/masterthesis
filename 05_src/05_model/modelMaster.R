@@ -81,8 +81,17 @@ indexName <- "BOW-Indexes-100pc-TRUE-FALSE.fst"
 labelName <- "BOW-Label-100pc-TRUE-FALSE.fst"
 resultRF100 <- predictRF(dataPath, fileName, 
                         indexName, labelName, sparse = TRUE) # 
+resultXG100 <- predictXG(dataPath, fileName, 
+                         indexName, labelName, sparse = TRUE) # 0.495
 
-
+# TFIDF 100pc # 13-10
+fileName <- "TFIDF-100pc-TRUE-FALSE.rds"
+indexName <- "TFIDF-Indexes-100pc-TRUE-FALSE.fst"
+labelName <- "TFIDF-Label-100pc-TRUE-FALSE.fst"
+resultRF_TFIDF100 <- predictRF(dataPath, fileName, 
+                         indexName, labelName, sparse = TRUE) # 
+resultXG_TFIDF100 <- predictXG(dataPath, fileName, 
+                         indexName, labelName, sparse = TRUE) # 
 
 # Sums of word2vec 100PC
 fileName4 <- "W2V-100pc-50-FALSE.fst"

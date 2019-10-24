@@ -21,7 +21,8 @@ sourceAll = function() {
   require(tensorflow)
   require(ggwordcloud)
   require(ggpubr)
-
+  require(LiblineaR)
+  require(naivebayes)
 
   # source internal source files
   sourcefiles = c("05_src/00_exploration/explorationHelper.R",

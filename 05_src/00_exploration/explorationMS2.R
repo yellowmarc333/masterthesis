@@ -1,8 +1,12 @@
 # next steps/ to dos:
 
 # [vor runter schreiben von methoden]
-# methoden: multinomial naive bayes oder logReg (hat besser performed)
+# methoden: multinomial naive bayes checken
 # validation data muss genauso preprocessed sein wie train Data
+valData <- read.fst("03_computedData/03_integratedData/valData.fst",
+                    as.data.table = TRUE)
+# in model predictors the only predict option einfügen (100% trainindizes) und
+# valdata seperat angeben
 # preparation functions und predictors durchgehen und schauen dass überall same
 # accuracy measure auschecken: binary cross entropy > mse?
 
@@ -16,6 +20,7 @@
 # exploration function for word vectors (relate to wordclouds)
 
 # [liste für groll:]
+
 # wie wird die anzahl der epochen/ nrounds gewählt (ist ja schon tuning)
 # guetemass wahrscheinlichkeit der richtigen klasse implementieren
 # validation/test bei xgboost und RF checken (muss gleich sein) (wird watchlist eigentlich gebraucht)
@@ -27,6 +32,7 @@
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xxlogReg umsetzen
 # xxdokumentieren welche tokens entfernt wurden. (0 wörter auch entfernen)
 #     xxgeht nicht vor prepareData da vom embedding abhängig? 
 #     xxwird geprinted in prepare fct's.

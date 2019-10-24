@@ -7,13 +7,11 @@ list.files(dataPath)
 fileName <- "Emb-10pc-FALSE.fst"
 indexName <- "Emb-Indexes-10pc-FALSE.fst"
 resultEmbLSTM10 <- predictLSTM(dataPath, fileName, 
-                        indexName, epochs = 1) # 0.424
+                        indexName, epochs = 10) # 0.437
 
 # Emb 10pc #06-10
-fileName <- "Emb-10pc-FALSE.fst"
-indexName <- "Emb-Indexes-10pc-FALSE.fst"
 resultEmbCNN10 <- predictEmb(dataPath, fileName, 
-                        indexName, epochs = 1) # 0.412
+                        indexName, epochs = 10) # 0.426
 
 # Emb 10pc on RF and XGB #02.08
 fileName <- "Emb-10pc-FALSE.fst"
@@ -36,6 +34,7 @@ fileName <- "TFIDF-10pc-FALSE-FALSE.fst"
 indexName <- "TFIDF-Indexes-10pc-FALSE-FALSE.fst"
 resultMLP_TDIDF10 <- predictMLP(dataPath, fileName, 
                               indexName, epochs = 15) # 0.4949
+resultLogReg_TDIDF10 <- predictLogReg(dataPath, fileName, indexName) # 0.502
 
 # BOW 10pc # 15-10
 fileName <- "BOW-10pc-TRUE-FALSE.rds"
@@ -49,7 +48,8 @@ fileName <- "BOW-10pc-FALSE-FALSE.fst"
 indexName <- "BOW-Indexes-10pc-FALSE-FALSE.fst"
 resultMLP10 <- predictMLP(dataPath, fileName, indexName, 
                           epochs = 12) # 0.491
-
+resultLogReg10 <- predictLogReg(dataPath, fileName, indexName) # 0.509
+resultNB10 <- predictNB(dataPath, fileName, indexName)
 
 # Sums of word2vec 10PC
 fileName3 <- "W2V-10pc-50-FALSE.fst"
@@ -61,16 +61,14 @@ resultRF3 <- predictRF(dataPath, fileName3) # 0.17
 fileName5 <- "W2VArray-10pc-50-FALSE.rds"
 resultCN <- predictCNN(dataPath, fileName5) # 0.15
 
-# Array Glove 10PC
+# Array Glove 10PC 24-10
 fileName <- "GloveArray-10pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-10pc-50-FALSE.fst"
 resultCNNGlove10 <- predictCNN(dataPath, fileName = fileName, 
-                           indexName = indexName, epochs = 12) # 0.49
-# Array LSTM 10PC
-fileName <- "GloveArray-10pc-50-FALSE.rds"
-indexName <- "Glove-Indexes-10pc-50-FALSE.fst"
+                           indexName = indexName, epochs = 12) # 0.484
+# Array LSTM 10PC 24-10
 resultLSTMArray10 <- predictLSTMArray(dataPath, fileName = fileName, 
-                           indexName = indexName, epochs = 1) # 0.523
+                           indexName = indexName, epochs = 12) # 0.5012
 
 # EmbLSTM 10pc shortdescription #03-08
 fileName <- "Emb-10pc-TRUE.fst"
@@ -126,11 +124,11 @@ indexName <- "Glove-Indexes-100pc-50-FALSE.fst"
 resultEmb2 <- predictCNN(dataPath, fileName,
                          indexName) #0.554, 06-10 0.5774
 
-# Array LSTM 100PC
+# Array LSTM 100PC 24-10
 fileName <- "GloveArray-100pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-100pc-50-FALSE.fst"
 resultLSTMArray <- predictLSTMArray(dataPath, fileName = fileName, 
-                                    indexName = indexName, epochs = 12) # 0.5712
+                                    indexName = indexName, epochs = 20) # 0.5916
 
 # Array LSTM 100PC merge Shortdescription
 fileName <- "GloveArray-100pc-50-TRUE.rds"

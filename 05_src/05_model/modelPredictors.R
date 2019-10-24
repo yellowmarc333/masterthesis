@@ -143,6 +143,199 @@ predictMLP <- function(dataPath, fileName, indexName,
 
 
 
+predictLogReg <- function(dataPath, fileName, indexName, labelName,
+                      upSampling = FALSE, sparse = FALSE){
+  assertString(dataPath)
+  assertString(fileName)
+  assertString(indexName)
+  
+  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
+  
+  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+  
+  trainData <- data[indexes]
+  if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                  method = "up", 
+                                                  label = "labelRaw")
+  trainLabelRaw <- trainData$labelRaw
+  
+  testData <- data[-indexes]
+  
+  testLabelRaw <- testData$labelRaw
+  
+  trainLabel <- as.numeric(trainLabelRaw) - 1
+  testLabel <- as.numeric(testLabelRaw) - 1
+  trainData[, labelRaw := NULL]
+  testData[, labelRaw := NULL]
+  
+  numClass <- length(unique(trainLabel))
+  
+  
+  print(paste("in train are number of uniques:", length(unique(trainLabel))))
+  print(paste("in test are number of uniques:", length(unique(testLabel))))
+  
+  print("training logreg model")
+  model <- LiblineaR::LiblineaR(trainData, target =  trainLabel,
+                                type = 0)
+  
+  # evaluating predictions and eval metrics
+  predictions <- as.data.table(predict(model, 
+                                       newx =  testData,
+                                       proba = TRUE))
+  # neu ordern
+  predictions[, predictions := NULL]
+  
+  
+  # extract the order of the columns in predictions
+  orderOfNames <- as.integer(gsub(colnames(predictions),
+                                  pattern = "probabilities.",
+                                  replacement = "")) + 1
+  
+  # evaluating predictions and eval metrics
+  names(predictions) <- levels(testLabelRaw)[orderOfNames]
+  
+  predictionsMax <- apply(predictions, 1 , function(x) {
+    names(x[which.max(x)])
+  })
+  
+  # Prob vs Accuracy plot Data
+  predictionsMaxProb <- apply(predictions, 1 , function(x) {
+    x[which.max(x)]
+  })
+  correctBinary <- testLabelRaw == predictionsMax
+  ProbAccDT <- data.table(Prob = predictionsMaxProb,
+                          Correct = correctBinary)
+  
+  # mse, accuracy
+  truth <- to_categorical(testLabel)
+  resultDiffProb <- (truth - predictions)^2    
+  meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
+  accuracy <- mean(correctBinary)
+  
+  confusionMatrix <- matrix(table(factor(predictionsMax, 
+                                         levels =  levels(testLabelRaw)),
+                                  factor(testLabelRaw, 
+                                         levels =  levels(testLabelRaw))), 
+                            ncol = numClass)
+  
+  confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
+  
+  # checking accuracy of model and from confusion matrix
+  print(paste("model accuracy is", accuracy,
+              "and confusion matrix accuracy is", confAcc))
+  
+  # naming rows and cols
+  rownames(confusionMatrix) <- levels(testLabelRaw)
+  colnames(confusionMatrix) <- levels(testLabelRaw)
+  print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
+  
+  # accuracy by class
+  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
+  names(accByClass) <-  levels(testLabelRaw)
+  
+  
+  return(list(acc = accuracy,
+              meanSquareError = meanSquareError,
+              confusionMatrix = confusionMatrix,
+              ProbAccDT = ProbAccDT,
+              accByClass = accByClass,
+              predictions = predictions,
+              testLabelRaw = testLabelRaw))
+  
+}
+
+predictNB <- function(dataPath, fileName, indexName, labelName,
+                          upSampling = FALSE, sparse = FALSE){
+  assertString(dataPath)
+  assertString(fileName)
+  assertString(indexName)
+  
+  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
+  
+  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+  
+  trainData <- data[indexes]
+  if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                  method = "up", 
+                                                  label = "labelRaw")
+  trainLabelRaw <- trainData$labelRaw
+  
+  testData <- data[-indexes]
+  
+  testLabelRaw <- testData$labelRaw
+  
+  trainLabel <- as.numeric(trainLabelRaw) - 1
+  testLabel <- as.numeric(testLabelRaw) - 1
+  trainData[, labelRaw := NULL]
+  testData[, labelRaw := NULL]
+  
+  numClass <- length(unique(trainLabel))
+  
+  
+  print(paste("in train are number of uniques:", length(unique(trainLabel))))
+  print(paste("in test are number of uniques:", length(unique(testLabel))))
+  
+  print("training naive bayes model")
+  model <- naive_bayes(x = trainData, y = trainLabelRaw,
+                       usepoisson = TRUE)
+  
+  # evaluating predictions and eval metrics
+  predictions <- as.data.table(predict(model, 
+                                       newdata =  testData,
+                                       type = "prob"))
+  
+  predictionsMax <- apply(predictions, 1 , function(x) {
+    names(x[which.max(x)])
+  })
+  
+  # Prob vs Accuracy plot Data
+  predictionsMaxProb <- apply(predictions, 1 , function(x) {
+    x[which.max(x)]
+  })
+  correctBinary <- testLabelRaw == predictionsMax
+  ProbAccDT <- data.table(Prob = predictionsMaxProb,
+                          Correct = correctBinary)
+  
+  # mse, accuracy
+  truth <- to_categorical(testLabel)
+  resultDiffProb <- (truth - predictions)^2    
+  meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
+  accuracy <- mean(correctBinary)
+  
+  confusionMatrix <- matrix(table(factor(predictionsMax, 
+                                         levels =  levels(testLabelRaw)),
+                                  factor(testLabelRaw, 
+                                         levels =  levels(testLabelRaw))), 
+                            ncol = numClass)
+  
+  confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
+  
+  # checking accuracy of model and from confusion matrix
+  print(paste("model accuracy is", accuracy,
+              "and confusion matrix accuracy is", confAcc))
+  
+  # naming rows and cols
+  rownames(confusionMatrix) <- levels(testLabelRaw)
+  colnames(confusionMatrix) <- levels(testLabelRaw)
+  print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
+  
+  # accuracy by class
+  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
+  names(accByClass) <-  levels(testLabelRaw)
+  
+  
+  return(list(acc = accuracy,
+              meanSquareError = meanSquareError,
+              confusionMatrix = confusionMatrix,
+              ProbAccDT = ProbAccDT,
+              accByClass = accByClass,
+              predictions = predictions,
+              testLabelRaw = testLabelRaw))
+  
+}
+
+
+
 predictXG <- function(dataPath, fileName, indexName, labelName,
                       upSampling = FALSE, sparse = FALSE, nrounds = 20){
   assertString(dataPath)

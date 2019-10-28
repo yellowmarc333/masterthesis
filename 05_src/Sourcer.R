@@ -23,7 +23,8 @@ sourceAll = function() {
   require(ggpubr)
   require(LiblineaR)
   require(naivebayes)
-
+  require(caret)
+  
   # source internal source files
   sourcefiles = c("05_src/00_exploration/explorationHelper.R",
                   "05_src/01_import/01_importMaster.R",
@@ -35,6 +36,8 @@ sourceAll = function() {
                   
                   "05_src/05_model/modelPredictors.R",
                   "05_src/05_model/generalizedSampling.R",
+                  "05_src/06_evaluation/evaluationHelper.R",
+                  "05_src/06_evaluation/evaluationMaster.R",
                   
                   "05_src/09_utilities/oneHotEncode.R")
   

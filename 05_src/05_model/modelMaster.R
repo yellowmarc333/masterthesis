@@ -2,78 +2,79 @@ dataPath <- "03_computedData/04_preparedData/"
 list.files(dataPath)
 
 #----------------------- 10 percent models ---------------------------------####
+# naming is mod_Embedding_Algorithm_Subsetsize
 
 # LSTM 10pc #06-10
 fileName <- "Emb-10pc-FALSE.fst"
 indexName <- "Emb-Indexes-10pc-FALSE.fst"
-resultEmbLSTM10 <- predictLSTM(dataPath, fileName, 
+mod_Emb_LSTM_10 <- predictLSTM(dataPath, fileName, 
                         indexName, epochs = 10) # 0.437
 
 # Emb 10pc #06-10
-resultEmbCNN10 <- predictEmb(dataPath, fileName, 
+mod_Emb_CNN_10 <- predictEmb(dataPath, fileName, 
                         indexName, epochs = 10) # 0.426
 
 # Emb 10pc on RF and XGB #02.08
 fileName <- "Emb-10pc-FALSE.fst"
 indexName <- "Emb-Indexes-10pc-FALSE.fst"
-resultEmbRF10 <- predictRF(dataPath, fileName, 
+mod_Emb_RF_10 <- predictRF(dataPath, fileName, 
                              indexName) #0.221
-resultEmbXG10 <- predictXG(dataPath, fileName, 
+mod_Emb_XG_10 <- predictXG(dataPath, fileName, 
                            indexName) #0.218
 
 # TFIDF 10pc #15-10
 fileName <- "TFIDF-10pc-TRUE-FALSE.rds"
 indexName <- "TFIDF-Indexes-10pc-TRUE-FALSE.fst"
 labelName <- "TFIDF-Label-10pc-TRUE-FALSE.fst"
-resultXG_TDIDF10 <- predictXG(dataPath, fileName,
+mod_TFIDF_XG_10 <- predictXG(dataPath, fileName,
                         indexName, labelName, sparse = TRUE) # 0.404
-resultRF_TDIDF10 <- predictRF(dataPath, fileName, 
+mod_TFIDF_RF_10 <- predictRF(dataPath, fileName, 
                         indexName, labelName, sparse = TRUE) # 
 
 fileName <- "TFIDF-10pc-FALSE-FALSE.fst"
 indexName <- "TFIDF-Indexes-10pc-FALSE-FALSE.fst"
-resultMLP_TDIDF10 <- predictMLP(dataPath, fileName, 
+mod_TFIDF_MLP_10 <- predictMLP(dataPath, fileName, 
                               indexName, epochs = 15) # 0.4949
-resultLogReg_TDIDF10 <- predictLogReg(dataPath, fileName, indexName) # 0.502
+mod_TFIDF_LogReg_10 <- predictLogReg(dataPath, fileName, indexName) # 0.502
 
 # BOW 10pc # 15-10
 fileName <- "BOW-10pc-TRUE-FALSE.rds"
 indexName <- "BOW-Indexes-10pc-TRUE-FALSE.fst"
 labelName <- "BOW-Label-10pc-TRUE-FALSE.fst"
-resultXG10 <- predictXG(dataPath, fileName, indexName, 
+mod_BOW_XG_10 <- predictXG(dataPath, fileName, indexName, 
                        labelName, sparse = TRUE, nrounds = 2) # 0.413
-resultRF10 <- predictRF(dataPath, fileName, indexName, 
+mod_BOW_RF_10 <- predictRF(dataPath, fileName, indexName, 
                        labelName, sparse = TRUE, num.trees = 50) # 0.426
 fileName <- "BOW-10pc-FALSE-FALSE.fst"
 indexName <- "BOW-Indexes-10pc-FALSE-FALSE.fst"
-resultMLP10 <- predictMLP(dataPath, fileName, indexName, 
+mod_BOW_MLP_10 <- predictMLP(dataPath, fileName, indexName, 
                           epochs = 12) # 0.491
-resultLogReg10 <- predictLogReg(dataPath, fileName, indexName) # 0.509
-resultNB10 <- predictNB(dataPath, fileName, indexName)
+mod_BOW_LogReg_10 <- predictLogReg(dataPath, fileName, indexName) # 0.509
+mod_BOW_NB_10 <- predictNB(dataPath, fileName, indexName)
 
 # Sums of word2vec 10PC
 fileName3 <- "W2V-10pc-50-FALSE.fst"
-resultNN3 <- predictNN(dataPath, fileName3) # 
-resultXG3 <- predictXG(dataPath, fileName3) # 0.14
-resultRF3 <- predictRF(dataPath, fileName3) # 0.17
+mod_W2V_NN_10 <- predictMLP(dataPath, fileName3) # 
+mod_W2V_XG_10 <- predictXG(dataPath, fileName3) # 0.14
+mod_W2V_RF_10 <- predictRF(dataPath, fileName3) # 0.17
 
 # Array word2vec 10PC
 fileName5 <- "W2VArray-10pc-50-FALSE.rds"
-resultCN <- predictCNN(dataPath, fileName5) # 0.15
+mod_W2VArray_CNN_10 <- predictCNN(dataPath, fileName5) # 0.15
 
 # Array Glove 10PC 24-10
 fileName <- "GloveArray-10pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-10pc-50-FALSE.fst"
-resultCNNGlove10 <- predictCNN(dataPath, fileName = fileName, 
+mod_GloveArray_CNN_10 <- predictCNN(dataPath, fileName = fileName, 
                            indexName = indexName, epochs = 12) # 0.484
 # Array LSTM 10PC 24-10
-resultLSTMArray10 <- predictLSTMArray(dataPath, fileName = fileName, 
+mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath, fileName = fileName, 
                            indexName = indexName, epochs = 12) # 0.5012
 
 # EmbLSTM 10pc shortdescription #03-08
 fileName <- "Emb-10pc-TRUE.fst"
 indexName <- "Emb-Indexes-10pc-TRUE.fst"
-resultEmbLSTM10SD <- predictLSTM(dataPath, fileName, 
+mod_Emb_LSTM_10SD <- predictLSTM(dataPath, fileName, 
                                indexName) # 0.4124
 
 #----------------------- 100 percent models --------------------------------####
@@ -83,76 +84,68 @@ resultEmbLSTM10SD <- predictLSTM(dataPath, fileName,
 fileName <- "BOW-100pc-TRUE-FALSE.rds"
 indexName <- "BOW-Indexes-100pc-TRUE-FALSE.fst"
 labelName <- "BOW-Label-100pc-TRUE-FALSE.fst"
-resultRF100 <- predictRF(dataPath, fileName, 
+mod_BOW_RF_100 <- predictRF(dataPath, fileName, 
                         indexName, labelName, sparse = TRUE) # 
-resultXG100 <- predictXG(dataPath, fileName, 
+mod_BOW_XG_100 <- predictXG(dataPath, fileName, 
                          indexName, labelName, sparse = TRUE) # 0.495
 
 # TFIDF 100pc # 13-10
 fileName <- "TFIDF-100pc-TRUE-FALSE.rds"
 indexName <- "TFIDF-Indexes-100pc-TRUE-FALSE.fst"
 labelName <- "TFIDF-Label-100pc-TRUE-FALSE.fst"
-resultRF_TFIDF100 <- predictRF(dataPath, fileName, 
+mod_TFIDF_RF_100 <- predictRF(dataPath, fileName, 
                          indexName, labelName, sparse = TRUE) # 
-resultXG_TFIDF100 <- predictXG(dataPath, fileName, 
+mod_TFIDF_XG_100 <- predictXG(dataPath, fileName, 
                          indexName, labelName, sparse = TRUE) # 
 
-# Sums of word2vec 100PC
-fileName4 <- "W2V-100pc-50-FALSE.fst"
-resultXG4 <- predictXG(dataPath, fileName4) # 18.6
-resultRF4 <- predictRF(dataPath, fileName4) # 
-
-# Array word2vec 100PC
-fileName6 <- "W2VArray-100pc-50-FALSE.rds"
-resultCN <- predictCNN(dataPath, fileName6) # 0.208
 
 # LSTM 100pc #06-10
 fileName <- "Emb-100pc-FALSE.fst"
 indexName <- "Emb-Indexes-100pc-FALSE.fst"
-resultLSTM2 <- predictLSTM(dataPath, fileName, 
+mod_Emb_LSTM_100 <- predictLSTM(dataPath, fileName, 
                          indexName, epochs = 20) # 0.600
 
 # Emb 100pc # 06-10
 fileName7 <- "Emb-100pc-FALSE.fst"
 indexName7 <- "Emb-Indexes-100pc-FALSE.fst"
-resultEmb7 <- predictEmb(dataPath, fileName7,
+mod_Emb_Emb_100 <- predictEmb(dataPath, fileName7,
                        indexName7, epochs = 15) # 0.580
 
 # Array Glove 100pc # 06-10
 fileName <- "GloveArray-100pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-100pc-50-FALSE.fst"
-resultEmb2 <- predictCNN(dataPath, fileName,
+mod_GloveArray_CNN_100 <- predictCNN(dataPath, fileName,
                          indexName) #0.554, 06-10 0.5774
 
 # Array LSTM 100PC 24-10
 fileName <- "GloveArray-100pc-50-FALSE.rds"
 indexName <- "Glove-Indexes-100pc-50-FALSE.fst"
-resultLSTMArray <- predictLSTMArray(dataPath, fileName = fileName, 
+mod_LSTMArray <- predictLSTMArray(dataPath, fileName = fileName, 
                                     indexName = indexName, epochs = 20) # 0.5916
 
 # Array LSTM 100PC merge Shortdescription
 fileName <- "GloveArray-100pc-50-TRUE.rds"
 indexName <- "Glove-Indexes-100pc-50-TRUE.fst"
-resultLSTMGloveTRUE <- predictLSTMArray(dataPath, fileName = fileName, 
+mod_LSTMGloveTRUE <- predictLSTMArray(dataPath, fileName = fileName, 
                                     indexName = indexName) #0.635
 
 #--------------------------- Ensembling ------------------------------------####
 
-accComparison <- data.table(category = names(resultEmbCNN10$accByClass),
-                            EmbCNN10 = resultEmbCNN10$accByClass,
-                            EmbLSTM10 = resultEmbLSTM10$accByClass,
-                            CNNGlove10 =  resultCNNGlove10$accByClass,
-                            LSTMArray10 = resultLSTMArray10$accByClass, 
-                            RF10 = resultRF10$accByClass)
+accComparison <- data.table(category = names(mod_EmbCNN10$accByClass),
+                            EmbCNN10 = mod_EmbCNN10$accByClass,
+                            EmbLSTM10 = mod_EmbLSTM10$accByClass,
+                            CNNGlove10 =  mod_CNNGlove10$accByClass,
+                            LSTMArray10 = mod_LSTMArray10$accByClass, 
+                            RF10 = mod_RF10$accByClass)
 View(accComparison)
 write.fst(accComparison, 
           path = "03_computedData/06_evaluatedData/accComparison.fst",
           compress = 0)
 
-ensembeRes1 <- ensembleMaxProb(resultXG2$predictions, 
-                               resultRF2$predictions,
-                               resultEmb$predictions,
-                               truth = resultXG2$testLabelRaw)
+ensembeRes1 <- ensembleMaxProb(mod_XG2$predictions, 
+                               mod_RF2$predictions,
+                               mod_Emb$predictions,
+                               truth = mod_XG2$testLabelRaw)
 
 
 dateNow <- gsub(date(), pattern = " ",
@@ -160,7 +153,7 @@ dateNow <- gsub(date(), pattern = " ",
 dateNow <- gsub(dateNow, pattern = ":",
                 replacement = "-")
 
-for(file in grep(x = ls(), pattern = "result", value = TRUE)){
+for(file in grep(x = ls(), pattern = "mod_", value = TRUE)){
   saveRDS(get(file, inherits = FALSE),
           file = paste0("03_computedData/05_modelData/",
                                    file,

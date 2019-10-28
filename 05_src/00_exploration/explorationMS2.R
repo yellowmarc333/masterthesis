@@ -1,17 +1,20 @@
 # next steps/ to dos:
 
 # [vor runter schreiben von methoden]
-# methoden: multinomial naive bayes checken
 # validation data muss genauso preprocessed sein wie train Data
 valData <- read.fst("03_computedData/03_integratedData/valData.fst",
                     as.data.table = TRUE)
 # in model predictors the only predict option einfügen (100% trainindizes) und
-# valdata seperat angeben
+# valdata seperat angeben (val. durchgehen)
 # preparation functions und predictors durchgehen und schauen dass überall same
-# accuracy measure auschecken: binary cross entropy > mse?
+# (auch naming)
+# prof gliederung schicken
+
 
 # [vor finaler modellrechnung]
-# - framework muss 100%ig abgeklärt sein
+# - framework bzgl splits muss 100%ig abgeklärt sein
+# - methoden müssen runtergebrochen sein, damit bzgl Parameter keine 
+#   fragen mehr aufkommen
 
 
 # [exploration]
@@ -32,6 +35,8 @@ valData <- read.fst("03_computedData/03_integratedData/valData.fst",
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xxlogloss überall reinnehmen + f1 score, + recall/precision (evaluation function schreiben)
+# xxmethoden: multinomial naive bayes checken
 # xxlogReg umsetzen
 # xxdokumentieren welche tokens entfernt wurden. (0 wörter auch entfernen)
 #     xxgeht nicht vor prepareData da vom embedding abhängig? 

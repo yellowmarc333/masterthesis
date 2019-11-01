@@ -1,21 +1,32 @@
-data <- read.fst("03_computedData/02_cleanedData/News.fst",
-                 as.data.table = TRUE)
+# global parameters
+fullWidth <- 15.49779
+fullHeight <- fullWidth * 9/16
 
-# sum(grepl(x = data2$headline, pattern = "€", fixed = TRUE))
-# 
-# grep(x = data2$headline, pattern = "€", fixed = TRUE)
-# View(data2[grep(x = headline, pattern = "â", fixed = TRUE), headline])
+# kapitel 2.1 ####
+data <- fread("03_computedData/01_importedData/News.csv")
+print(nrow(data))
+print(colnames(data))
+print(length(unique(data$category)))
+
+# kapitel 2.3 ####
+inPath = "03_computedData/02_cleanedData/News.fst"
+outPath = "03_computedData/07_deploymentData/"
+data <- read.fst(inPath, as.data.table = TRUE)
+
+ggObj <- barplotCategories(data)
+ggsave(filename = paste0(outPath, "barplotCategories.pdf"),
+       plot = ggObj, width = fullWidth, height = fullHeight, 
+       device = "pdf")
+
 
 N <- nrow(data)
 label <- data$category
-
 texts <- as.character(data$headline)
 
 # Create iterator over tokens
 tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
                            remove_punct = FALSE, remove_symbols = FALSE, 
                            remove_hyphens = TRUE)
-
 
 tokens <- as.list(tokens)
 
@@ -28,21 +39,8 @@ vocab <- as.data.table(text2vec::prune_vocabulary(vocab, term_count_min = 2L))
 # how many headlines have 2 sentences
 pointOccurance <- vocab[term == ".", doc_count]
 print(paste(". occurs", pointOccurance, 
-            "times in a senctence"))
+            "times in a sentence"))
 print(paste("this equals", pointOccurance/N, "percent of news headlines"))
-
-# plot for category frequencies
-categoryFreq <- data[, .(count = .N), by = category]
-categoryFreq[, labPos := cumsum(count) - 0.5*count]
-
-ggObj <- ggplot(categoryFreq, aes(x = 2, y = count, fill = category)) +
-  geom_bar(stat = "identity", fill = colGenerator(nrow(categoryFreq))) +
-  coord_polar("y", start = 0) +
-  geom_text(aes(y = labPos, label = count), color = "white")+
-  #scale_fill_manual() +
-  theme_void() +
-  xlim(0.5, 2.5) 
-ggObj
 
 
 
@@ -98,25 +96,31 @@ word2 <- plotWordClouds(catFilter = "ENVIRONMENT", nWords = 50,
 length(intersect(word1$term, word2$term))/50 # 0.5
 
 
+# kapitel 2.2:  klassenmerging
 dataRaw <- read.fst("03_computedData/02_cleanedData/News.fst",
                     as.data.table = TRUE)
-dataRaw[category == "WORLDPOST", ][1:5, headline]
-dataRaw[category == "THE WORLDPOST", ][1:5, headline]
+dataRaw[category == "worldpost", ][1:4, headline]
+dataRaw[category == "the worldpost", ][1:4, headline]
 # nicht unterscheidbar
 
-dataRaw[category == "CULTURE & ARTS", ][1:5, headline]
-dataRaw[category == "ARTS & CULTURE", ][1:5, headline]
-dataRaw[category == "ARTS", ][1:5, headline]
+dataRaw[category == "culture & arts", ][1:4, headline]
+dataRaw[category == "arts & culture", ][1:4, headline]
+dataRaw[category == "arts", ][1:4, headline]
 # nicht unterscheidbar
 
-dataRaw[category == "STYLE", ][1:5, headline]
-dataRaw[category == "STYLE & BEAUTY", ][1:5, headline]
+dataRaw[category == "style", ][1:4, headline]
+dataRaw[category == "style & beauty", ][1:4, headline]
 # nicht unterscheidbar
 
-dataRaw[category == "PARENTS", ][1:5, headline]
-dataRaw[category == "PARENTING", ][1:5, headline]
+expTable <- data.table(parents = 
+                     dataRaw[category == "parents", ][1:4, headline],
+                     parenting = 
+                       dataRaw[category == "parenting", ][1:4, headline])
+print(xtable(expTable, label = "tab:parentsMerge"), include.rownames = TRUE)
+
+
 #nicht unterscheidbar
 
-dataRaw[category == "GREEN", ][1:5, headline]
-dataRaw[category == "ENVIRONMENT", ][1:5, headline]
+dataRaw[category == "green", ][1:4, headline]
+dataRaw[category == "environment", ][1:4, headline]
 #nicht unterscheidbar

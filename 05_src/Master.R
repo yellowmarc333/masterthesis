@@ -18,7 +18,6 @@ importData(inPath = "02_initialData/",
 cleanData(inPath = paste0(computedDataPath,"01_importedData/"),
           outPath = paste0(computedDataPath, "02_cleanedData/"))
 
-
 # # 03 INTEGRATION
 integrateData(inPath = "03_computedData/02_cleanedData/", 
              outPath = "03_computedData/03_integratedData/",

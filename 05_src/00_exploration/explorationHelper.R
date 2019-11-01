@@ -1,8 +1,7 @@
 plotWordClouds <- function(catFilter = "POLITICS", nWords = 50,
                            returnData = FALSE) {
   
-  dataRaw <- read.fst("03_computedData/01_importedData/News.fst",
-                   as.data.table = TRUE)
+  dataRaw <- fread("03_computedData/01_importedData/News.csv")
   data <- dataRaw[category == (catFilter),]
   N <- nrow(data)
   
@@ -44,6 +43,33 @@ plotWordClouds <- function(catFilter = "POLITICS", nWords = 50,
 
 
 
-colGenerator <- colorRampPalette(c("white", "grey", "yellow", "red",
+colGenerator <- colorRampPalette(c("grey", "yellow", "red",
                                    "mediumorchid1", "green", 
                                    "royalblue1", "black"))
+
+barplotCategories <- function(data){
+  assertDataTable(data)
+
+   # plot for category frequencies
+  categoryFreq <- data[, .(count = .N), by = category]
+  categoryFreq[, labPos := cumsum(count) - 0.5*count]
+  
+  ggObj <- ggplot(categoryFreq, aes(x = reorder(category, -count),
+                                    y = count, fill = category, 
+                                    label = category)) +
+    geom_bar(stat = "identity", fill =  rev(colGenerator(nrow(categoryFreq)))) +
+    geom_text_repel(nudge_x = 2, nudge_y = 10000, segment.size = 0.8,
+                    segment.alpha = 0.5, point.padding = 2.5,
+                    box.padding = 0.5, size = 7) +
+    geom_text(aes(x = category, y = count, label = count),
+              vjust = -0.5, angle = 0, size = 4) +
+    labs(x = "Nachrichtenkategorie",
+         y = "Anzahl Datenpunkte") +
+    theme(axis.text.x  = element_blank(),
+          axis.title = element_text(size = 20),
+          axis.ticks.x = element_blank(),
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank())  
+  
+  return(ggObj)
+}

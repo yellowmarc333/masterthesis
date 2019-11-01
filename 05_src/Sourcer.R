@@ -1,5 +1,6 @@
 sourceAll = function() {
   # source external libraries
+  require(xtable)
   require(fst)
   require(plotly)
   require(data.table)
@@ -24,6 +25,7 @@ sourceAll = function() {
   require(LiblineaR)
   require(naivebayes)
   require(caret)
+  require(ggrepel)
   
   # source internal source files
   sourcefiles = c("05_src/00_exploration/explorationHelper.R",

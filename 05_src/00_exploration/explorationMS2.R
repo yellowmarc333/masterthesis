@@ -8,8 +8,10 @@ valData <- read.fst("03_computedData/03_integratedData/valData.fst",
 # valdata seperat angeben (val. durchgehen)
 # preparation functions und predictors durchgehen und schauen dass überall same
 # (auch naming)
-# prof gliederung schicken
 
+
+# [runterschreiben]
+# word embeddings from software, algorithms
 
 # [vor finaler modellrechnung]
 # - framework bzgl splits muss 100%ig abgeklärt sein
@@ -35,6 +37,7 @@ valData <- read.fst("03_computedData/03_integratedData/valData.fst",
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xx prof gliederung schicken
 # xxlogloss überall reinnehmen + f1 score, + recall/precision (evaluation function schreiben)
 # xxmethoden: multinomial naive bayes checken
 # xxlogReg umsetzen

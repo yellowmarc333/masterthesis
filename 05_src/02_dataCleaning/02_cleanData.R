@@ -26,6 +26,13 @@ cleanData = function(inPath = "03_computedData/01_importedData/",
   data[category == "green", category := "green & environment"]
   data[category == "environment", category := "green & environment"]
   
+  # removing empty points if there are any
+  emptyPoints <- sapply(as.list(headlineTmp), function(x) {
+    length(strsplit(x, split = " ")[[1]]) == 0
+  })
+  print(paste("there are", sum(emptyPoints), "empty points that will be removed"))
+  
+  data <- data[!emptyPoints]
   
   # compression argument prevents converting error from o to c
   write.fst(data, path = paste0(outPath, "News.fst"), compress = 0)

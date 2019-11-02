@@ -1,8 +1,6 @@
 source("05_src/Sourcer.R")
 sourcedFiles = sourceAll()
 
-computedDataPath <- "03_computedData/"
-
 # increase vector memory
 R_MAX_VSIZE = 50 * 10^9 
 R_MAX_NUM_DLLS = 500
@@ -12,11 +10,11 @@ print(paste0("Max vector memory is set to ", as.numeric((Sys.getenv('R_MAX_VSIZE
 
 # 01 IMPORT
 importData(inPath = "02_initialData/", 
-           outPath = paste0(computedDataPath,"01_importedData/"))
+           outPath = "03_computedData/01_importedData/")
 
 #02 DATA CLEANING
-cleanData(inPath = paste0(computedDataPath,"01_importedData/"),
-          outPath = paste0(computedDataPath, "02_cleanedData/"))
+cleanData(inPath = "03_computedData/01_importedData/",
+          outPath = "03_computedData/02_cleanedData/")
 
 # # 03 INTEGRATION
 integrateData(inPath = "03_computedData/02_cleanedData/", 

@@ -275,7 +275,7 @@ predictNB <- function(dataPath, fileName, indexName, labelName,
   print(paste("in train are number of uniques:", length(unique(trainLabel))))
   print(paste("in test are number of uniques:", length(unique(testLabel))))
   
-  browser()
+
   print("training naive bayes model")
   model <- naive_bayes(x = trainData, y = trainLabelRaw,
                        laplace = 1, usekernel = TRUE,

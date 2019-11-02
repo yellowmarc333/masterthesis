@@ -26,6 +26,9 @@ sourceAll = function() {
   require(naivebayes)
   require(caret)
   require(ggrepel)
+  require(RColorBrewer)
+  require(wordcloud)
+  require(wordcloud2)
   
   # source internal source files
   sourcefiles = c("05_src/00_exploration/explorationHelper.R",

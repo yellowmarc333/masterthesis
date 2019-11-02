@@ -540,7 +540,7 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   
   # see how many words are in glove of the data words
   notFound <- as.data.table(vocab[!(vocab$term %in% glove$V1),])
-  
+
   commonWordsRatio <- round(mean(vocab$term %in% glove$V1), digits = 3)
   print(paste("the data words and Glove have", commonWordsRatio, 
               "in common"))

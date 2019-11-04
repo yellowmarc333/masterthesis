@@ -11,6 +11,7 @@ sourceAll = function() {
   require(jsonlite)
   require(devtools)
   require(plyr)
+  require(dplyr)
   require(quanteda)
   require(h2o)
   require(nnet)

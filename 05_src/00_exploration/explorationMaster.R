@@ -118,34 +118,45 @@ ggsave(filename = paste0(outPath, "barplotCategories.pdf"),
        plot = ggObj, width = fullWidth, height = fullHeight, 
        device = "pdf")
 
+
+ggObj <- barplotSymbolInfo(data)
+ggsave(filename = paste0(outPath, "barplotSymbols.pdf"),
+       plot = ggObj, width = fullWidth, height = fullHeight, 
+       device = "pdf")
+
+tableWordInfo(data)
+# wieviele wörter pro kategorie überhaupt im korpus sind,
+# wieviele wörter es insgesamt gibt
+# wordcloud gesamt
+
 categoryFreq <- data[, .(count = .N), by = category][order(-count)]
 categoryFreq[, cumSumPart := round(cumsum(count)/sum(count), 3)]
 print(categoryFreq[6])
 print(nrow(data) / length(unique(data$category)))
 
-# average number of words by category: (do in)
-nWordsByCategory <- data[, {
-  tokens <- quanteda::tokens(headline, what = "word", remove_numbers = FALSE, 
-                             remove_punct = FALSE, remove_symbols = FALSE, 
-                             remove_hyphens = TRUE)
-  tokens <- as.list(tokens)
-  res <- round(mean(sapply(tokens, length)), digits = 3)
-  .(nWordsByCategory = res)
-}, by = category]
-
-setorderv(nWordsByCategory, c("nWordsByCategory"), -1)
-# anzahl symbole, anzahl neuangefangene Sätze anzahl stopwords
 
 print(nrow(data))
 label <- data$category
 texts <- as.character(data$headline)
 
+# evaluation on total data
 # Create iterator over tokens
 tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
                            remove_punct = FALSE, remove_symbols = FALSE, 
                            remove_hyphens = TRUE)
 
 tokens <- as.list(tokens)
+# exploration of all tokens
+tokensLength <- sapply(tokens, length)
+print(round(mean(tokensLength),3))
+print(min(tokensLength))
+print(data[which.min(tokensLength), .(category, headline)])
+
+print(max(tokensLength))
+print(head(order(tokensLength, decreasing = TRUE)))
+tokens[which.max(tokensLength)]
+View(data[head(order(tokensLength, decreasing = TRUE)),
+                .(category, headline)])
 
 # Create vocabulary. Terms will be unigrams (simple words).
 itoken <- text2vec::itoken(tokens, progressbar = FALSE)

@@ -8,8 +8,7 @@ valData <- read.fst("03_computedData/03_integratedData/valData.fst",
 # valdata seperat angeben (val. durchgehen)
 # preparation functions und predictors durchgehen und schauen dass überall same
 # (auch naming)
-
-
+# in bag of words vielleicht doch nicht symbols entfernen? und stopwords
 # [runterschreiben]
 # word embeddings from software, algorithms
 

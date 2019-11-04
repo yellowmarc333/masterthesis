@@ -1,6 +1,14 @@
 source("05_src/Sourcer.R")
 sourcedFiles = sourceAll()
 
+allFiles <- list.files(path = "05_src/", recursive = T, full.names = T)
+subFiles <- str_subset(allFiles, "[.][R]$") 
+lineSum <- sum(sapply(subFiles, function(x) {
+  length(readLines(x))
+} )); lineSum
+
+
+
 # increase vector memory
 R_MAX_VSIZE = 50 * 10^9 
 R_MAX_NUM_DLLS = 500

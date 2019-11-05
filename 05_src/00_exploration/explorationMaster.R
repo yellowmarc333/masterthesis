@@ -124,7 +124,9 @@ ggsave(filename = paste0(outPath, "barplotSymbols.pdf"),
        plot = ggObj, width = fullWidth, height = fullHeight, 
        device = "pdf")
 
-tableWordInfo(data)
+tableWordInfo <- tableWordInfo(data) # not sure if will be used
+print(tableWordInfo[which.max(nWordsByCategory)])
+print(tableWordInfo[which.min(nWordsByCategory)])
 # wieviele wörter pro kategorie überhaupt im korpus sind,
 # wieviele wörter es insgesamt gibt
 # wordcloud gesamt
@@ -136,16 +138,22 @@ print(nrow(data) / length(unique(data$category)))
 
 
 print(nrow(data))
+
+
+# evaluation on total data
 label <- data$category
 texts <- as.character(data$headline)
 
-# evaluation on total data
-# Create iterator over tokens
 tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
                            remove_punct = FALSE, remove_symbols = FALSE, 
-                           remove_hyphens = TRUE)
-
+                           remove_hyphens = FALSE)
 tokens <- as.list(tokens)
+
+# Create vocabulary. Terms will be unigrams (simple words).
+itoken <- text2vec::itoken(tokens, progressbar = FALSE)
+vocab <- text2vec::create_vocabulary(itoken)
+vocab <- as.data.table(text2vec::prune_vocabulary(vocab, term_count_min = 1L))
+
 # exploration of all tokens
 tokensLength <- sapply(tokens, length)
 print(round(mean(tokensLength),3))
@@ -156,13 +164,12 @@ print(max(tokensLength))
 print(head(order(tokensLength, decreasing = TRUE)))
 tokens[which.max(tokensLength)]
 View(data[head(order(tokensLength, decreasing = TRUE)),
-                .(category, headline)])
+          .(category, headline)])
 
-# Create vocabulary. Terms will be unigrams (simple words).
-itoken <- text2vec::itoken(tokens, progressbar = FALSE)
-vocab <- text2vec::create_vocabulary(itoken)
-vocab <- as.data.table(text2vec::prune_vocabulary(vocab, term_count_min = 2L))
-
+# exploring vocab
+print(nrow(vocab))
+print(vocab[which.max(term_count)],)
+print(nrow(vocab[term_count <= 1]))
 
 # how many headlines have 2 sentences
 pointOccurance <- vocab[term == ".", doc_count]

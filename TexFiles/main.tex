@@ -1,0 +1,279 @@
+\documentclass[a4paper,11pt]{article}
+
+\parindent0cm
+\usepackage[
+backend=biber,
+style=apa,
+sorting=nyt
+]{biblatex}
+\addbibresource{literature.bib}
+
+\usepackage{array}
+\usepackage[utf8]{inputenc}
+\usepackage{dirtytalk}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage{layouts}
+% printing the textsize used
+% \printinunitsof{cm}
+% \prntlen{\textwidth}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage[ngerman]{babel}
+\usepackage[left=3cm,right=2.5cm,top=2cm,bottom=2cm]{geometry}
+\renewcommand{\baselinestretch}{1.5}\normalsize % Zeilenabstand 1.5
+\usepackage[utf8]{inputenc}
+
+
+\begin{document}
+
+\begin{titlepage}
+
+\vspace*{3cm}
+
+
+\begin{figure}[t]
+\begin{flushright}
+\includegraphics[width = 7cm,  keepaspectratio]{Images/TULogo.png}
+\label{fig2}
+
+\end{flushright}
+\end{figure}
+\vspace*{3cm}
+
+
+\begin{center}
+
+\vspace*{2cm}
+
+\title{Masterthesis}
+
+
+
+{\huge Masterthesis}\\
+ {\huge{\textbf{Multilabel-Klassifizierung \\
+ von Nachrichten Schlagzeilen}}\\}
+ \vspace{0.2cm}
+ {\large  Vergleich zwischen neuronalen Netzen und baumbasierten Algorithmen auf verschiedenen Repräsentationen von Wörtern\\}
+\vspace*{5cm}
+
+
+{\large  Fakultät Statistik\\
+Lehrstuhl Statistical Methods for Big Data }
+\vspace*{0.5cm}
+
+ \begin{large}
+ Betreuer: Prof. Dr. Andreas Groll\\
+  \end{large}
+
+  \begin{large}
+Verfasser: Marc Schmieder\\
+\date{October 2019}
+   \vspace*{2cm}
+
+ \end{large}
+\end{center}
+\newpage
+%\large
+\thispagestyle{empty}
+\tableofcontents
+\newpage
+\end{titlepage}
+
+
+
+
+
+
+
+\section{Einleitung}
+
+\begin{itemize}
+    \item nutzen der klassifikation für die Redaktion
+    \item oft nur binäre klassifikation, multi selteneres topic
+    \item multiclass auch bei next best offer
+    \item bag of words kein guten Ruf, bei welchen Datensätzen lohnen sich Neural nets überhaupt.
+\end{itemize}{}
+
+\section{Datensatz und Problemstellung}
+
+In diesem Kapitel wird der für diese Thesis relevante Datensatz vorgestellt. Nach dessen Bereinigung erfolgt eine Exploration und anschließend die Erläuterung der Zielstellung mit dem einhergehenden Klassifikationsproblems.
+
+
+\subsection{Initialer Datensatz}
+
+Der Datensatz trägt den Titel \textit{News Category Dataset} (\cite{dataset}) und stammt von der Machine Learning Plattform \textit{Kaggle}. Er umfasst $200853$ Beobachtungen, die Informationen in englischer Sprache über Artikel der US-Amerikanischen Onlinezeitung \textit{Huffpost} enthalten. Der Zeitraum, in dem die Veröffentlichungen stattgefunden haben, erstreckt sich vom 28.01.2012 bis zum 25.05.2019, also über eine Zeitspanne von über $7$ Jahren. Die Inhalte der Artikel sind lediglich verlinkt und nicht direkt im Datensatz enthalten. Für jeden Artikel ist die Nachrichtenschlagzeile des Artikels angegeben. Zusätzlich zu dem Link des Artikels ist für jeden Datenpunkt das Veröffentlichungsdatum, der Name des Autors, eine Kurzbeschreibung und die Nachrichtenkategorie gegeben. Letzteres ist die Zielvariable (genauere Erläuterung in Kapitel \ref{Kap:Zielst}), die $41$ verschiedene Ausprägungen annimmt. Die Kurzbeschreibung enthält ähnliche Informationen wie die Nachrichtenüberschrift und ist manchmal vorhanden und manchmal nicht. Für die Beantwortung der Fragestellung (Kapitel \ref{Kap:Zielst}) soll nur die Schlagzeile als abhängige Variable in die Modellierung eingehen. Bevor eine Exploration des Datensatz erfolgt, werden im nächsten Abschnitt vorgenommene Änderungen an den relevanten Spalten Nachrichtenkategorie und Nachrichtenschlagzeile aufgelistet und begründet.
+
+
+\subsection{Änderungen am Datensatz}
+
+In der US-amerikanischen Sprache spielt die Groß- und Kleinschreibung außer bei der Nutzung von Personalpronomen keine Rolle. Deshalb wurden in den Texten alle Großbuchstaben zu Kleinbuchstaben konvertiert. Auf diese Weise werden in der Modellierung die Wörter \textit{Teacher} und \textit{teacher} nicht unterschiedlich behandelt. \\
+\\
+Die Artikel wurden vermutlich von einigen Autoren in unterschiedlichen Ländern geschrieben, denn die Texte enthalten unterschiedliche Zeichensätze. Bei der verwendeten \texttt{utf8} Enkodierung entstanden bei unbekannten Zeichen drei-zeichige Konvertierungsfehler (z.b. der Form \say{a@S}). Diese wurden durch Leerzeichen ersetzt. In dem Wissen, dass die Wörter des Textkorpus mit den \textit{Global Word Vectors} (Kapitel \ref{Kap:Glove}) abgeglichen werden, wurden einige Begriffe so ersetzt, dass bestimmte Wörter in den \textit{Global Word Vectors} gefunden werden. Zuerst erfolgte eine Entfernung von Sonderzeichen wie beispielsweise \say{©} oder \say{™}. Eine Art der Ersetzung findet zum Beispiel bei \say{n't} zu \say{ not} statt. Analog wurden \say{'ll} durch \say{ will} und \say{'ve} durch \say{ have} ersetzt. Kurzformen der Form \say{here's} wurden zu \say{here is} geändert, da sonst die Wörter mit Endung \say{'s} so immer als eigenständige Wörter repräsentiert werden und nicht sinngemäß als Tupel. Häufig vorkommende Eigennamen mit analoger Endung \say{trump's} wurden durch \say{trump his} ausgetauscht. Nach dem die Vorkommnisse der Art \say{here's} entfernt worden, können nun Vorkommnisse der Art \say{john's son} durch \say{john its son} ersetzt werden. So ist bei Wörtertupeln dieser Art zwar nicht das Geschlecht von John bekannt, aber zumindest offensichtlich, dass der Sohn John zugehörig ist. Nach der Bereinigung des Textkorpus wurden letztendlich noch $6$ Datenpunkte entfernt, die in der Schlagzeile keine Wörter mehr enthalten. Es verbleiben nun also insgesamt $200847$ Beobachtungen.\\
+\\
+Nach der Umfangreichen Bereinigung des Schlagzeilen-Textkorpuses liegt nun die Zielvariable Nachrichtenkategorie im Fokus.
+Bei genauerer Betrachtung der $41$ Kategorien fällt auf, dass diese teilweise bereits namentlich ähnlich ausfallen. In Tabelle \ref{tab:parentsMerge} sind beispielhaft $4$ Schlagzeilen der Kategorien \textit{parents} und \textit{parenting} aufgeführt.
+
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{ | p{0.1 \textwidth} | p{0.42 \textwidth}| p{0.42 \textwidth} | }
+  \hline
+Beispiel & Kategorie parents  & Kategorie parenting \\ 
+  \hline
+1 & 40 tweets that sum up life with 4-year-olds & a baby book of disasters \\ 
+  2 & these were the trendiest baby names in the late '80s & it is time to find your tribe \\ 
+  3 & these quotes from kids are hilarious, adorable and oddly insightful & help huffpost parents win a webby award! \\ 
+  4 & 30  itstar wars'-inspired names parents are giving their babies & why our 'imperfect' moments are perfect to our children \\ 
+   \hline
+\end{tabular}
+\label{tab:parentsMerge}
+\caption{beispiel todo}
+\end{center}
+\end{table}
+
+Anhand der Beispiele wird deutlich, dass es schwierig ist, diese mit menschlicher Intuition eine der beiden Kategorien eindeutig zuzuordnen. Als zusätzlicher Indikator, der für die Verschmelzung zweier Kategorien spricht, erfolgte die Betrachtung der relativen Schnittmenge der gemeinsamen häufigsten Wörter. Die häufigsten Wörter pro Kategorie wurden ermittelt, indem die kompletten Daten auf die Kategorie gefiltert werden, anschließend Symbole und \textit{stopwords} (Wörter wie \say{he}, \say{is} oder \say{through}, die komplette Liste ist im Anhang unter (todo) zu finden) entfernt und die Wörter nach der gesamten Anzahl ihres Auftretens sortiert werden. Tabelle \ref{tab:categoryMerge} zeigt die relative Schnittmenge der $50$ häufigsten Wörter für ausgewählte Paare an Kategorien.
+
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{|l|l|c|}
+  \hline
+Kategorie 1 & Kategorie 2  & relative Schnittmenge \\ 
+  \hline
+\textit{parents} & \textit{parenting} & $0.74$ \\
+\textit{arts} & \textit{culture \& arts} & $0.52$\\
+\textit{culture \& arts} & \textit{arts \& culture} &  $0.38$\\
+\textit{arts} & \textit{arts \& culture}  & $0.40$\\
+\textit{the worldpost} & \textit{worldpost} & $0.46$ \\
+\textit{style} & \textit{style \& beauty} & $0.52$ \\
+\textit{green} & \textit{environment} & $0.50$ \\
+\hline
+\textit{wellness} & \textit{black voices} & $0.16$ \\
+\textit{politics} & \textit{home \& living} & $0.06$ \\
+   \hline
+\end{tabular}
+\label{tab:categoryMerge}
+\caption{todo}
+\end{center}
+\end{table}
+
+Die ersten $7$ Zeilen beinhalten Kategorien, die eine relative Schnittmenge von gemeinsamen Wörtern von $0.38$ oder höher haben. In den letzten beiden Zeilen ist zu sehen, dass inhaltlich verschiedene Kategorien eine vergleichbar geringe Schnittmenge an häufigsten Wörtern haben.
+
+Mit den Argumenten der menschlichen Intuition und der Ergebnisse aus Tabelle \ref{tab:categoryMerge} wurden in folgenden Fällen die Kategorien zusammengelegt: \\
+Die Kategorien \textit{parents} und \textit{parenting} wurde zu \textit{parents}, \textit{arts}, \textit{culture \& arts} und \textit{arts \& culture} zu \textit{arts \& culture}, \textit{the worldpost} und \textit{worldpost} zu \textit{worldpost}, \textit{style} und \textit{style \& beauty} zu \textit{style \& beauty} sowie \textit{green} und \textit{environment} zu \textit{green \& environment}. Beispiele analog zu \ref{tab:parentsMerge} für die anderen zusammengelegten Kategorien finden sich im Anhang (todo verlinken, auflisten). Die $41$ Kategorien wurden somit auf $35$ Kategorien reduziert, welche inhaltlich mit menschlicher Intuition unterscheidbar sind. Nach den Modifikationen folgt im nächsten Abschnitt eine Exploration des Datensatzes.
+
+\subsection{Exploration des bereinigten Datensatzes}
+
+Von großem Interesse ist die Verteilung der Nachrichtensparten im kompletten bereinigten Datensatz.
+Abbildung \ref{abb:barplotCategories} zeigt die absoluten Anzahlen der Datenpunkt pro Nachrichtenkategorie. 
+
+\begin{figure}[ht]
+    \centering
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/barplotCategories.pdf} 
+\label{abb:barplotCategories}
+\caption{Anzahl Datenpunkte pro Nachrichtenkategorie}
+\end{figure}
+todo: box im die labels größer machen.\\
+
+Es ist festzustellen, dass die Kategorien keineswegs ausgeglichen vorliegen. Die häufigste Kategorie stellt \textit{politics} dar mit $32738$ Datenpunkten. Zweit- und dritt-häufigste Kategorien sind \textit{wellness} und \textit{Entertainment} mit $17827$ und $16058$ Beobachtungen. Die Nachrichtensparten mit den wenigsten Artikeln bilden \textit{college}, \textit{latino voices} und \textit{education} mit $1144$, $1129$ und $1004$ Beobachtungen.\\
+Die ersten $6$ Kategorien stellen bereits $50.3$ Prozent der gesamten Beobachtungen dar. Durchschnittlich beinhaltet eine Kategorie $5738.5$ Nachrichtenschlagzeilen.\\
+\\
+Es folgt nun eine Exploration des Textkorpus der Schlagzeilen erst ohne und dann in Verbindung mit den Kategorien. Im Rahmen der Analyse zählen Symbole sämtlicher Art auch als Wörter. Die kürzeste Überschrift des Datensatzes enthält nur $1$ Wort, während die längste $91$ Wörter umfasst. Durchschnittlich enthält eine Schlagzeile $11.147$ Wörter. Das Vokabular aller Schlagzeilen umfasst $67938$ Wörter, wobei \say{the} das häufigste Wort ist und in $54033$ Artikelüberschriften vorkommt. $31274$ Wörter kommen nur einmal vor. In der Betrachtung der mittleren Wortanzahlen pro Kategorie fällt auf, dass diese differieren. Die Kategorie mit der höchsten durchschnittlichen Anzahl von $12.863$ Wörtern ist \textit{style \& beauty}. Die Kategorie, bei der sich die Autoren durchschnittlich am kürzesten fassen, ist \textit{food \& drink} mit $9.328$ Wörtern. Ein weiterer interessanter Aspekt ist, ob in den Kategorien bestimmte Sonderzeichen oder Symbole besonders häufig oder selten vorkommen. Abbildung \ref{abb:barplotSymbols} zeigt die relative Anzahl der Vorkommnisse verschiedener Symbole in den Schlagzeilen pro Kategorie.
+
+\begin{figure}[ht]
+    \centering
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/barplotSymbols.pdf} 
+\label{abb:barplotSymbols}
+\caption{Relativer Anteil Datenpunkte pro Nachrichtenkategorie}
+\end{figure}
+
+Ein Wert von beispielsweise $0.15$ für eine bestimmte Nachrichtensparte ist in der Grafik ist so zu interpretieren, dass in 15 Prozent aller Schlagzeilen dieser Kategorie das entsprechende Symbol mindestens einmal aufgetaucht ist.
+
+
+\begin{itemize}
+\item barplottwoaxes mit laenge der wörter und größe des korpuses
+    \item noch was über die categories erzählen in Bezug auf Zeitrum und huffpost an sich
+    \item sagen, dass satzzeichen auch features sind und im bow drinkbleiben müssen
+    \item word clouds exemplarisch
+\end{itemize}{}
+
+\subsection{Zielstellung} \label{Kap:Zielst}
+
+\begin{itemize}
+    \item 35 Klassen multiclass, jede beobachtung gehört nur einer klasse an.
+    \item betrachtete evaluationsmaße
+\end{itemize}{}
+
+
+\section{Statistische Methoden}
+
+\subsection{Repräsentationen der Wörter und Sätze (mit preprocessing der tokens}
+\subsubsection{Bag-Of-Words}
+\subsubsection{Term Frequency Inverse Document frequency}
+\subsubsection{Sequentielle Darstellung}
+\subsubsection{Word-To-Vec Überwacht, Summe von Word-To-Vec}
+\subsubsection{Glove Embeddings} \label{Kap:Glove}
+
+
+\subsection{Algorithmen und Verfahren}
+
+\subsubsection{Extreme Gradient Boosting}
+\subsubsection{Random Forest}
+\subsubsection{Neuronales Netz: Multi-Layer-Perception}
+\subsubsection{Neuronales Netz: Convolutional Neural Net}
+\subsubsection{Neuronales Netz: Long-Short-Term-Memory Neural Net}
+
+\begin{itemize}
+    \item grafik über kombination von word embeddings und Algorithmen (was kann mit was verwendet werden)
+\end{itemize}{}
+
+
+\section{Statistische Auswertung}
+
+\subsection{Vorauswahl der Verfahren}
+
+\begin{itemize}
+    \item grafik mit framework zu train/test/validation (10 prozent vorauswahl benchmarken, dann auf 90 prozent traintest/tuning. Die selben Modelle dann auf 10 prozent valdata validieren? 10 prozent war, weil dann in der kleinsten klasse noch mindestens $100$ Beobachtungen sind.
+    \item außerdem welche tokens entfernt wurden.
+    \item tabelle mit allem was ich ausprobiert habe
+\end{itemize}{}
+
+\subsection{Anwendung der Modelle}
+\subsubsection{Performanzmaße}
+
+\begin{itemize}
+    \item accuracy, mse etc
+    \item accuracy by class comparison
+    \item confidence vs accuracy plots
+    \item maß wie sicher ist sich das Verfahren, wenn es die richtige klasse ist?
+\end{itemize}{}
+
+\subsubsection{Explaining der besten Modelle}
+
+\begin{itemize}
+    \item beobachtungen verändern, wörter wegnehmen, hinzufügen, reihenfolge ändern und schauen ob das verfahren stabil /sensitiv zur reihenfolge
+    \item nachbarklassen identifizieren
+    \item convolutional filters holen und ähnlichkeiten zu combinationen aus word vectors erhalten
+\end{itemize}{}
+
+\subsubsection{Anpassung des besten Modell auf den gesamten Datensatz}
+
+\section{Zusammenfassung}
+
+\subsection{Ergebnisse}
+\subsection{Fazit und Ausblick}
+
+\newpage
+
+\printbibliography[
+heading=bibintoc,
+title={Literaturverzeichnis}
+]
+
+\end{document}
+
+

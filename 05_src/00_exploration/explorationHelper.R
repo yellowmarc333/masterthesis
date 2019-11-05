@@ -190,7 +190,7 @@ tableWordInfo <- function(data) {
                                    .SDcols = -c("category")],
                     max = plotData[, sapply(.SD, max), 
                                    .SDcols = -c("category")]),3)
-  # todo: gesamt noch einfuegen
+  
   row.names(res) <- colnames(plotData)[2:3]
   
   print(xtable(res, label = "tab:wordInfo"), include.rownames = TRUE)

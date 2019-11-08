@@ -20,8 +20,8 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   }
   
   tokens <- tokens(texts, what = "word", remove_numbers = FALSE, 
-                   remove_punct = TRUE, remove_symbols = TRUE, 
-                   remove_hyphens = TRUE)
+                   remove_punct = FALSE, remove_symbols = FALSE, 
+                   remove_hyphens = FALSE)
 
   
   # remove stopwords
@@ -68,7 +68,7 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
     write.fst(result, path = paste0(outPath, "BOW-", 
                                     subsetSize, "-", saveSparse,
                                     "-", mergeSD, ".fst"),
-              compress = 0)
+              compress = 0, uniform_encoding = FALSE)
   } else {
     saveRDS(tokens.sparse, file = paste0(outPath, "BOW-", 
                                     subsetSize, "-", saveSparse,
@@ -78,14 +78,14 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
                                                              "BOW-Label-", 
                                     subsetSize, "-", saveSparse,
                                     "-", mergeSD, ".fst"),
-              compress = 0)
+              compress = 0, uniform_encoding = FALSE)
   }
  
   # write indexes in both cases of saveSparse
   write.fst(data.table(indexes), path = paste0(outPath, "BOW-Indexes-", 
                                                subsetSize, "-", saveSparse,
                                                "-", mergeSD, ".fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
   
 }
 
@@ -115,9 +115,9 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   }
 
   # Create iterator over tokens
-  tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
-                              remove_punct = TRUE, remove_symbols = TRUE, 
-                              remove_hyphens = TRUE)
+  tokens <- tokens(texts, what = "word", remove_numbers = FALSE, 
+                   remove_punct = FALSE, remove_symbols = FALSE, 
+                   remove_hyphens = FALSE)
   
   # remove stopwords because are inducing meaning
   tokens <- tokens_remove(tokens, c(stopwords("english")))
@@ -172,7 +172,7 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
     write.fst(result, path = paste0(outPath, "TFIDF-", 
                                     subsetSize, "-", saveSparse,
                                     "-", mergeSD, ".fst"),
-              compress = 0)
+              compress = 0, uniform_encoding = FALSE)
   } else {
     saveRDS(tokens.sparse, file = paste0(outPath, "TFIDF-", 
                                          subsetSize, "-", saveSparse,
@@ -182,14 +182,14 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
               path = paste0(outPath, "TFIDF-Label-", 
                             subsetSize, "-", saveSparse,
                             "-", mergeSD, ".fst"),
-              compress = 0)
+              compress = 0, uniform_encoding = FALSE)
   }
   
   # write indexes in both cases of saveSparse
   write.fst(data.table(indexes), path = paste0(outPath, "TFIDF-Indexes-", 
                                                subsetSize, "-", saveSparse,
                                                "-", mergeSD, ".fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
   
 }
 
@@ -223,7 +223,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   # Create iterator over tokens
   tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
                              remove_punct = FALSE, remove_symbols = FALSE, 
-                             remove_hyphens = TRUE)
+                             remove_hyphens = FALSE)
   
 
   
@@ -272,7 +272,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   write.fst(wordVectors, paste0(outPath, "WordVectors-", 
                                 subsetSize, "-", word2VecSize,
                                 "-", mergeSD, ".fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
   
   
   # testVector <- wordVectors[, trump]
@@ -362,12 +362,12 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   write.fst(data.table(indexes), path = paste0(outPath, "W2V-Indexes-", 
                                   subsetSize, "-", word2VecSize,
                                   "-", mergeSD, ".fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
   
   write.fst(result, path = paste0(outPath, "W2V-", 
                                   subsetSize, "-", word2VecSize,
                                   "-", mergeSD, ".fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
 }
 
 prepareDataEmb = function(inPath = "03_computedData/03_integratedData/", 
@@ -400,7 +400,7 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
   # Create iterator over tokens
   tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
                              remove_punct = FALSE, remove_symbols = FALSE, 
-                             remove_hyphens = TRUE)
+                             remove_hyphens = FALSE)
 
 
   
@@ -461,12 +461,12 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
   write.fst(data.table(indexes), path = paste0(outPath, "Emb-Indexes-", 
                                    subsetSize,
                                    "-", mergeSD, ".fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
   
   write.fst(result, path = paste0(outPath, "Emb-", 
                                   subsetSize,
                                   "-", mergeSD, ".fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
 }
 
 
@@ -500,7 +500,7 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   # Create iterator over tokens
   tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
                              remove_punct = FALSE, remove_symbols = FALSE, 
-                             remove_hyphens = TRUE)
+                             remove_hyphens = FALSE)
   
   tokens <- as.list(tokens)
   
@@ -561,7 +561,7 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   write.fst(wordVectors, paste0(outPath, "Glove-", 
                                 subsetSize, "-", word2VecSize,
                                 "-", mergeSD, ".fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
   rm(wordVectorsRaw, glove)
 
   # testVector <- wordVectors[, dog]
@@ -651,12 +651,12 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   write.fst(data.table(indexes), path = paste0(outPath, "Glove-Indexes-", 
                                                subsetSize, "-", word2VecSize,
                                                "-", mergeSD, ".fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
   
   write.fst(result, path = paste0(outPath, "Glove-", 
                                   subsetSize, "-", word2VecSize,
                                   "-", mergeSD, ".fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
 }
 
 
@@ -702,7 +702,7 @@ pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/",
     # Create iterator over tokens
     tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
                                remove_punct = TRUE, remove_symbols = TRUE, 
-                               remove_hyphens = TRUE)
+                               remove_hyphens = FALSE)
     
     
     

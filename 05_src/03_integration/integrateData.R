@@ -23,12 +23,12 @@ integrateData = function(inPath = "03_computedData/02_cleanedData/",
   trainSubset10pc <- trainSubset100pc[sample.int(.N, size = round(.N * 0.1))]
  
   write.fst(trainSubset100pc, path = paste0(outPath, "trainSubset100pc.fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
   write.fst(trainSubset10pc, path = paste0(outPath, "trainSubset10pc.fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
   write.fst(trainSubset1pc, path = paste0(outPath, "trainSubset1pc.fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
   
   write.fst(valData, path = paste0(outPath, "valData.fst"),
-            compress = 0)
+            compress = 0, uniform_encoding = FALSE)
 }

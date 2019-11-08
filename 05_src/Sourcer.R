@@ -13,8 +13,6 @@ sourceAll = function() {
   require(plyr)
   require(dplyr)
   require(quanteda)
-  require(h2o)
-  require(nnet)
   require(xgboost)
   require(microbenchmark)
   require(ranger)

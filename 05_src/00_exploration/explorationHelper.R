@@ -1,7 +1,7 @@
 plotWordClouds <- function(data, catFilter = "POLITICS", nWords = 50,
                            returnData = FALSE) {
   assertDataTable(data)
-  data <- data[category == (catFilter),]
+  if(catFilter != "none") data <- data[category == (catFilter),]
   N <- nrow(data)
   
   label <- data$category
@@ -127,9 +127,19 @@ barplotSymbolInfo <- function(data){
   }, by = category]
   
   setorderv(relOccByCategory, c("nWordsByCategory"), -1)
-  plotData <- relOccByCategory[, .(category, relExclamation,
-                                  relQuestion, relPoint,
+  plotData <- relOccByCategory[, .(category, relPoint, relExclamation,
+                                   relQuestion,
                                   relQuotes, relNoSymbols)]
+  
+  print("colMeans by category")
+  print(round(colMeans(plotData[, -"category"]), 3))
+  print("maximum categories")
+  maxCat <- sapply(plotData[, -"category"], which.max)
+  print(plotData[maxCat, .(category)])
+  
+  print("minimum categories")
+  minCat <- sapply(plotData[, -"category"], which.min)
+  print(plotData[minCat, .(category)])
   
   plotDataMelt <- melt(plotData, id.vars = "category")
   plotColors = topo.colors(5)

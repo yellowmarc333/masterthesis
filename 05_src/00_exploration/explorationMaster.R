@@ -94,9 +94,11 @@ print(xtable(expTable, label = "tab:styleMerge"), include.rownames = TRUE)
 # nicht unterscheidbar
 
 expTable <- data.table(parents = 
-                         dataRaw[category == toupper("parents"), ][1:4, headline],
+                         dataRaw[category == toupper("parents"), ][1:4, 
+                                                                   headline],
                        parenting = 
-                         dataRaw[category == toupper("parenting"), ][1:4, headline])
+                         dataRaw[category == toupper("parenting"), ][1:4,
+                                                                     headline])
 print(xtable(expTable, label = "tab:parentsMerge"), include.rownames = TRUE)
 
 
@@ -104,14 +106,17 @@ print(xtable(expTable, label = "tab:parentsMerge"), include.rownames = TRUE)
 expTable <- data.table(var1 = 
                          dataRaw[category == toupper("green"), ][1:4, headline],
                        var2 = 
-                         dataRaw[category == toupper("environment"), ][1:4, headline])
+                         dataRaw[category == toupper("environment"), ][1:4,
+                                                                       headline])
 print(xtable(expTable, label = "tab:greenMerge"), include.rownames = TRUE)
 #nicht unterscheidbar
 
 # kapitel 2.3 ####
 inPath = "03_computedData/02_cleanedData/News.fst"
 outPath = "03_computedData/07_deploymentData/"
+inPath2 = "03_computedData/02_cleanedData/News.csv"
 data <- read.fst(inPath, as.data.table = TRUE)
+data <- fread(inPath2)
 
 ggObj <- barplotCategories(data)
 ggsave(filename = paste0(outPath, "barplotCategories.pdf"),
@@ -179,6 +184,12 @@ print(paste("this equals", pointOccurance/N, "percent of news headlines"))
 
 
 # wordclouds
+wordCloud <- plotWordClouds(data, catFilter = "none", 
+                            nWords = 300, returnData = TRUE)
+ggsave(filename = paste0(outPath, "wordCloudAll.pdf"),
+       plot = wordCloud, width = fullWidth, height = fullHeight, 
+       device = "pdf")
+
 wordCloud <- plotWordClouds(data, catFilter = "politics", nWords = 100)
 ggsave(filename = paste0(outPath, "wordCloudPolitics.pdf"),
        plot = wordCloud, width = fullWidth, height = fullHeight, 

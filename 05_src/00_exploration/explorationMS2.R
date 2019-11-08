@@ -1,6 +1,7 @@
 # next steps/ to dos:
 
 # [vor runter schreiben von methoden]
+# can't zu cant ersetzen option?, stopwords erweitern
 # validation data muss genauso preprocessed sein wie train Data
 valData <- read.fst("03_computedData/03_integratedData/valData.fst",
                     as.data.table = TRUE)

@@ -9,6 +9,9 @@ cleanData = function(inPath = "03_computedData/01_importedData/",
   
   headlineTmp <- sapply(as.list(headlineTmp), cleanTerms)
 
+  browser()
+
+  
   # converting column types
   data[, headline := headlineTmp]
   data[, category := tolower(as.character(category))]
@@ -16,6 +19,9 @@ cleanData = function(inPath = "03_computedData/01_importedData/",
   data[, link := as.character(link)]
   data[, short_description := as.character(short_description)]
   data[, date := as.Date(date)]
+  
+  # that this still occurs is an fst problem
+  # any(grepl(headlineTmp, pattern =  "â"))
   
   # merge the categories together
   data[category == "the worldpost", category := "worldpost"]
@@ -35,5 +41,7 @@ cleanData = function(inPath = "03_computedData/01_importedData/",
   data <- data[!emptyPoints]
   
   # compression argument prevents converting error from o to c
-  write.fst(data, path = paste0(outPath, "News.fst"), compress = 0)
+  write.fst(data, path = paste0(outPath, "News.fst"), compress = 0,
+            uniform_encoding = FALSE)
+  fwrite(data, file = paste0(outPath, "News.csv"))
 }

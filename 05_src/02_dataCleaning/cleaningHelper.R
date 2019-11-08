@@ -41,14 +41,17 @@ cleanTerms <- function(object){
 
   # i have checked this before, it should work, some symbols
   # still occuring are other symbols
-  rmPatterns = c("â", "ã", "â", "ê", "#", "˜", "©", "™", "€")
+  rmPatterns = c("â","â", "ã", "â", "ê", "#", "˜", "©", "™", "€")
   for (pattern in rmPatterns) {
     object <- gsub(pattern = pattern, replacement = "",
                    x = object, fixed = TRUE)
   }
 
+
   # this one at last: patterns like it's or that's should already been removed!
   object <- gsub(pattern = "'s", replacement = " its",
+                 x = object, fixed = TRUE )
+  object <- gsub(pattern = "-", replacement = " ",
                  x = object, fixed = TRUE )
  
   

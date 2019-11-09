@@ -1,3 +1,4 @@
+options(encoding= "utf8")
 source("05_src/Sourcer.R")
 sourcedFiles = sourceAll()
 

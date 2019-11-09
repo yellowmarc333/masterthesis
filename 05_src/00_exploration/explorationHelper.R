@@ -25,7 +25,7 @@ plotWordClouds <- function(data, catFilter = "POLITICS", nWords = 50,
   #> Loading required package: ggplot2
   setorderv(vocab, c("term_count", "doc_count"), "-1")
   plotData <- vocab[1:nWords]
-  plotData[, plotSize := term_count/sum(term_count)/2]
+  plotData[, plotSize := term_count/sum(term_count)]
   plotData[, plotColor := sample(brewer.pal(8, "Dark2"), .N,
                                  replace = TRUE)]
   # plotData[, term := c("Marc", "schmieder", "yellow", "smart", "333",

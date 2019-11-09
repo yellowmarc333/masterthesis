@@ -69,7 +69,7 @@ mod_GloveArray_CNN_10 <- predictCNN(dataPath, fileName = fileName,
                            indexName = indexName, epochs = 12) # 0.484
 # Array LSTM 10PC 24-10
 mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath, fileName = fileName, 
-                           indexName = indexName, epochs = 12) # 0.5012
+                           indexName = indexName, epochs = 15) # 0.5119
 
 # EmbLSTM 10pc shortdescription #03-08
 fileName <- "Emb-10pc-TRUE.fst"

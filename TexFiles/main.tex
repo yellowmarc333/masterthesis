@@ -107,10 +107,10 @@ In diesem Kapitel wird der für diese Thesis relevante Datensatz vorgestellt. Na
 
 \subsection{Initialer Datensatz}
 
-Der Datensatz trägt den Titel \textit{News Category Dataset} (\cite{dataset}) und stammt von der Machine Learning Plattform \textit{Kaggle}. Er umfasst $200853$ Beobachtungen, die Informationen in englischer Sprache über Artikel der US-Amerikanischen Onlinezeitung \textit{Huffpost} enthalten. Der Zeitraum, in dem die Veröffentlichungen stattgefunden haben, erstreckt sich vom 28.01.2012 bis zum 25.05.2019, also über eine Zeitspanne von über $7$ Jahren. Die Inhalte der Artikel sind lediglich verlinkt und nicht direkt im Datensatz enthalten. Für jeden Artikel ist die Nachrichtenschlagzeile des Artikels angegeben. Zusätzlich zu dem Link des Artikels ist für jeden Datenpunkt das Veröffentlichungsdatum, der Name des Autors, eine Kurzbeschreibung und die Nachrichtenkategorie gegeben. Letzteres ist die Zielvariable (genauere Erläuterung in Kapitel \ref{Kap:Zielst}), die $41$ verschiedene Ausprägungen annimmt. Die Kurzbeschreibung enthält ähnliche Informationen wie die Nachrichtenüberschrift und ist manchmal vorhanden und manchmal nicht. Für die Beantwortung der Fragestellung (Kapitel \ref{Kap:Zielst}) soll nur die Schlagzeile als abhängige Variable in die Modellierung eingehen. Bevor eine Exploration des Datensatz erfolgt, werden im nächsten Abschnitt vorgenommene Änderungen an den relevanten Spalten Nachrichtenkategorie und Nachrichtenschlagzeile aufgelistet und begründet.
+Der Datensatz trägt den Titel \textit{News Category Dataset} (\cite{dataset}) und stammt von der Machine Learning Plattform \textit{Kaggle}. Er umfasst $200853$ Beobachtungen, die Informationen in englischer Sprache über Artikel der US-Amerikanischen Onlinezeitung \textit{Huffpost} enthalten. Der Zeitraum, in dem die Veröffentlichungen stattgefunden haben, erstreckt sich vom 28.01.2012 bis zum 25.05.2018, also über eine Zeitspanne von über $6$ Jahren. Die Inhalte der Artikel sind lediglich verlinkt und nicht direkt im Datensatz enthalten. Für jeden Artikel ist die Nachrichtenschlagzeile des Artikels angegeben. Zusätzlich zu dem Link des Artikels ist für jeden Datenpunkt das Veröffentlichungsdatum, der Name des Autors, eine Kurzbeschreibung und die Nachrichtenkategorie gegeben. Letzteres ist die Zielvariable (genauere Erläuterung in Kapitel \ref{Kap:Zielst}), die $41$ verschiedene Ausprägungen annimmt. Die Kurzbeschreibung enthält ähnliche Informationen wie die Nachrichtenüberschrift und ist manchmal vorhanden und manchmal nicht. Für die Beantwortung der Fragestellung (Kapitel \ref{Kap:Zielst}) soll nur die Schlagzeile als abhängige Variable in die Modellierung eingehen. Bevor eine Exploration des Datensatz erfolgt, werden im nächsten Abschnitt vorgenommene Änderungen an den relevanten Spalten Nachrichtenkategorie und Nachrichtenschlagzeile aufgelistet und begründet.
 
 
-\subsection{Änderungen am Datensatz}
+\subsection{Änderungen am Datensatz} \label{kap:2_2Aend}
 
 In der US-amerikanischen Sprache spielt die Groß- und Kleinschreibung außer bei der Nutzung von Personalpronomen keine Rolle. Deshalb wurden in den Texten alle Großbuchstaben zu Kleinbuchstaben konvertiert. Auf diese Weise werden in der Modellierung die Wörter \textit{Teacher} und \textit{teacher} nicht unterschiedlich behandelt. \\
 \\
@@ -128,11 +128,11 @@ Beispiel & Kategorie parents  & Kategorie parenting \\
 1 & 40 tweets that sum up life with 4-year-olds & a baby book of disasters \\ 
   2 & these were the trendiest baby names in the late '80s & it is time to find your tribe \\ 
   3 & these quotes from kids are hilarious, adorable and oddly insightful & help huffpost parents win a webby award! \\ 
-  4 & 30  itstar wars'-inspired names parents are giving their babies & why our 'imperfect' moments are perfect to our children \\ 
+  4 & 30  'star wars'-inspired names parents are giving their babies & why our 'imperfect' moments are perfect to our children \\ 
    \hline
 \end{tabular}
 \label{tab:parentsMerge}
-\caption{beispiel todo}
+\caption{4 Beispiele für Schlagzeilen der Kategorien \textit{parents} und \textit{parenting}}
 \end{center}
 \end{table}
 
@@ -191,17 +191,30 @@ Es folgt nun eine Exploration des Textkorpus der Schlagzeilen erst ohne und dann
 \caption{Relativer Anteil Datenpunkte pro Nachrichtenkategorie}
 \end{figure}
 
-Ein Wert von beispielsweise $0.15$ für eine bestimmte Nachrichtensparte ist in der Grafik ist so zu interpretieren, dass in 15 Prozent aller Schlagzeilen dieser Kategorie das entsprechende Symbol mindestens einmal aufgetaucht ist.
+Ein Wert von beispielsweise $0.15$ für eine bestimmte Nachrichtensparte in der Grafik ist so zu interpretieren, dass in 15 Prozent aller Schlagzeilen dieser Kategorie das entsprechende Symbol mindestens einmal aufgetaucht ist. Die im Folgenden beschriebenen Durchschnitte sind Mittelwerte über die Kategorien und nicht über den gesamten Datensatz. Betrachtet sei nun das Vorkommen eines Punktes in einer Schlagzeile. Dieses kann so interpretiert werden, dass eine Schlagzeile 2 Sätze enthält. Dies ist insgesamt mit einem durchschnittlichen relativen Anteil von $0.051$ selten der Fall. In der Sparte \textit{world news} kommen mehrere Sätze am häufigsten vor, in \textit{fifty} am wenigsten. Der Mittelwert für Ausrufezeichen beträgt $0.014$ und die Kategorie \textit{style \& beauty} nimmt das Maximum, die Kategorie \textit{world news} hier das Minimum an. Fragezeichen kommen in durchschnittlich $0.059$ der Schlagzeilen vor, dabei am häufigsten in \textit{divorce} und am seltensten in \textit{crime}. Anführungszeichen sind mit durchschnittlich $0.127$ bei den hier betrachteten Satzzeichen am meisten vertreten. Sie wurden besonders oft in der \textit{entertainment} Sparte genutzt und kamen am seltensten in \textit{education} zum Einsatz. Die Rubrik \say{komplementär} gibt an, zu welchem relativen Anteil keine der betrachteten Symbole vorkommt. Hier ist zu sehen, dass Kategorien wie \textit{entertainment}, \textit{comedy}, \textit{black voices} oder \textit{divorce} häufig Symbole beinhalten, die einen dramatischen Charakter haben. Sparten wie \textit{fifty}, \textit{food \& drink} und \textit{travel} bleiben mit weniger Symbolen sachlicher. Abbildung \ref{abb:barplotSymbols} zeigt insgesamt, dass Symbole für die Nachrichtensparten eine Rolle spielen und für die in Kapitel \ref{Kap:Bow} und \ref{Kap:Tfidf} beschriebenen \textit{bag-of-words} und \textit{term-frequency-inverse-document-frequency} Ansätze nicht entfernt werden sollten.\\
+\\
+Es folgt nun eine Betrachtung der vorkommenden Wörter im Datensatz. Abbildung \ref{abb:WordcloudAll} zeigt eine \textit{Wordcloud}, in der die häufigsten $100$ Wörter aller Kategorien (nach Entfernung von Symbolen und \textit{stopwords}) abgebildet sind.
+
+\begin{figure}[ht]
+    \centering
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/wordCloudAll.pdf} 
+\label{abb:WordcloudAll}
+\caption{\textit{Wordcloud} für die häufigsten 100 Wörter aller Kategorien}
+\end{figure}
+
+Je größer ein Wort, desto häufiger kommt es insgesamt im Textkorpus vor. Es ist erstaunlich, dass \say{trump} sich über den gesamten Textkorpus als häufigstes Wort etabliert hat und der Zeitraum der Daten sich auf über $6$ Jahre erstreckt. Die $3$ häufigsten Wörter danach sind \say{photos}, \say{new} und \say{video}. Es ist zu sehen, dass viele Namen und Begriffe aus der Politik zu sehen sind, was einleuchtend ist, da \textit{politics} zu größte Sparte darstellt. 
+Auffallend ist außerdem, dass viele der auftauchenden Begriffe identisch oder fast identisch zu den Namen einiger Kategorien sind. Beispiele dafür sind \say{travel}, \say{wedding}, \say{style} oder \say{parents}. In Abbildung \ref{abb:WordcloudWellness} ist eine weitere \textit{Wordcloud} der zweitgrößten Sparte \textit{wellness} zu sehen.
 
 
-\begin{itemize}
-\item barplottwoaxes mit laenge der wörter und größe des korpuses
-    \item noch was über die categories erzählen in Bezug auf Zeitrum und huffpost an sich
-    \item sagen, dass satzzeichen auch features sind und im bow drinkbleiben müssen
-    \item word clouds exemplarisch
-\end{itemize}{}
+\begin{figure}[ht]
+    \centering
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/wordCloudWellness.pdf} 
+\label{abb:WordcloudWellness}
+\caption{\textit{Wordcloud} für die häufigsten 100 Wörter der Kategorie \textit{wellness}}
+\end{figure}
 
-\subsection{Zielstellung} \label{Kap:Zielst}
+In dieser Kategorie ist zu beobachten, dass oft über Schlaf, Yoga, Meditation und Sport geschrieben wird. Es werden aber auch Krankheiten wie Krebs (\say{cancer}), Übergewichtigkeit (\say{obesity}) und Diabetis angesprochen, die genauso für die Kategorie \textit{healthy living} stehen könnten. \say{yoga}, \say{breast}, \say{diet} oder \say{pounds} sind auch legitime Schlagwörter für die \say{women} Sparte. Genauso ist zu vermuten, dass die Wörter \say{eat}, \say{foods} und \say{healthy} ebenso in \say{food \& drink} oft vorzufinden sind. Mit dem Blick auf die \textit{Wordclouds} und auch in Anbetracht der Kategorienzusammenlegung in Kapitel \ref{kap:2_2Aend} fällt auf, dass es nicht immer einfach ist, die Kategorien nur über ihre häufigsten Schlagwörter auseinanderzuhalten. Auf die verschiedenen Möglichkeiten, wie die Schlagzeilen in ein numerisches Datenformat überführt werden können, wird in Kapitel \ref{kap:3.1Wordemb} detailiert eingegangen.
+Nachdem nun der Datensatz ausführlich exploriert wurde, folgt im nächsten Unterabschnitt die Zielstellung dieser Thesis.
 
 \begin{itemize}
     \item 35 Klassen multiclass, jede beobachtung gehört nur einer klasse an.
@@ -209,11 +222,23 @@ Ein Wert von beispielsweise $0.15$ für eine bestimmte Nachrichtensparte ist in 
 \end{itemize}{}
 
 
+\subsection{Zielstellung} \label{Kap:Zielst}
+
+Ziel dieser Arbeit soll es sein, verschiedene Algorithmen auf verschiedenen Arten der Repräsentation der Wörter miteinander zu vergleichen. Dabei liegt ein \textit{multilabel}-Klassifikationsproblem mit $35$ Klassen vor, bei der jede Beobachtung genau einer Klasse zugehörig ist. Dabei soll für die Vorhersagen der trainierten Modelle gelten das
+\begin{center}
+    $f(x_i) = p_i = (p(c_1), ...., p(c_{35}))$ \hspace{3cm} mit $\sum_{i = 1}^{35} p(c_i) = 1$,
+\end{center}
+dabei sind $p(c_j)$, $j = 1,...,35$ die modellierten Wahrscheinlichkeiten der Zugehörigkeit der Beobachtung $x_i$ zur Klasse $c_j$.
+
+
+Es werden Modelle trainiert, die in der Vorhersage für jede der 
+
+
 \section{Statistische Methoden}
 
-\subsection{Repräsentationen der Wörter und Sätze (mit preprocessing der tokens}
-\subsubsection{Bag-Of-Words}
-\subsubsection{Term Frequency Inverse Document frequency}
+\subsection{Repräsentationen der Wörter und Sätze (mit preprocessing der tokens} \label{kap:3.1Wordemb}
+\subsubsection{Bag-Of-Words} \label{Kap:Bow}
+\subsubsection{Term Frequency Inverse Document frequency} \label{Kap:Tfidf}
 \subsubsection{Sequentielle Darstellung}
 \subsubsection{Word-To-Vec Überwacht, Summe von Word-To-Vec}
 \subsubsection{Glove Embeddings} \label{Kap:Glove}

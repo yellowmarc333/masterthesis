@@ -2,16 +2,13 @@ cleanData = function(inPath = "03_computedData/01_importedData/",
                      outPath = "03_computedData/02_cleanedData/"){
 
   data = fread(paste0(inPath, "News.csv"))
-  
-  headlineTmp <- as.character(data$headline)
+
+  headlineTmp <- data$headline
   # lower
   headlineTmp <- tolower(headlineTmp)
   
   headlineTmp <- sapply(as.list(headlineTmp), cleanTerms)
 
-  browser()
-
-  
   # converting column types
   data[, headline := headlineTmp]
   data[, category := tolower(as.character(category))]

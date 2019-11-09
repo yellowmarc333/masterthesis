@@ -112,11 +112,12 @@ print(xtable(expTable, label = "tab:greenMerge"), include.rownames = TRUE)
 #nicht unterscheidbar
 
 # kapitel 2.3 ####
-inPath = "03_computedData/02_cleanedData/News.fst"
 outPath = "03_computedData/07_deploymentData/"
-inPath2 = "03_computedData/02_cleanedData/News.csv"
-data <- read.fst(inPath, as.data.table = TRUE)
-data <- fread(inPath2)
+inPath = "03_computedData/02_cleanedData/News.csv"
+inPath2 = "03_computedData/02_cleanedData/News.fst"
+
+data <- read.fst(inPath2, as.data.table = TRUE)
+
 
 ggObj <- barplotCategories(data)
 ggsave(filename = paste0(outPath, "barplotCategories.pdf"),
@@ -185,7 +186,7 @@ print(paste("this equals", pointOccurance/N, "percent of news headlines"))
 
 # wordclouds
 wordCloud <- plotWordClouds(data, catFilter = "none", 
-                            nWords = 300, returnData = TRUE)
+                            nWords = 100)
 ggsave(filename = paste0(outPath, "wordCloudAll.pdf"),
        plot = wordCloud, width = fullWidth, height = fullHeight, 
        device = "pdf")

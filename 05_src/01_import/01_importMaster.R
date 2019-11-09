@@ -18,6 +18,7 @@ importData = function(inPath = "02_initialData/",
   data <- as.data.table(data)
 
   # #replace some symbols that are not utf-8 encoding and lead to encoding errors
+  data[, headline := as.character(headline)]
   data[, headline := gsub(pattern = "’", replacement = "'",
                           x = headline, fixed = TRUE )]
   data[, headline := gsub(pattern = "‘", replacement = "'",
@@ -52,9 +53,11 @@ importData = function(inPath = "02_initialData/",
                           x = headline, fixed = TRUE )]
   data[, headline := gsub(pattern = "Â", replacement = "A",
                           x = headline, fixed = TRUE )]
-  
-  
-  #fwrite(x = data, file = paste0(outPath, "News.csv"))
+ 
+  # mixed encodings cannont be set by Encoding()
+  #
   # compression argument prevents converting error from o to c
-  write.fst(data, path = paste0(outPath, "News.fst"), compress = 0)
+  fwrite(data, file = paste0(outPath, "News.csv"))
+  write.fst(data, path = paste0(outPath, "News.fst"), compress = 0,
+           uniform_encoding = FALSE)
 }

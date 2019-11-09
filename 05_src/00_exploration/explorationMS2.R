@@ -1,5 +1,6 @@
 # next steps/ to dos:
 
+
 # [vor runter schreiben von methoden]
 # can't zu cant ersetzen option?, stopwords erweitern
 # validation data muss genauso preprocessed sein wie train Data
@@ -37,6 +38,7 @@ valData <- read.fst("03_computedData/03_integratedData/valData.fst",
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xx neuen encoding Fehler beheben (uniform_enc = FALSE setzen)
 # xx prof gliederung schicken
 # xxlogloss überall reinnehmen + f1 score, + recall/precision (evaluation function schreiben)
 # xxmethoden: multinomial naive bayes checken

@@ -52,7 +52,7 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   trainSize = 0.8
   set.seed(100)
   indexes <- sample.int(newN, floor(newN * trainSize))
-  
+
   tokens.sparse <- text2vec::create_dtm(
     itoken, vectorizer, skip_grams_window = 2L)
   # use window of 5 for context words
@@ -141,12 +141,13 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   # Use our filtered vocabulary
   vectorizer <- text2vec::vocab_vectorizer(vocab)
   dtm = text2vec::create_dtm(itoken, vectorizer)
+  dfm = as.dfm(dtm)
 
-  # define tfidf model
-  tfidf = TfIdf$new()
-  tfidf_fit = tfidf$fit_transform(x = dtm, tfidf)
+  tfidf = dfm_tfidf(x = dfm, scheme_tf = "propmax", 
+                    scheme_df = "inverse", smoothing = 1,
+                    k = 1)
 
-  tokens.sparse <- tfidf_fit
+  tokens.sparse <- tfidf
  
   labelIndexes <- as.integer(gsub(names(tokens), 
                                   pattern = "text", 
@@ -172,8 +173,9 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
     write.fst(result, path = paste0(outPath, "TFIDF-", 
                                     subsetSize, "-", saveSparse,
                                     "-", mergeSD, ".fst"),
-              compress = 0, uniform_encoding = FALSE)
+              compress = 0)
   } else {
+
     saveRDS(tokens.sparse, file = paste0(outPath, "TFIDF-", 
                                          subsetSize, "-", saveSparse,
                                          "-", mergeSD, ".rds"),

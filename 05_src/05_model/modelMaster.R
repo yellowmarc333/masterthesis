@@ -27,9 +27,12 @@ fileName <- "TFIDF-10pc-TRUE-FALSE.rds"
 indexName <- "TFIDF-Indexes-10pc-TRUE-FALSE.fst"
 labelName <- "TFIDF-Label-10pc-TRUE-FALSE.fst"
 mod_TFIDF_XG_10 <- predictXG(dataPath, fileName,
-                        indexName, labelName, sparse = TRUE) # 0.404
+                        indexName, labelName, sparse = TRUE,
+                        nrounds = 30) # 0.404
+# mit neuen weights: 0.423
 mod_TFIDF_RF_10 <- predictRF(dataPath, fileName, 
-                        indexName, labelName, sparse = TRUE) # 
+                        indexName, labelName, sparse = TRUE) # 0.4744
+# mit neuen weights: 0.44358
 
 fileName <- "TFIDF-10pc-FALSE-FALSE.fst"
 indexName <- "TFIDF-Indexes-10pc-FALSE-FALSE.fst"
@@ -42,9 +45,9 @@ fileName <- "BOW-10pc-TRUE-FALSE.rds"
 indexName <- "BOW-Indexes-10pc-TRUE-FALSE.fst"
 labelName <- "BOW-Label-10pc-TRUE-FALSE.fst"
 mod_BOW_XG_10 <- predictXG(dataPath, fileName, indexName, 
-                       labelName, sparse = TRUE, nrounds = 2) # 0.413
+                       labelName, sparse = TRUE, nrounds = 30) # 0.4344
 mod_BOW_RF_10 <- predictRF(dataPath, fileName, indexName, 
-                       labelName, sparse = TRUE, num.trees = 50) # 0.426
+                       labelName, sparse = TRUE, num.trees = 500) # 0.455
 fileName <- "BOW-10pc-FALSE-FALSE.fst"
 indexName <- "BOW-Indexes-10pc-FALSE-FALSE.fst"
 mod_BOW_MLP_10 <- predictMLP(dataPath, fileName, indexName, 
@@ -71,11 +74,7 @@ mod_GloveArray_CNN_10 <- predictCNN(dataPath, fileName = fileName,
 mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath, fileName = fileName, 
                            indexName = indexName, epochs = 15) # 0.5119
 
-# EmbLSTM 10pc shortdescription #03-08
-fileName <- "Emb-10pc-TRUE.fst"
-indexName <- "Emb-Indexes-10pc-TRUE.fst"
-mod_Emb_LSTM_10SD <- predictLSTM(dataPath, fileName, 
-                               indexName) # 0.4124
+
 
 #----------------------- 100 percent models --------------------------------####
 

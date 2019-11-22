@@ -498,7 +498,7 @@ predictRF <- function(dataPath, fileName, indexName, labelName = NULL,
   assertString(fileName)
   assertString(indexName)
 
-
+  
   # loading indexis for train/test split
   indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
   
@@ -575,6 +575,10 @@ predictRF <- function(dataPath, fileName, indexName, labelName = NULL,
   
   if(sparse){
     data <- readRDS(paste0(dataPath, fileName))
+    # quickfixes for new tfidf method
+    data[is.na(data)] <- 0
+    data <- as(data, "dgCMatrix")
+    
     label <- read.fst(paste0(dataPath, labelName), as.data.table = TRUE)
     trainData <- data[indexes,]
     trainLabelRaw <- label[indexes]$labelRaw
@@ -589,8 +593,7 @@ predictRF <- function(dataPath, fileName, indexName, labelName = NULL,
     
     trainSparse <- cbind(trainLabel, trainData)
     testSparse <- cbind(testLabel, testData)
-    
-    
+
     print("fitting model with sparse")
     model = ranger::ranger(dependent.variable.name = "trainLabel", 
                            data = trainSparse,

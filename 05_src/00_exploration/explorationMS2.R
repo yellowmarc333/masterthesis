@@ -2,6 +2,7 @@
 
 
 # [vor runter schreiben von methoden]
+# accuracyByClass fixen tfidf bzw andere
 # can't zu cant ersetzen option?, stopwords erweitern
 # validation data muss genauso preprocessed sein wie train Data
 valData <- read.fst("03_computedData/03_integratedData/valData.fst",

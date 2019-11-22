@@ -1,4 +1,3 @@
-options(encoding= "utf8")
 source("05_src/Sourcer.R")
 sourcedFiles = sourceAll()
 
@@ -33,11 +32,11 @@ integrateData(inPath = "03_computedData/02_cleanedData/",
 # 04 DATA PREPARATION
 prepareDataBOW(inPath = "03_computedData/03_integratedData/",
             outPath = "03_computedData/04_preparedData/", 
-            subsetSize = "10pc", saveSparse =  FALSE,  mergeSD = FALSE)
+            subsetSize = "10pc", saveSparse =  TRUE,  mergeSD = FALSE)
 
 prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
                outPath = "03_computedData/04_preparedData/", 
-               subsetSize = "10pc", saveSparse = FALSE)
+               subsetSize = "10pc", saveSparse = TRUE)
 
 prepareDataGlove(inPath = "03_computedData/03_integratedData/",
                  outPath = "03_computedData/04_preparedData/", 

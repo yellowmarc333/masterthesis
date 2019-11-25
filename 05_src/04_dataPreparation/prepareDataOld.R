@@ -1,23 +1,19 @@
 prepareDataBOW = function(inPath = "03_computedData/03_integratedData/", 
-                          outPath = "03_computedData/04_preparedData/",
-                          subsetSize = c("1pc", "10pc", "100pc"),
-                          saveSparse = FALSE, mergeSD = FALSE){
+                       outPath = "03_computedData/04_preparedData/",
+                       subsetSize = c("1pc", "10pc", "100pc"),
+                       saveSparse = FALSE, mergeSD = FALSE){
   assertString(inPath)
   assertString(outPath)
   subsetSize <- match.arg(subsetSize)
   assertFlag(mergeSD)
   
-  # readin files
   fileName <- paste0("trainSubset", subsetSize, ".fst")
   subsetData <- read.fst(path = paste0(inPath, fileName), 
                          as.data.table = TRUE)
-  indexes <- readRDS(paste0(inPath, "indexes",
-                            subsetSize, ".rds"))
   
   labelRaw <- as.factor(subsetData$category)
-  
+  subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
   if (mergeSD) {
-    subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
     texts <- subsetData$HeadLShortD
   } else {
     texts <- subsetData$headline
@@ -26,36 +22,41 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   tokens <- tokens(texts, what = "word", remove_numbers = FALSE, 
                    remove_punct = FALSE, remove_symbols = FALSE, 
                    remove_hyphens = FALSE)
+
   
   # remove stopwords
   tokens <- tokens_remove(tokens, c(stopwords("english")))
   
+  # wordstemming
+  #tokens <- tokens_wordstem(tokens, language = "english")
+  
   # reduce to tokens > 0
   filter <- lengths(tokens) > 0
-  
+
   print(paste("removed tokes with 0 words. In total", sum(!filter)))
   
   # for returning to model
   deleteIndexes <- which(!filter)
-  
+
   # Create vocabulary. Terms will be unigrams (simple words).
   itoken <- text2vec::itoken(as.list(tokens), progressbar = FALSE)
   vocab <- text2vec::create_vocabulary(itoken)
   vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 2L)
   vectorizer <- text2vec::vocab_vectorizer(vocab)
-  
+
   labelIndexes <- as.integer(gsub(names(tokens), 
                                   pattern = "text", 
                                   replacement = ""))
-  
-  
   # dont need that probably
-  labelRed <- labelRaw
+  labelRed <- labelRaw[labelIndexes]
+  newN <- length(labelRed)
+
+  indexes <- readRDS(paste0(inPath, "indexes",
+                            subsetSize, ".rds"))
   
-  # create dtm
   tokens.sparse <- text2vec::create_dtm(
     itoken, vectorizer, skip_grams_window = 2L)
-  
+  # use window of 5 for context words
   if(!saveSparse) {
     tokens.dfm <- as.data.frame(as.matrix(tokens.sparse))
     tokens.dt <- as.data.table(tokens.dfm)
@@ -64,40 +65,23 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
     
     result <- data.table(labelRaw = as.factor(labelRed), tokens.dt)
     rm(tokens.dt)
-    result[, isFiltered := filter]
-    result[ , isTrainSet := .I %in% indexes]
     
-    # todo hier ueberlegen ob das auch guenstiger geloest werden kann
-    resultTrain <- result[isFiltered & isTrainSet][, c("isFiltered", 
-                                                       "isTrainSet") := NULL]
-    resultTest <- result[isFiltered & !isTrainSet][, c("isFiltered", 
-                                                       "isTrainSet") := NULL]
-    assert(ncol(resultTrain) == ncol(resultTest))
-    
-    print(paste("check that train and test is rightly filtered:",
-                - nrow(resultTrain) - nrow(resultTest) + nrow(subsetData)))
-
-    saveRDS(list(resultTrain = resultTrain,
-                 resultTest = resultTest,
-                 indexes = indexes,
-                 filter = filter), 
-            file = paste0(outPath, "BOW-", 
-                          subsetSize, "-", saveSparse,
-                          "-", mergeSD, ".rds"),
-            compress = FALSE)
-    
+    write.fst(result, path = paste0(outPath, "BOW-", 
+                                    subsetSize, "-", saveSparse,
+                                    "-", mergeSD, ".fst"),
+              compress = 0)
   } else {
     saveRDS(tokens.sparse, file = paste0(outPath, "BOW-", 
-                                         subsetSize, "-", saveSparse,
-                                         "-", mergeSD, ".rds"),
-            compress = FALSE)
+                                    subsetSize, "-", saveSparse,
+                                    "-", mergeSD, ".rds"),
+              compress = FALSE)
     write.fst(data.table(labelRaw = as.factor(labelRed)), path = paste0(outPath, 
-                                                                        "BOW-Label-", 
-                                                                        subsetSize, "-", saveSparse,
-                                                                        "-", mergeSD, ".fst"),
+                                                             "BOW-Label-", 
+                                    subsetSize, "-", saveSparse,
+                                    "-", mergeSD, ".fst"),
               compress = 0)
   }
-  
+ 
   # write indexes in both cases of saveSparse
   write.fst(data.table(indexes), path = paste0(outPath, "BOW-Indexes-", 
                                                subsetSize, "-", saveSparse,
@@ -110,9 +94,9 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
 
 
 prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/", 
-                            outPath = "03_computedData/04_preparedData/",
-                            subsetSize = c("1pc", "10pc", "100pc"),
-                            saveSparse = FALSE, mergeSD = FALSE){
+                          outPath = "03_computedData/04_preparedData/",
+                          subsetSize = c("1pc", "10pc", "100pc"),
+                          saveSparse = FALSE, mergeSD = FALSE){
   assertString(inPath)
   assertString(outPath)
   subsetSize <- match.arg(subsetSize)
@@ -120,8 +104,8 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   
   fileName <- paste0("trainSubset", subsetSize, ".fst")
   subsetData <- read.fst(path = paste0(inPath, fileName), 
-                         as.data.table = TRUE)
-  
+                   as.data.table = TRUE)
+
   label <- subsetData$category
   
   subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
@@ -130,7 +114,7 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   } else {
     texts <- subsetData$headline
   }
-  
+
   # Create iterator over tokens
   tokens <- tokens(texts, what = "word", remove_numbers = FALSE, 
                    remove_punct = FALSE, remove_symbols = FALSE, 
@@ -159,13 +143,13 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   vectorizer <- text2vec::vocab_vectorizer(vocab)
   dtm = text2vec::create_dtm(itoken, vectorizer)
   dfm = as.dfm(dtm)
-  
+
   tfidf = dfm_tfidf(x = dfm, scheme_tf = "augmented", 
                     scheme_df = "inverse", smoothing = 1,
                     k = 1)
-  
+
   tokens.sparse <- tfidf
-  
+ 
   labelIndexes <- as.integer(gsub(names(tokens), 
                                   pattern = "text", 
                                   replacement = ""))
@@ -191,7 +175,7 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
                                     "-", mergeSD, ".fst"),
               compress = 0)
   } else {
-    
+
     saveRDS(tokens.sparse, file = paste0(outPath, "TFIDF-", 
                                          subsetSize, "-", saveSparse,
                                          "-", mergeSD, ".rds"),
@@ -243,7 +227,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
                              remove_punct = FALSE, remove_symbols = FALSE, 
                              remove_hyphens = FALSE)
   
-  
+
   
   # dont remove stopwords because are inducing meaning
   #tokens <- tokens_remove(tokens, c(stopwords("english")))
@@ -285,7 +269,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   
   wordVectors <- as.data.table(glove$components)
   
-  
+
   # write just the wordVectors
   write.fst(wordVectors, paste0(outPath, "WordVectors-", 
                                 subsetSize, "-", word2VecSize,
@@ -316,7 +300,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
     if((i %% 1000) == 0) {
       print(paste("filling", i, "/", N))
     }
-    
+
     tmpWords <- tokens[[i]]
     existWords <- tmpWords[tmpWords %in% wordVectorsNames]
     
@@ -376,8 +360,8 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
                             subsetSize, ".rds"))
   
   write.fst(data.table(indexes), path = paste0(outPath, "W2V-Indexes-", 
-                                               subsetSize, "-", word2VecSize,
-                                               "-", mergeSD, ".fst"),
+                                  subsetSize, "-", word2VecSize,
+                                  "-", mergeSD, ".fst"),
             compress = 0)
   
   write.fst(result, path = paste0(outPath, "W2V-", 
@@ -390,17 +374,17 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
                           outPath = "03_computedData/04_preparedData/",
                           subsetSize = c("1pc", "10pc", "100pc"),
                           mergeSD = FALSE){
-  
+
   assertString(inPath)
   assertString(outPath)
   subsetSize <- match.arg(subsetSize)
   assertFlag(mergeSD)
-  
+
   fileName <- paste0("trainSubset", subsetSize, ".fst")
   subsetData <- read.fst(path = paste0(inPath, fileName), 
                          as.data.table = TRUE)
   
-  
+
   
   N <- nrow(subsetData)
   
@@ -412,13 +396,13 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
   } else {
     texts <- subsetData$headline
   }
-  
+
   # Create iterator over tokens
   tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
                              remove_punct = FALSE, remove_symbols = FALSE, 
                              remove_hyphens = FALSE)
-  
-  
+
+
   
   # dont remove stopwords because are inducing meaning
   # tokens <- quanteda::tokens_remove(tokens, c(stopwords("english")))
@@ -456,7 +440,7 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
   myKerasTokenizer = keras::text_tokenizer() %>%
     keras::fit_text_tokenizer(x = tokens_text)
   sequences <- keras::texts_to_sequences(tokenizer = myKerasTokenizer, 
-                                         texts = tokens_text)
+                                    texts = tokens_text)
   
   padded <- sequences %>%
     pad_sequences(maxlen = maxWords)
@@ -464,19 +448,19 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
   labelIndexes <- as.integer(gsub(names(tokens_text), 
                                   pattern = "text", 
                                   replacement = ""))
-  
+
   labelRed <- label[labelIndexes]
-  
+
   result <- data.table(labelRaw = as.factor(labelRed), padded)
   
-  
+
   indexes <- readRDS(paste0("03_computedData/03_integratedData/indexes",
                             subsetSize, ".rds"))
   
   
   write.fst(data.table(indexes), path = paste0(outPath, "Emb-Indexes-", 
-                                               subsetSize,
-                                               "-", mergeSD, ".fst"),
+                                   subsetSize,
+                                   "-", mergeSD, ".fst"),
             compress = 0)
   
   write.fst(result, path = paste0(outPath, "Emb-", 
@@ -488,10 +472,10 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
 
 
 prepareDataGlove = function(inPath = "03_computedData/03_integratedData/", 
-                            outPath = "03_computedData/04_preparedData/",
-                            subsetSize = c("1pc", "10pc", "100pc"),
-                            word2VecSize = 50,
-                            mergeSD = FALSE){
+                          outPath = "03_computedData/04_preparedData/",
+                          subsetSize = c("1pc", "10pc", "100pc"),
+                          word2VecSize = 50,
+                          mergeSD = FALSE){
   assertString(inPath)
   assertString(outPath)
   subsetSize <- match.arg(subsetSize)
@@ -501,7 +485,7 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   fileName <- paste0("trainSubset", subsetSize, ".fst")
   subsetData <- read.fst(path = paste0(inPath, fileName), 
                          as.data.table = TRUE)
-  
+
   N <- nrow(subsetData)
   
   label <- subsetData$category
@@ -572,14 +556,14 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   wordVectorsRaw[, V1 := NULL]
   wordVectors <- as.data.table(t(wordVectorsRaw))
   colnames(wordVectors) <- wordVectorsNames
-  
+
   # write just the wordVectors
   write.fst(wordVectors, paste0(outPath, "Glove-", 
                                 subsetSize, "-", word2VecSize,
                                 "-", mergeSD, ".fst"),
             compress = 0)
   rm(wordVectorsRaw, glove)
-  
+
   # testVector <- wordVectors[, dog]
   # 
   # cos_sim = sapply(data.table(wordVectors), function(x) {
@@ -590,7 +574,7 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   #                norm = "l2")
   # head(sort(cos_sim[,1], decreasing = TRUE), 20)
   N_tokens <- length(tokens)
-  
+
   channels <- nrow(wordVectors)
   
   print("creating wordVectorArray")

@@ -34,7 +34,7 @@ predictMLP <- function(dataPath, fileName, indexName,
   # setting up trainLabel
   assertFactor(trainLabelRaw)
   trainLabelNumeric <- as.numeric(trainLabelRaw) - 1
-  names(trainLabelNumeric) <- trainLabelRaw
+  names(trainLabelNumeric) <-trainLabelRaw
   trainLabel <- to_categorical(trainLabelNumeric)
   
   # setting up testLabel
@@ -43,9 +43,8 @@ predictMLP <- function(dataPath, fileName, indexName,
   names(testLabelNumeric) <- testLabelRaw
   testLabel <- to_categorical(testLabelNumeric)
   
-  nVocab = max(rbind(trainData,testData)) + 1
-  
-  
+ 
+  # nVocab = max(rbind(trainData,testData)) + 1
   model <- keras_model_sequential() %>% 
     
     # Add a vanilla hidden layer:

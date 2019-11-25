@@ -39,6 +39,7 @@ valData <- read.fst("03_computedData/03_integratedData/valData.fst",
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+#xx seed problem lösen
 # xx neuen encoding Fehler beheben (uniform_enc = FALSE setzen)
 # xx prof gliederung schicken
 # xxlogloss überall reinnehmen + f1 score, + recall/precision (evaluation function schreiben)

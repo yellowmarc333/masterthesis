@@ -20,7 +20,7 @@ indexName <- "Emb-Indexes-10pc-FALSE.fst"
 mod_Emb_RF_10 <- predictRF(dataPath, fileName, 
                              indexName) #0.221
 mod_Emb_XG_10 <- predictXG(dataPath, fileName, 
-                           indexName) #0.218
+                           indexName, nrounds = 30) #0.218
 
 # TFIDF 10pc #15-10
 fileName <- "TFIDF-10pc-TRUE-FALSE.rds"
@@ -28,17 +28,19 @@ indexName <- "TFIDF-Indexes-10pc-TRUE-FALSE.fst"
 labelName <- "TFIDF-Label-10pc-TRUE-FALSE.fst"
 mod_TFIDF_XG_10 <- predictXG(dataPath, fileName,
                         indexName, labelName, sparse = TRUE,
-                        nrounds = 30) # 0.404
+                        nrounds = 30) 
 # mit neuen weights: 0.423
 mod_TFIDF_RF_10 <- predictRF(dataPath, fileName, 
-                        indexName, labelName, sparse = TRUE) # 0.4744
+                        indexName, labelName, sparse = TRUE)
 # mit neuen weights: 0.44358
 
 fileName <- "TFIDF-10pc-FALSE-FALSE.fst"
 indexName <- "TFIDF-Indexes-10pc-FALSE-FALSE.fst"
 mod_TFIDF_MLP_10 <- predictMLP(dataPath, fileName, 
-                              indexName, epochs = 15) # 0.4949
-mod_TFIDF_LogReg_10 <- predictLogReg(dataPath, fileName, indexName) # 0.502
+                              indexName, epochs = 10) # 0.5077
+# mit neuen weights:
+mod_TFIDF_LogReg_10 <- predictLogReg(dataPath, fileName, indexName) # 0.495
+# mit neuen weights:
 
 # BOW 10pc # 15-10
 fileName <- "BOW-10pc-TRUE-FALSE.rds"

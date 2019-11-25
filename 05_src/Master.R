@@ -27,16 +27,25 @@ cleanData(inPath = "03_computedData/01_importedData/",
 # # 03 INTEGRATION
 integrateData(inPath = "03_computedData/02_cleanedData/", 
              outPath = "03_computedData/03_integratedData/",
-             trainSize = 0.6)
+             trainSize = 0.8)
 
 # 04 DATA PREPARATION
+# this case works
 prepareDataBOW(inPath = "03_computedData/03_integratedData/",
-            outPath = "03_computedData/04_preparedData/", 
-            subsetSize = "10pc", saveSparse =  TRUE,  mergeSD = FALSE)
+               outPath = "03_computedData/04_preparedData/", 
+               subsetSize = "10pc", saveSparse =  FALSE,  mergeSD = FALSE)
+
+prepareDataBOW(inPath = "03_computedData/03_integratedData/",
+               outPath = "03_computedData/04_preparedData/", 
+               subsetSize = "10pc", saveSparse =  TRUE,  mergeSD = FALSE)
 
 prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
-               outPath = "03_computedData/04_preparedData/", 
-               subsetSize = "10pc", saveSparse = TRUE)
+                 outPath = "03_computedData/04_preparedData/", 
+                 subsetSize = "10pc", saveSparse = FALSE)
+
+prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
+                 outPath = "03_computedData/04_preparedData/", 
+                 subsetSize = "10pc", saveSparse = TRUE)
 
 prepareDataGlove(inPath = "03_computedData/03_integratedData/",
                  outPath = "03_computedData/04_preparedData/", 
@@ -47,8 +56,8 @@ prepareDataW2V(inPath = "03_computedData/03_integratedData/",
                subsetSize = "10pc", word2VecSize = 50)
 
 prepareDataEmb(inPath = "03_computedData/03_integratedData/",
-                 outPath = "03_computedData/04_preparedData/", 
-                 subsetSize = "10pc", mergeSD = FALSE)
+               outPath = "03_computedData/04_preparedData/", 
+               subsetSize = "10pc", mergeSD = FALSE)
 
 
 

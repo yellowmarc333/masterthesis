@@ -15,19 +15,23 @@ integrateData = function(inPath = "03_computedData/02_cleanedData/",
   
   # sample subsets and train indexes for 1, 10, 100 percent
   trainSubset100pc <- data[-valIndexes]
-
   set.seed(100)
-  trainSubset1pc <- trainSubset100pc[sample.int(.N, size = round(.N * 0.01))]
+  indexes100pc <- sample.int(nrow(trainSubset100pc), 
+                            floor(nrow(trainSubset100pc) * trainSize))
 
   set.seed(100)
   trainSubset10pc <- trainSubset100pc[sample.int(.N, size = round(.N * 0.1))]
+  set.seed(100)
+  indexes10pc <- sample.int(nrow(trainSubset10pc), 
+                        floor(nrow(trainSubset10pc) * trainSize))
  
   write.fst(trainSubset100pc, path = paste0(outPath, "trainSubset100pc.fst"),
             compress = 0, uniform_encoding = FALSE)
+  saveRDS(indexes100pc, file = paste0(outPath, "indexes100pc.rds"))
   write.fst(trainSubset10pc, path = paste0(outPath, "trainSubset10pc.fst"),
             compress = 0, uniform_encoding = FALSE)
-  write.fst(trainSubset1pc, path = paste0(outPath, "trainSubset1pc.fst"),
-            compress = 0, uniform_encoding = FALSE)
+  saveRDS(indexes10pc, file = paste0(outPath, "indexes10pc.rds"))
+
   
   write.fst(valData, path = paste0(outPath, "valData.fst"),
             compress = 0, uniform_encoding = FALSE)

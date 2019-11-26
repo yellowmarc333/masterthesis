@@ -32,11 +32,10 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   
   # reduce to tokens > 0
   filter <- lengths(tokens) > 0
+  # IndexDT for knowing which observations belong in train and test set
+  IndexDT <- data.table(isFiltered = filter)[ , isTrainSet := .I %in% indexes]
   
   print(paste("removed tokes with 0 words. In total", sum(!filter)))
-  
-  # for returning to model
-  deleteIndexes <- which(!filter)
   
   # Create vocabulary. Terms will be unigrams (simple words).
   itoken <- text2vec::itoken(as.list(tokens), progressbar = FALSE)
@@ -44,13 +43,7 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
   vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 2L)
   vectorizer <- text2vec::vocab_vectorizer(vocab)
   
-  labelIndexes <- as.integer(gsub(names(tokens), 
-                                  pattern = "text", 
-                                  replacement = ""))
-  
-  
-  # dont need that probably
-  labelRed <- labelRaw
+  labelRed <- as.factor(labelRaw)
   
   # create dtm
   tokens.sparse <- text2vec::create_dtm(
@@ -62,48 +55,55 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
     rm(tokens.sparse)
     rm(tokens.dfm)
     
-    result <- data.table(labelRaw = as.factor(labelRed), tokens.dt)
+    result <- data.table(tokens.dt)
     rm(tokens.dt)
-    result[, isFiltered := filter]
-    result[ , isTrainSet := .I %in% indexes]
-    
-    # todo hier ueberlegen ob das auch guenstiger geloest werden kann
-    resultTrain <- result[isFiltered & isTrainSet][, c("isFiltered", 
-                                                       "isTrainSet") := NULL]
-    resultTest <- result[isFiltered & !isTrainSet][, c("isFiltered", 
-                                                       "isTrainSet") := NULL]
+       
+    resultTrain <- result[IndexDT$isFiltered & IndexDT$isTrainSet, ]
+    resultTest <- result[IndexDT$isFiltered & !IndexDT$isTrainSet, ]
     assert(ncol(resultTrain) == ncol(resultTest))
     
-    print(paste("check that train and test is rightly filtered:",
-                - nrow(resultTrain) - nrow(resultTest) + nrow(subsetData)))
+    labelTrain <- labelRed[IndexDT$isFiltered & IndexDT$isTrainSet]
+    labelTest <- labelRed[IndexDT$isFiltered & !IndexDT$isTrainSet]
+    
+    print(paste("check that train and test is rightly filtered: there are",
+                - nrow(resultTrain) - nrow(resultTest) + nrow(subsetData),
+                "deleted data points"))
 
     saveRDS(list(resultTrain = resultTrain,
                  resultTest = resultTest,
-                 indexes = indexes,
-                 filter = filter), 
+                 labelTrain = labelTrain,
+                 labelTest = labelTest,
+                 IndexDT = IndexDT), 
             file = paste0(outPath, "BOW-", 
                           subsetSize, "-", saveSparse,
                           "-", mergeSD, ".rds"),
             compress = FALSE)
     
   } else {
-    saveRDS(tokens.sparse, file = paste0(outPath, "BOW-", 
-                                         subsetSize, "-", saveSparse,
-                                         "-", mergeSD, ".rds"),
+    result <- tokens.sparse
+    rm(tokens.sparse)
+    
+    resultTrain <- result[IndexDT$isFiltered & IndexDT$isTrainSet, ]
+    resultTest <- result[IndexDT$isFiltered & !IndexDT$isTrainSet, ]
+    assert(ncol(resultTrain) == ncol(resultTest))
+    
+    labelTrain <- labelRed[IndexDT$isFiltered & IndexDT$isTrainSet]
+    labelTest <- labelRed[IndexDT$isFiltered & !IndexDT$isTrainSet]
+    
+    print(paste("check that train and test is rightly filtered:",
+                - nrow(resultTrain) - nrow(resultTest) + nrow(subsetData)))
+    
+    saveRDS(list(resultTrain = resultTrain,
+                 resultTest = resultTest,
+                 labelTrain = labelTrain,
+                 labelTest = labelTest,
+                 IndexDT = IndexDT), 
+            file = paste0(outPath, "BOW-", 
+                          subsetSize, "-", saveSparse,
+                          "-", mergeSD, ".rds"),
             compress = FALSE)
-    write.fst(data.table(labelRaw = as.factor(labelRed)), path = paste0(outPath, 
-                                                                        "BOW-Label-", 
-                                                                        subsetSize, "-", saveSparse,
-                                                                        "-", mergeSD, ".fst"),
-              compress = 0)
   }
-  
-  # write indexes in both cases of saveSparse
-  write.fst(data.table(indexes), path = paste0(outPath, "BOW-Indexes-", 
-                                               subsetSize, "-", saveSparse,
-                                               "-", mergeSD, ".fst"),
-            compress = 0)
-  
+
 }
 
 
@@ -121,11 +121,14 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   fileName <- paste0("trainSubset", subsetSize, ".fst")
   subsetData <- read.fst(path = paste0(inPath, fileName), 
                          as.data.table = TRUE)
+  indexes <- readRDS(paste0(inPath, "indexes",
+                            subsetSize, ".rds"))
   
   label <- subsetData$category
+  labelRed <- as.factor(label)
   
-  subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
   if (mergeSD) {
+    subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
     texts <- subsetData$HeadLShortD
   } else {
     texts <- subsetData$headline
@@ -139,16 +142,15 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   # remove stopwords because are inducing meaning
   tokens <- tokens_remove(tokens, c(stopwords("english")))
   
-  # use wordstemming
-  #tokens <- tokens_wordstem(tokens, language = "english")
-  
   # reduce to tokens > 0
   filter <- lengths(tokens) > 0
-  tokens <- tokens[filter]
+  
+  # IndexDT for knowing which observations belong in train and test set
+  IndexDT <- data.table(isFiltered = filter)[ , isTrainSet := .I %in% indexes]
+  
   print(paste("removed tokes with 0 words. In total", sum(!filter)))
   
   tokens <- as.list(tokens)
-  
   
   # Create vocabulary. Terms will be unigrams (simple words).
   itoken <- text2vec::itoken(tokens, progressbar = FALSE)
@@ -166,15 +168,6 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   
   tokens.sparse <- tfidf
   
-  labelIndexes <- as.integer(gsub(names(tokens), 
-                                  pattern = "text", 
-                                  replacement = ""))
-  labelRed <- label[labelIndexes]
-  newN <- length(labelRed)
-  
-  indexes <- readRDS(paste0("03_computedData/03_integratedData/indexes", 
-                            subsetSize, ".rds"))
-  
   if(!saveSparse) {
     tokens.dfm <- as.data.frame(as.matrix(tokens.sparse))
     tokens.dt <- as.data.table(tokens.dfm)
@@ -182,32 +175,55 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
     rm(tokens.sparse)
     rm(tokens.dfm)
     
-    result <- data.table(labelRaw = as.factor(labelRed),
-                         tokens.dt)
+    result <- data.table(tokens.dt)
     rm(tokens.dt)
     
-    write.fst(result, path = paste0(outPath, "TFIDF-", 
-                                    subsetSize, "-", saveSparse,
-                                    "-", mergeSD, ".fst"),
-              compress = 0)
-  } else {
+    # todo hier ueberlegen ob das auch guenstiger geloest werden kann
+    resultTrain <- result[IndexDT$isFiltered & IndexDT$isTrainSet, ]
+    resultTest <- result[IndexDT$isFiltered & !IndexDT$isTrainSet, ]
+    assert(ncol(resultTrain) == ncol(resultTest))
     
-    saveRDS(tokens.sparse, file = paste0(outPath, "TFIDF-", 
-                                         subsetSize, "-", saveSparse,
-                                         "-", mergeSD, ".rds"),
+    labelTrain <- labelRed[IndexDT$isFiltered & IndexDT$isTrainSet]
+    labelTest <- labelRed[IndexDT$isFiltered & !IndexDT$isTrainSet]
+    
+    print(paste("check that train and test is rightly filtered: there are",
+                - nrow(resultTrain) - nrow(resultTest) + nrow(subsetData),
+                "deleted data points"))
+    
+    saveRDS(list(resultTrain = resultTrain,
+                 resultTest = resultTest,
+                 labelTrain = labelTrain,
+                 labelTest = labelTest,
+                 IndexDT = IndexDT), 
+            file = paste0(outPath, "TFIDF-", 
+                          subsetSize, "-", saveSparse,
+                          "-", mergeSD, ".rds"),
             compress = FALSE)
-    write.fst(data.table(labelRaw = as.factor(labelRed)), 
-              path = paste0(outPath, "TFIDF-Label-", 
-                            subsetSize, "-", saveSparse,
-                            "-", mergeSD, ".fst"),
-              compress = 0)
+    
+  } else {
+    result <- tokens.sparse
+    rm(tokens.sparse)
+    
+    resultTrain <- result[IndexDT$isFiltered & IndexDT$isTrainSet, ]
+    resultTest <- result[IndexDT$isFiltered & !IndexDT$isTrainSet, ]
+    assert(ncol(resultTrain) == ncol(resultTest))
+    
+    labelTrain <- labelRed[IndexDT$isFiltered & IndexDT$isTrainSet]
+    labelTest <- labelRed[IndexDT$isFiltered & !IndexDT$isTrainSet]
+    
+    print(paste("check that train and test is rightly filtered:",
+                - nrow(resultTrain) - nrow(resultTest) + nrow(subsetData)))
+    
+    saveRDS(list(resultTrain = resultTrain,
+                 resultTest = resultTest,
+                 labelTrain = labelTrain,
+                 labelTest = labelTest,
+                 IndexDT = IndexDT), 
+            file = paste0(outPath, "TFIDF-", 
+                          subsetSize, "-", saveSparse,
+                          "-", mergeSD, ".rds"),
+            compress = FALSE)
   }
-  
-  # write indexes in both cases of saveSparse
-  write.fst(data.table(indexes), path = paste0(outPath, "TFIDF-Indexes-", 
-                                               subsetSize, "-", saveSparse,
-                                               "-", mergeSD, ".fst"),
-            compress = 0)
   
 }
 
@@ -226,13 +242,17 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   fileName <- paste0("trainSubset", subsetSize, ".fst")
   subsetData <- read.fst(path = paste0(inPath, fileName), 
                          as.data.table = TRUE)
-  
+  indexes <- readRDS(paste0(inPath, "indexes",
+                            subsetSize, ".rds"))
+   
   N <- nrow(subsetData)
   
   label <- subsetData$category
+  labelRed <- as.factor(label)
   
-  subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
   if (mergeSD) {
+    subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
+    
     texts <- subsetData$HeadLShortD
   } else {
     texts <- subsetData$headline
@@ -248,8 +268,6 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   # dont remove stopwords because are inducing meaning
   #tokens <- tokens_remove(tokens, c(stopwords("english")))
   
-  # dont use wordstemming
-  #tokens <- tokens_wordstem(tokens, language = "english")
   tokens <- as.list(tokens)
   
   # here select max words as smallest number of length, that at least
@@ -261,7 +279,9 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   maxWords <- max(sortedNumWords[1:2])
   
   filter <- between(sapply(tokens, length), left = 0, right =  maxWords)
-  tokens <- tokens[filter]
+  # IndexDT for knowing which observations belong in train and test set
+  IndexDT <- data.table(isFiltered = filter)[ , isTrainSet := .I %in% indexes]
+  
   
   print(paste("removed tokes with 0 words. In total", sum(!filter)))
   
@@ -284,10 +304,9 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   glove$fit_transform(tcm, n_iter = 20)
   
   wordVectors <- as.data.table(glove$components)
-  
-  
+
   # write just the wordVectors
-  write.fst(wordVectors, paste0(outPath, "WordVectors-", 
+  write.fst(wordVectors, paste0(outPath, "W2VPure-", 
                                 subsetSize, "-", word2VecSize,
                                 "-", mergeSD, ".fst"),
             compress = 0)
@@ -329,35 +348,45 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
     }
     
     # fill up rows with 0's for equal array length, when length < maxWords
-    if (nrow(tmpMatrix) != maxWords) {
+    if (nrow(tmpMatrix) < maxWords) {
       tmpFillUp <- rbind(tmpMatrix,
                          matrix(numeric((maxWords - nrow(tmpMatrix)) * 
                                           channels),
                                 ncol = channels))
-    } else {
+    } else if (nrow(tmpMatrix) > maxWords) {
+      # other case for observations that are not deleted yet fill up with 0's
+      tmpFillUp <- matrix(numeric(maxWords* channels), ncol = channels)
+    } else { # if the observation has exactly maxWords
       tmpFillUp <- tmpMatrix
     }
     wordVectorArray[i, , ] <- tmpFillUp
-    
   }
   
   print("finished filling")
+  result <- wordVectorArray
+  rm(wordVectorArray)
   
-  labelIndexes <- as.integer(gsub(names(tokens), 
-                                  pattern = "text", 
-                                  replacement = ""))
+  resultTrain <- result[IndexDT$isFiltered & IndexDT$isTrainSet, ,]
+  resultTest <- result[IndexDT$isFiltered & !IndexDT$isTrainSet, ,]
+  assert(ncol(resultTrain) == ncol(resultTest))
   
-  labelRed <- label[labelIndexes]
+  labelTrain <- labelRed[IndexDT$isFiltered & IndexDT$isTrainSet]
+  labelTest <- labelRed[IndexDT$isFiltered & !IndexDT$isTrainSet]
   
-  saveRDS(list(label = labelRed,
-               wordVectorArray = wordVectorArray,
+  print(paste("check that train and test is rightly filtered:",
+              - nrow(resultTrain) - nrow(resultTest) + nrow(subsetData)))
+  
+  saveRDS(list(resultTrain = resultTrain,
+               resultTest = resultTest,
+               labelTrain = labelTrain,
+               labelTest = labelTest,
+               IndexDT = IndexDT,
                maxWords = maxWords,
-               channels = channels),
+               channels = channels), 
           file = paste0(outPath, "W2VArray-", 
                         subsetSize, "-", word2VecSize,
-                        "-", mergeSD, ".rds"))
-  
-  
+                        "-", mergeSD, ".rds"),
+          compress = FALSE)
   
   print("sum word vectors to text vectors")
   
@@ -369,24 +398,27 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
                              return(res)
                            })
   
-  result = data.table(labelRaw = as.factor(labelRed),
-                      t(wordVectorSums))
+  result <- data.table(t(wordVectorSums))
   
-  indexes <- readRDS(paste0("03_computedData/03_integratedData/indexes",
-                            subsetSize, ".rds"))
+  resultTrain <- result[IndexDT$isFiltered & IndexDT$isTrainSet, ]
+  resultTest <- result[IndexDT$isFiltered & !IndexDT$isTrainSet, ]
+  assert(ncol(resultTrain) == ncol(resultTest))
   
-  write.fst(data.table(indexes), path = paste0(outPath, "W2V-Indexes-", 
-                                               subsetSize, "-", word2VecSize,
-                                               "-", mergeSD, ".fst"),
-            compress = 0)
+  labelTrain <- labelRed[IndexDT$isFiltered & IndexDT$isTrainSet]
+  labelTest <- labelRed[IndexDT$isFiltered & !IndexDT$isTrainSet]
   
-  write.fst(result, path = paste0(outPath, "W2V-", 
-                                  subsetSize, "-", word2VecSize,
-                                  "-", mergeSD, ".fst"),
-            compress = 0)
+  saveRDS(list(resultTrain = resultTrain,
+               resultTest = resultTest,
+               labelTrain = labelTrain,
+               labelTest = labelTest,
+               IndexDT = IndexDT), 
+          file = paste0(outPath, "W2VSums-", 
+                        subsetSize, "-", word2VecSize,
+                        "-", mergeSD, ".rds"),
+          compress = FALSE)
 }
 
-prepareDataEmb = function(inPath = "03_computedData/03_integratedData/", 
+prepareDataSeq = function(inPath = "03_computedData/03_integratedData/", 
                           outPath = "03_computedData/04_preparedData/",
                           subsetSize = c("1pc", "10pc", "100pc"),
                           mergeSD = FALSE){
@@ -399,15 +431,16 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
   fileName <- paste0("trainSubset", subsetSize, ".fst")
   subsetData <- read.fst(path = paste0(inPath, fileName), 
                          as.data.table = TRUE)
-  
-  
+  indexes <- readRDS(paste0(inPath, "indexes",
+                            subsetSize, ".rds"))
   
   N <- nrow(subsetData)
   
   label <- subsetData$category
+  labelRed <- as.factor(label)
   
-  subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
   if (mergeSD) {
+    subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
     texts <- subsetData$HeadLShortD
   } else {
     texts <- subsetData$headline
@@ -419,18 +452,15 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
                              remove_hyphens = FALSE)
   
   
-  
   # dont remove stopwords because are inducing meaning
   # tokens <- quanteda::tokens_remove(tokens, c(stopwords("english")))
-  
-  # dont use wordstemming
-  #tokens <- tokens_wordstem(tokens, language = "english")
   
   # prune vocabulary
   itoken <- text2vec::itoken(as.list(tokens), progressbar = FALSE)
   vocab <- as.data.table(text2vec::create_vocabulary(itoken))
   # select words which just occur 2 times or less
   rem_wordsvocab <- vocab[term_count <= 2 , term]
+
   tokens <- quanteda::tokens_remove(tokens, rem_wordsvocab)
   
   # here select max words as smallest number of length, that at least
@@ -442,13 +472,16 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
   maxWords <- max(sortedNumWords[1:2])
   
   filter <- between(sapply(tokens, length), left = 0, right =  maxWords)
-  tokens <- tokens[filter]
   
+  # IndexDT for knowing which observations belong in train and test set
+  IndexDT <- data.table(isFiltered = filter)[ , isTrainSet := .I %in% indexes]
+
   print(paste("removed tokes with 0 words. In total", sum(!filter)))
   
   # bringt tokens back to text format for keras tokenizer
   tokens_text_list <- sapply(tokens, function(x) {
-    do.call(paste, as.list(x))
+    if (length(x) == 0) return("")
+    else return(do.call(paste, as.list(x)))
   })
   tokens_text <- unlist(tokens_text_list)
   
@@ -461,28 +494,29 @@ prepareDataEmb = function(inPath = "03_computedData/03_integratedData/",
   padded <- sequences %>%
     pad_sequences(maxlen = maxWords)
   
-  labelIndexes <- as.integer(gsub(names(tokens_text), 
-                                  pattern = "text", 
-                                  replacement = ""))
+  result <- data.table(padded)
+  rm(padded)
   
-  labelRed <- label[labelIndexes]
+  resultTrain <- result[IndexDT$isFiltered & IndexDT$isTrainSet, ]
+  resultTest <- result[IndexDT$isFiltered & !IndexDT$isTrainSet, ]
+  assert(ncol(resultTrain) == ncol(resultTest))
   
-  result <- data.table(labelRaw = as.factor(labelRed), padded)
+  labelTrain <- labelRed[IndexDT$isFiltered & IndexDT$isTrainSet]
+  labelTest <- labelRed[IndexDT$isFiltered & !IndexDT$isTrainSet]
   
+  print(paste("check that train and test is rightly filtered: there are",
+              - nrow(resultTrain) - nrow(resultTest) + nrow(subsetData),
+              "deleted data points"))
   
-  indexes <- readRDS(paste0("03_computedData/03_integratedData/indexes",
-                            subsetSize, ".rds"))
-  
-  
-  write.fst(data.table(indexes), path = paste0(outPath, "Emb-Indexes-", 
-                                               subsetSize,
-                                               "-", mergeSD, ".fst"),
-            compress = 0)
-  
-  write.fst(result, path = paste0(outPath, "Emb-", 
-                                  subsetSize,
-                                  "-", mergeSD, ".fst"),
-            compress = 0)
+  saveRDS(list(resultTrain = resultTrain,
+               resultTest = resultTest,
+               labelTrain = labelTrain,
+               labelTest = labelTest,
+               IndexDT = IndexDT), 
+          file = paste0(outPath, "Seq-", 
+                        subsetSize, "-",
+                        "-", mergeSD, ".rds"),
+          compress = FALSE)
 }
 
 
@@ -501,13 +535,15 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   fileName <- paste0("trainSubset", subsetSize, ".fst")
   subsetData <- read.fst(path = paste0(inPath, fileName), 
                          as.data.table = TRUE)
-  
+  indexes <- readRDS(paste0(inPath, "indexes",
+                            subsetSize, ".rds"))
   N <- nrow(subsetData)
   
   label <- subsetData$category
+  labelRed <- as.factor(label)
   
-  subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
   if (mergeSD) {
+    subsetData[, HeadLShortD := paste(headline, short_description, sep = ". ")]
     texts <- subsetData$HeadLShortD
   } else {
     texts <- subsetData$headline
@@ -523,9 +559,6 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   # dont remove stopwords because are inducing meaning
   #tokens <- tokens_remove(tokens, c(stopwords("english")))
   
-  # dont use wordstemming
-  #tokens <- tokens_wordstem(tokens, language = "english")
-  
   # here select max words as smallest number of length, that at least
   # 0.999 of the Data points have (maybe complicated coded)
   tableWords <- sort(table(sapply(tokens, length)), decreasing = TRUE)
@@ -535,9 +568,9 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   maxWords <- max(sortedNumWords[1:2])
   
   filter <- between(sapply(tokens, length), left = 0, right =  maxWords)
-  tokens <- tokens[filter]
   
-  deleteIndexes <- which(!filter)
+  # IndexDT for knowing which observations belong in train and test set
+  IndexDT <- data.table(isFiltered = filter)[ , isTrainSet := .I %in% indexes]
   
   print(paste("removed tokes with 0 words. In total", sum(!filter)))
   
@@ -574,7 +607,7 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   colnames(wordVectors) <- wordVectorsNames
   
   # write just the wordVectors
-  write.fst(wordVectors, paste0(outPath, "Glove-", 
+  write.fst(wordVectors, paste0(outPath, "GlovePure-", 
                                 subsetSize, "-", word2VecSize,
                                 "-", mergeSD, ".fst"),
             compress = 0)
@@ -616,35 +649,47 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
     }
     
     # fill up rows with 0's for equal array length, when length < maxWords
-    if (nrow(tmpMatrix) != maxWords) {
+    if (nrow(tmpMatrix) < maxWords) {
       tmpFillUp <- rbind(tmpMatrix,
                          matrix(numeric((maxWords - nrow(tmpMatrix)) * 
                                           channels),
                                 ncol = channels))
-    } else {
+    } else if (nrow(tmpMatrix) > maxWords) {
+      # other case for observations that are not deleted yet fill up with 0's
+      tmpFillUp <- matrix(numeric(maxWords* channels), ncol = channels)
+    } else { # if the observation has exactly maxWords
       tmpFillUp <- tmpMatrix
     }
     wordVectorArray[i, , ] <- tmpFillUp
-    
   }
   
   print("finished filling")
+  result <- wordVectorArray
+  rm(wordVectorArray)
   
-  labelIndexes <- as.integer(gsub(names(tokens), 
-                                  pattern = "text", 
-                                  replacement = ""))
+  resultTrain <- result[IndexDT$isFiltered & IndexDT$isTrainSet, ,]
+  resultTest <- result[IndexDT$isFiltered & !IndexDT$isTrainSet, ,]
+  assert(ncol(resultTrain) == ncol(resultTest))
   
-  labelRed <- label[labelIndexes]
+  labelTrain <- labelRed[IndexDT$isFiltered & IndexDT$isTrainSet]
+  labelTest <- labelRed[IndexDT$isFiltered & !IndexDT$isTrainSet]
   
-  saveRDS(list(label = labelRed,
-               wordVectorArray = wordVectorArray,
+  print(paste("check that train and test is rightly filtered:",
+              - nrow(resultTrain) - nrow(resultTest) + nrow(subsetData)))
+  
+  saveRDS(list(resultTrain = resultTrain,
+               resultTest = resultTest,
+               labelTrain = labelTrain,
+               labelTest = labelTest,
+               IndexDT = IndexDT,
                maxWords = maxWords,
-               channels = channels),
+               channels = channels), 
           file = paste0(outPath, "GloveArray-", 
                         subsetSize, "-", word2VecSize,
-                        "-", mergeSD, ".rds"))
+                        "-", mergeSD, ".rds"),
+          compress = FALSE)
   
-  
+  rm(result, resultTrain, resultTest, labelTrain, labelTest)
   
   print("sum word vectors to text vectors")
   
@@ -656,21 +701,24 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
                              return(res)
                            })
   
-  result = data.table(labelRaw = as.factor(labelRed),
-                      t(wordVectorSums))
+  result <- data.table(t(wordVectorSums))
   
-  indexes <- readRDS(paste0("03_computedData/03_integratedData/indexes",
-                            subsetSize, ".rds"))
+  resultTrain <- result[IndexDT$isFiltered & IndexDT$isTrainSet, ]
+  resultTest <- result[IndexDT$isFiltered & !IndexDT$isTrainSet, ]
+  assert(ncol(resultTrain) == ncol(resultTest))
   
-  write.fst(data.table(indexes), path = paste0(outPath, "Glove-Indexes-", 
-                                               subsetSize, "-", word2VecSize,
-                                               "-", mergeSD, ".fst"),
-            compress = 0)
+  labelTrain <- labelRed[IndexDT$isFiltered & IndexDT$isTrainSet]
+  labelTest <- labelRed[IndexDT$isFiltered & !IndexDT$isTrainSet]
   
-  write.fst(result, path = paste0(outPath, "Glove-", 
-                                  subsetSize, "-", word2VecSize,
-                                  "-", mergeSD, ".fst"),
-            compress = 0)
+  saveRDS(list(resultTrain = resultTrain,
+               resultTest = resultTest,
+               labelTrain = labelTrain,
+               labelTest = labelTest,
+               IndexDT = IndexDT), 
+          file = paste0(outPath, "GloveSums-", 
+                        subsetSize, "-", word2VecSize,
+                        "-", mergeSD, ".rds"),
+          compress = FALSE)
 }
 
 

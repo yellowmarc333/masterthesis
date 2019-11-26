@@ -1,30 +1,28 @@
 
-predictMLP <- function(dataPath, fileName, indexName,
+predictMLP <- function(dataPath, fileName, 
                        upSampling = FALSE, epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
-  assertString(indexName)
   assertFlag(upSampling)
   
   print("read in Data")
-  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+  data <- readRDS(paste0(dataPath, fileName))
+  assertList(data)
+  assertSubset(names(data), choices = c("resultTrain", "resultTest",
+                                        "labelTrain", "labelTest",
+                                        "IndexDT"))
   
-  label <- data$labelRaw
-  
-  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
-  
-  
-  trainData <- data[indexes, , ]
+  trainData <- data$resultTrain
   if(upSampling) trainData <- generalizedSampling(data = trainData, 
                                                   method = "up", 
                                                   label = "labelRaw")
-  trainLabelRaw <- trainData$labelRaw
-  testData <- data[-indexes, , ]
+  testData <- data$resultTest
+  trainLabelRaw <- data$labelTrain
+  assertFactor(trainLabelRaw)
+  testLabelRaw <- data$labelTest
+  assertFactor(testLabelRaw)
   
-  trainData[, labelRaw := NULL]
-  testData[, labelRaw := NULL]
-  
-  testLabelRaw <- label[-indexes]
+  rm(data)  # praembel end
   
   print(paste("in train are number of uniques:", 
               length(unique(trainLabelRaw))))
@@ -32,13 +30,11 @@ predictMLP <- function(dataPath, fileName, indexName,
               length(unique(testLabelRaw))))
   
   # setting up trainLabel
-  assertFactor(trainLabelRaw)
   trainLabelNumeric <- as.numeric(trainLabelRaw) - 1
   names(trainLabelNumeric) <-trainLabelRaw
   trainLabel <- to_categorical(trainLabelNumeric)
   
   # setting up testLabel
-  assertFactor(testLabelRaw)
   testLabelNumeric <- as.numeric(testLabelRaw) - 1
   names(testLabelNumeric) <- testLabelRaw
   testLabel <- to_categorical(testLabelNumeric)
@@ -142,34 +138,36 @@ predictMLP <- function(dataPath, fileName, indexName,
 
 
 
-predictLogReg <- function(dataPath, fileName, indexName, labelName,
+predictLogReg <- function(dataPath, fileName,  
                       upSampling = FALSE, sparse = FALSE){
   assertString(dataPath)
   assertString(fileName)
-  assertString(indexName)
+  assertFlag(upSampling)
   
-  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
+  print("read in Data")
+  data <- readRDS(paste0(dataPath, fileName))
+  assertList(data)
+  assertSubset(names(data), choices = c("resultTrain", "resultTest",
+                                        "labelTrain", "labelTest",
+                                        "IndexDT"))
   
-  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
-  
-  trainData <- data[indexes]
+  trainData <- data$resultTrain
   if(upSampling) trainData <- generalizedSampling(data = trainData, 
                                                   method = "up", 
                                                   label = "labelRaw")
-  trainLabelRaw <- trainData$labelRaw
+  testData <- data$resultTest
+  trainLabelRaw <- data$labelTrain
+  assertFactor(trainLabelRaw)
+  testLabelRaw <- data$labelTest
+  assertFactor(testLabelRaw)
   
-  testData <- data[-indexes]
-  
-  testLabelRaw <- testData$labelRaw
+  rm(data) # praembel end
   
   trainLabel <- as.numeric(trainLabelRaw) - 1
   testLabel <- as.numeric(testLabelRaw) - 1
-  trainData[, labelRaw := NULL]
-  testData[, labelRaw := NULL]
   
   numClass <- length(unique(trainLabel))
-  
-  
+
   print(paste("in train are number of uniques:", length(unique(trainLabel))))
   print(paste("in test are number of uniques:", length(unique(testLabel))))
   
@@ -243,15 +241,15 @@ predictLogReg <- function(dataPath, fileName, indexName, labelName,
   
 }
 
-predictNB <- function(dataPath, fileName, indexName, labelName,
+predictNB <- function(dataPath, fileName,  
                           upSampling = FALSE, sparse = FALSE){
   assertString(dataPath)
   assertString(fileName)
-  assertString(indexName)
   
-  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
   
-  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+  indexes <- readRDS(paste0(dataPath, indexName))[[1]] 
+  
+  data <- readRDS(paste0(dataPath, fileName))
   
   trainData <- data[indexes]
   if(upSampling) trainData <- generalizedSampling(data = trainData, 
@@ -337,16 +335,16 @@ predictNB <- function(dataPath, fileName, indexName, labelName,
 
 
 
-predictXG <- function(dataPath, fileName, indexName, labelName,
+predictXG <- function(dataPath, fileName,  
                       upSampling = FALSE, sparse = FALSE, nrounds = 20){
   assertString(dataPath)
   assertString(fileName)
-  assertString(indexName)
+  
 
-  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
+  indexes <- readRDS(paste0(dataPath, indexName))[[1]] 
   
   if(!sparse) {
-    data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+    data <- readRDS(paste0(dataPath, fileName))
     
     trainData <- data[indexes]
     if(upSampling) trainData <- generalizedSampling(data = trainData, 
@@ -386,7 +384,7 @@ predictXG <- function(dataPath, fileName, indexName, labelName,
  
   if(sparse) {
     data <- readRDS(paste0(dataPath, fileName))
-    label <- read.fst(paste0(dataPath, labelName), as.data.table = TRUE)
+    label <- readRDS(paste0(dataPath, labelName))
     
     trainData <- data[indexes,]
     trainLabelRaw <- label$labelRaw[indexes]
@@ -491,18 +489,18 @@ predictXG <- function(dataPath, fileName, indexName, labelName,
 }
 
 
-predictRF <- function(dataPath, fileName, indexName, labelName = NULL,
+predictRF <- function(dataPath, fileName,  labelName = NULL,
                       upSampling = FALSE, sparse = FALSE, num.trees = 500) {
   assertString(dataPath)
   assertString(fileName)
-  assertString(indexName)
+  
 
   
   # loading indexis for train/test split
-  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
+  indexes <- readRDS(paste0(dataPath, indexName))[[1]]  
   
   if(!sparse){
-    data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+    data <- readRDS(paste0(dataPath, fileName))
     trainData <- data[indexes,]
     if(upSampling) trainData <- generalizedSampling(data = trainData, 
                                                     method = "up", 
@@ -578,7 +576,7 @@ predictRF <- function(dataPath, fileName, indexName, labelName = NULL,
     data[is.na(data)] <- 0
     data <- as(data, "dgCMatrix")
     
-    label <- read.fst(paste0(dataPath, labelName), as.data.table = TRUE)
+    label <- readRDS(paste0(dataPath, labelName))
     trainData <- data[indexes,]
     trainLabelRaw <- label[indexes]$labelRaw
     testData <- data[-indexes, ]
@@ -671,10 +669,10 @@ predictRF <- function(dataPath, fileName, indexName, labelName = NULL,
 }
 
 
-predictCNN <- function(dataPath, fileName, indexName, epochs = 12) {
+predictCNN <- function(dataPath, fileName,  epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
-  assertString(indexName)
+  
 
  
   print("read in Data")
@@ -683,7 +681,7 @@ predictCNN <- function(dataPath, fileName, indexName, epochs = 12) {
   label <- as.factor(dataRDS[["label"]])
   maxWords <- dataRDS[["maxWords"]]
   channels <- dataRDS[["channels"]]
-  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
+  indexes <- readRDS(paste0(dataPath, indexName))[[1]] 
   
   trainData <- data[indexes, , ]
   testData <- data[-indexes, , ]
@@ -815,19 +813,19 @@ predictCNN <- function(dataPath, fileName, indexName, epochs = 12) {
 
 
 
-predictEmb <- function(dataPath, fileName, indexName,
+predictSeq <- function(dataPath, fileName, 
                        upSampling = FALSE, epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
-  assertString(indexName)
+  
   assertFlag(upSampling)
   
   print("read in Data")
-  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+  data <- readRDS(paste0(dataPath, fileName))
 
   label <- data$labelRaw
 
-  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
+  indexes <- readRDS(paste0(dataPath, indexName))[[1]]  
   
 
   trainData <- data[indexes, , ]
@@ -974,17 +972,17 @@ predictEmb <- function(dataPath, fileName, indexName,
 }
 
 
-predictLSTM <- function(dataPath, fileName, indexName,
+predictLSTM <- function(dataPath, fileName, 
                         upSampling = FALSE, epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
-  assertString(indexName)
+  
   
   print("read in Data")
-  data <- read.fst(paste0(dataPath, fileName), as.data.table = TRUE)
+  data <- readRDS(paste0(dataPath, fileName))
   label <- data$labelRaw
   
-  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]]  
+  indexes <- readRDS(paste0(dataPath, indexName))[[1]]  
   
   trainData <- data[indexes, , ]
   if(upSampling) trainData <- generalizedSampling(data = trainData, 
@@ -1111,11 +1109,11 @@ predictLSTM <- function(dataPath, fileName, indexName,
               testLabelRaw = testLabelRaw))
 }
 
-predictLSTMArray <- function(dataPath, fileName, indexName,
+predictLSTMArray <- function(dataPath, fileName, 
                              upSampling = FALSE, epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
-  assertString(indexName)
+  
   
   print("read in Data")
   dataRDS <- readRDS(paste0(dataPath, fileName))
@@ -1123,7 +1121,7 @@ predictLSTMArray <- function(dataPath, fileName, indexName,
   label <- as.factor(dataRDS[["label"]])
   maxWords <- dataRDS[["maxWords"]]
   channels <- dataRDS[["channels"]]
-  indexes <- read.fst(paste0(dataPath, indexName), as.data.table = TRUE)[[1]] 
+  indexes <- readRDS(paste0(dataPath, indexName))[[1]] 
   
   rm(dataRDS)
   gc()

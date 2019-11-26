@@ -38,7 +38,6 @@ cleanData = function(inPath = "03_computedData/01_importedData/",
   data <- data[!emptyPoints]
   
   # compression argument prevents converting error from o to c
-  write.fst(data, path = paste0(outPath, "News.fst"), compress = 0,
-            uniform_encoding = FALSE)
+  write.fst(data, path = paste0(outPath, "News.fst"), compress = 0)
   fwrite(data, file = paste0(outPath, "News.csv"))
 }

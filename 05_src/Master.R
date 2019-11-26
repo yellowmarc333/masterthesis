@@ -47,19 +47,18 @@ prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
                  outPath = "03_computedData/04_preparedData/", 
                  subsetSize = "10pc", saveSparse = TRUE)
 
-prepareDataGlove(inPath = "03_computedData/03_integratedData/",
-                 outPath = "03_computedData/04_preparedData/", 
-                 subsetSize = "10pc", word2VecSize = 50, mergeSD = FALSE)
-
 prepareDataW2V(inPath = "03_computedData/03_integratedData/",
                outPath = "03_computedData/04_preparedData/", 
                subsetSize = "10pc", word2VecSize = 50)
 
-prepareDataEmb(inPath = "03_computedData/03_integratedData/",
+prepareDataSeq(inPath = "03_computedData/03_integratedData/",
                outPath = "03_computedData/04_preparedData/", 
                subsetSize = "10pc", mergeSD = FALSE)
 
 
+prepareDataGlove(inPath = "03_computedData/03_integratedData/",
+                 outPath = "03_computedData/04_preparedData/", 
+                 subsetSize = "10pc", word2VecSize = 50, mergeSD = FALSE)
 
 
 # binary

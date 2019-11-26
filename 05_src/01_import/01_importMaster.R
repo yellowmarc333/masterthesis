@@ -58,6 +58,5 @@ importData = function(inPath = "02_initialData/",
   #
   # compression argument prevents converting error from o to c
   fwrite(data, file = paste0(outPath, "News.csv"))
-  write.fst(data, path = paste0(outPath, "News.fst"), compress = 0,
-           uniform_encoding = FALSE)
+  write.fst(data, path = paste0(outPath, "News.fst"), compress = 0)
 }

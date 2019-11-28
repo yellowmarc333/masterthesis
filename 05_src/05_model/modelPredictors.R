@@ -10,7 +10,7 @@ predictMLP <- function(dataPath, fileName,
   assertList(data)
   assertSubset(names(data), choices = c("resultTrain", "resultTest",
                                         "labelTrain", "labelTest",
-                                        "IndexDT"))
+                                        "IndexDT", "maxWords", "channels"))
   
   trainData <- data$resultTrain
   if(upSampling) trainData <- generalizedSampling(data = trainData, 
@@ -24,10 +24,7 @@ predictMLP <- function(dataPath, fileName,
   
   rm(data)  # praembel end
   
-  print(paste("in train are number of uniques:", 
-              length(unique(trainLabelRaw))))
-  print(paste("in test are number of uniques:", 
-              length(unique(testLabelRaw))))
+  assert(length(unique(trainLabelRaw)) == length(unique(testLabelRaw)))
   
   # setting up trainLabel
   trainLabelNumeric <- as.numeric(trainLabelRaw) - 1
@@ -69,7 +66,7 @@ predictMLP <- function(dataPath, fileName,
   # Compiling model
   model %>% compile(
     loss = 'categorical_crossentropy',
-    optimizer = optimizer_rmsprop(lr = 0.0005),
+    optimizer = optimizer_adam(lr = 0.001),
     metrics = c('accuracy')
   )
   
@@ -124,6 +121,7 @@ predictMLP <- function(dataPath, fileName,
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
+  assert(all(accByClass <= 1))
   names(accByClass) <-  levels(trainLabelRaw)
   
   
@@ -149,7 +147,7 @@ predictLogReg <- function(dataPath, fileName,
   assertList(data)
   assertSubset(names(data), choices = c("resultTrain", "resultTest",
                                         "labelTrain", "labelTest",
-                                        "IndexDT"))
+                                        "IndexDT", "maxWords", "channels"))
   
   trainData <- data$resultTrain
   if(upSampling) trainData <- generalizedSampling(data = trainData, 
@@ -168,8 +166,7 @@ predictLogReg <- function(dataPath, fileName,
   
   numClass <- length(unique(trainLabel))
 
-  print(paste("in train are number of uniques:", length(unique(trainLabel))))
-  print(paste("in test are number of uniques:", length(unique(testLabel))))
+  assert(length(unique(trainLabelRaw)) == length(unique(testLabelRaw)))
   
   print("training logreg model")
   model <- LiblineaR::LiblineaR(trainData, target =  trainLabel,
@@ -226,8 +223,9 @@ predictLogReg <- function(dataPath, fileName,
   colnames(confusionMatrix) <- levels(testLabelRaw)
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
-  # accuracy by class
-  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
+  # accuracy by class: colSums are the amount of true labels
+  accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
+  assert(all(accByClass <= 1))
   names(accByClass) <-  levels(testLabelRaw)
   
   
@@ -245,34 +243,33 @@ predictNB <- function(dataPath, fileName,
                           upSampling = FALSE, sparse = FALSE){
   assertString(dataPath)
   assertString(fileName)
+  assertFlag(upSampling)
   
-  
-  indexes <- readRDS(paste0(dataPath, indexName))[[1]] 
-  
+  print("read in Data")
   data <- readRDS(paste0(dataPath, fileName))
+  assertList(data)
+  assertSubset(names(data), choices = c("resultTrain", "resultTest",
+                                        "labelTrain", "labelTest",
+                                        "IndexDT", "maxWords", "channels"))
   
-  trainData <- data[indexes]
+  trainData <- data$resultTrain
   if(upSampling) trainData <- generalizedSampling(data = trainData, 
                                                   method = "up", 
                                                   label = "labelRaw")
-  trainLabelRaw <- trainData$labelRaw
+  testData <- data$resultTest
+  trainLabelRaw <- data$labelTrain
+  assertFactor(trainLabelRaw)
+  testLabelRaw <- data$labelTest
+  assertFactor(testLabelRaw)
   
-  testData <- data[-indexes]
-  
-  testLabelRaw <- testData$labelRaw
-  
+  rm(data) # praembel end
   trainLabel <- as.numeric(trainLabelRaw) - 1
   testLabel <- as.numeric(testLabelRaw) - 1
-  trainData[, labelRaw := NULL]
-  testData[, labelRaw := NULL]
   
   numClass <- length(unique(trainLabel))
   
+  assert(length(unique(trainLabelRaw)) == length(unique(testLabelRaw)))
   
-  print(paste("in train are number of uniques:", length(unique(trainLabel))))
-  print(paste("in test are number of uniques:", length(unique(testLabel))))
-  
-
   print("training naive bayes model")
   model <- naive_bayes(x = trainData, y = trainLabelRaw,
                        laplace = 1, usekernel = TRUE,
@@ -318,8 +315,9 @@ predictNB <- function(dataPath, fileName,
   colnames(confusionMatrix) <- levels(testLabelRaw)
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
-  # accuracy by class
-  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
+  # accuracy by class: colSums are the amount of true labels
+  accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
+  assert(all(accByClass <= 1))
   names(accByClass) <-  levels(testLabelRaw)
   
   
@@ -339,31 +337,37 @@ predictXG <- function(dataPath, fileName,
                       upSampling = FALSE, sparse = FALSE, nrounds = 20){
   assertString(dataPath)
   assertString(fileName)
+  assertFlag(upSampling)
   
 
-  indexes <- readRDS(paste0(dataPath, indexName))[[1]] 
+  print("read in Data")
+  data <- readRDS(paste0(dataPath, fileName))
+  assertList(data)
+  assertSubset(names(data), choices = c("resultTrain", "resultTest",
+                                        "labelTrain", "labelTest",
+                                        "IndexDT", "maxWords", "channels"))
   
+  trainData <- data$resultTrain
+  if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                  method = "up", 
+                                                  label = "labelRaw")
+  testData <- data$resultTest
+  trainLabelRaw <- data$labelTrain
+  assertFactor(trainLabelRaw)
+  testLabelRaw <- data$labelTest
+  assertFactor(testLabelRaw)
+  
+  rm(data)  
+
+  assert(length(unique(trainLabelRaw)) == length(unique(testLabelRaw)))
+  
+  numClass <-  length(unique(trainLabelRaw))
+  
+  trainLabel <- as.numeric(trainLabelRaw) - 1
+  testLabel <- as.numeric(testLabelRaw) - 1
+  # praembel end  
+
   if(!sparse) {
-    data <- readRDS(paste0(dataPath, fileName))
-    
-    trainData <- data[indexes]
-    if(upSampling) trainData <- generalizedSampling(data = trainData, 
-                                                    method = "up", 
-                                                    label = "labelRaw")
-    trainLabelRaw <- trainData$labelRaw
-    
-    testData <- data[-indexes]
-    
-    testLabelRaw <- testData$labelRaw
-    
-    trainLabel <- as.numeric(trainLabelRaw) - 1
-    testLabel <- as.numeric(testLabelRaw) - 1
-    trainData[, labelRaw := NULL]
-    testData[, labelRaw := NULL]
-    
-    print(paste("in train are number of uniques:", length(unique(trainLabel))))
-    print(paste("in test are number of uniques:", length(unique(testLabel))))
-    
     # create watchlist
     watchIndexes <- sample.int(nrow(trainData), 
                                size = round(nrow(trainData) * 0.8))
@@ -383,26 +387,10 @@ predictXG <- function(dataPath, fileName,
   }
  
   if(sparse) {
-    data <- readRDS(paste0(dataPath, fileName))
-    label <- readRDS(paste0(dataPath, labelName))
-    
-    trainData <- data[indexes,]
-    trainLabelRaw <- label$labelRaw[indexes]
-    numClass <- length(unique(trainLabelRaw))
-    
-    testData <- data[-indexes,]
-    testLabelRaw <- label$labelRaw[-indexes]
-    
-    trainLabel <- as.numeric(trainLabelRaw) - 1
-    testLabel <- as.numeric(testLabelRaw) - 1
-    
-    print(paste("in train are number of uniques:", numClass))
-    print(paste("in test are number of uniques:", length(unique(testLabelRaw))))
-    
     # create watchlist
     watchIndexes <- sample.int(nrow(trainData), 
                                size = round(nrow(trainData) * 0.8))
-    watchTrain <- trainData[watchIndexes,]
+    watchTrain <- trainData[watchIndexes, ]
     watchTest <- trainData[-watchIndexes, ]
     watchTrainLabel <- trainLabel[watchIndexes]
     watchTestLabel <- trainLabel[-watchIndexes]
@@ -414,10 +402,8 @@ predictXG <- function(dataPath, fileName,
     testMat = xgb.DMatrix(testData, label = testLabel)
     
     watchlist = list(dtrain = watchTrainMat, dtest = watchTestMat)
-    
-    
   }
-  
+
   # add Parameters
   numClass <- numClass
   eval_metric <- "merror"
@@ -432,7 +418,7 @@ predictXG <- function(dataPath, fileName,
                              nrounds = nrounds, 
                              verbose = 1, 
                              watchlist = watchlist)
-  
+
   # evaluating predictions and eval metrics
   predictions <- as.data.table(predict(model, 
                                        newdata =  testMat,
@@ -473,8 +459,9 @@ predictXG <- function(dataPath, fileName,
   colnames(confusionMatrix) <- levels(testLabelRaw)
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
-  # accuracy by class
-  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
+  # accuracy by class: colSums are the amount of true labels
+  accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
+  assert(all(accByClass <= 1))
   names(accByClass) <-  levels(testLabelRaw)
   
   
@@ -493,25 +480,38 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
                       upSampling = FALSE, sparse = FALSE, num.trees = 500) {
   assertString(dataPath)
   assertString(fileName)
+  assertFlag(upSampling)
   
-
   
-  # loading indexis for train/test split
-  indexes <- readRDS(paste0(dataPath, indexName))[[1]]  
+  print("read in Data")
+  data <- readRDS(paste0(dataPath, fileName))
+  assertList(data)
+  assertSubset(names(data), choices = c("resultTrain", "resultTest",
+                                        "labelTrain", "labelTest",
+                                        "IndexDT", "maxWords", "channels"))
+  
+  trainData <- data$resultTrain
+  if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                  method = "up", 
+                                                  label = "labelRaw")
+  testData <- data$resultTest
+  trainLabelRaw <- data$labelTrain
+  assertFactor(trainLabelRaw)
+  testLabelRaw <- data$labelTest
+  assertFactor(testLabelRaw)
+  
+  rm(data)  
+  
+  assert(length(unique(trainLabelRaw)) == length(unique(testLabelRaw)))
+  
+  numClass <-  length(unique(trainLabelRaw))
+  
+  trainLabel <- as.numeric(trainLabelRaw) - 1
+  testLabel <- as.numeric(testLabelRaw) - 1
+  # praembel end  
   
   if(!sparse){
-    data <- readRDS(paste0(dataPath, fileName))
-    trainData <- data[indexes,]
-    if(upSampling) trainData <- generalizedSampling(data = trainData, 
-                                                    method = "up", 
-                                                    label = "labelRaw")
-    trainLabelRaw <- trainData$labelRaw
-    testData <- data[-indexes, ]
-    testLabelRaw <- testData$labelRaw
-    
-    trainLabel <- as.numeric(trainLabelRaw) - 1
-    testLabel <- as.numeric(testLabelRaw) - 1
-    
+    trainData <- data.table(labelRaw = trainLabel, trainData)
     print("fitting model with data.table")
     model = ranger::ranger(dependent.variable.name = "labelRaw", 
                            data = trainData,
@@ -522,8 +522,9 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
                                         testData, 
                                         type = "response")$predictions)
     
+    orderOfNames <- as.integer(colnames(model$predictions)) + 1
     # evaluating predictions and eval metrics
-    names(predictions) <- levels(testLabelRaw)
+    names(predictions) <- levels(testLabelRaw)[orderOfNames]
     
     predictionsMax <- apply(predictions, 1 , function(x) {
       names(x[which.max(x)])
@@ -564,23 +565,23 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
     colnames(confusionMatrix) <- levels(testLabelRaw)
     print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
     
-    # accuracy by class
-    accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
+    # accuracy by class: colSums are the amount of true labels
+    accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
+    assert(all(accByClass <= 1))
     names(accByClass) <-  levels(testLabelRaw)
     
   }
   
-  if(sparse){
-    data <- readRDS(paste0(dataPath, fileName))
+  if (sparse){
     # quickfixes for new tfidf method
-    data[is.na(data)] <- 0
-    data <- as(data, "dgCMatrix")
-    
-    label <- readRDS(paste0(dataPath, labelName))
-    trainData <- data[indexes,]
-    trainLabelRaw <- label[indexes]$labelRaw
-    testData <- data[-indexes, ]
-    testLabelRaw <- label[-indexes]$labelRaw
+    if (class(trainData) != "dgCMatrix") {
+      trainData[is.na(data)] <- 0
+      trainData <- as(trainData, "dgCMatrix")
+      
+      testData[is.na(testData)] <- 0
+      testData <- as(testData, "dgCMatrix")
+    }
+   
 
     # because of naming transition use not "-1"
     trainLabel <- Matrix::Matrix(data = as.numeric(trainLabelRaw),
@@ -607,10 +608,6 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
     
     # evaluating predictions and eval metrics
     names(predictions) <- levels(testLabelRaw)[orderOfNames]
-    
-    rm(data)
-    gc()
-    
     
     predictionsMax <- apply(predictions, 1 , function(x) {
       names(x[which.max(x)])
@@ -651,8 +648,9 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
     colnames(confusionMatrix) <- levels(testLabelRaw)
     print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
     
-    # accuracy by class
-    accByClass <- diag(as.matrix(confusionMatrix)) / colSums(truth)
+    # accuracy by class: colSums are the amount of true labels
+    accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
+    assert(all(accByClass <= 1))
     names(accByClass) <-  levels(testLabelRaw)
     
   }
@@ -669,30 +667,34 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
 }
 
 
-predictCNN <- function(dataPath, fileName,  epochs = 12) {
+predictCNNArray <- function(dataPath, fileName, 
+                            upSampling = FALSE, epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
+  assertNumber(epochs)
   
-
- 
   print("read in Data")
-  dataRDS <- readRDS(paste0(dataPath, fileName))
-  data <- dataRDS[["wordVectorArray"]]
-  label <- as.factor(dataRDS[["label"]])
-  maxWords <- dataRDS[["maxWords"]]
-  channels <- dataRDS[["channels"]]
-  indexes <- readRDS(paste0(dataPath, indexName))[[1]] 
+  data <- readRDS(paste0(dataPath, fileName))
+  assertList(data)
+  assertSubset(names(data), choices = c("resultTrain", "resultTest",
+                                        "labelTrain", "labelTest",
+                                        "IndexDT", "maxWords", "channels"))
   
-  trainData <- data[indexes, , ]
-  testData <- data[-indexes, , ]
+  trainData <- data$resultTrain
+  if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                  method = "up", 
+                                                  label = "labelRaw")
+  testData <- data$resultTest
+  trainLabelRaw <- data$labelTrain
+  assertFactor(trainLabelRaw)
+  testLabelRaw <- data$labelTest
+  assertFactor(testLabelRaw)
   
-  trainLabelRaw <- label[indexes]
-  testLabelRaw <- label[-indexes]
+  maxWords <- data$maxWords
+  channels <- data$channels
+  rm(data)  
   
-  print(paste("in train are number of uniques:", 
-              length(unique(trainLabelRaw))))
-  print(paste("in test are number of uniques:", 
-              length(unique(testLabelRaw))))
+  assert(length(unique(trainLabelRaw)) == length(unique(testLabelRaw)))
   
   # setting up trainLabel
   trainLabelNumeric <- as.numeric(trainLabelRaw) - 1
@@ -715,15 +717,15 @@ predictCNN <- function(dataPath, fileName,  epochs = 12) {
       padding = "same", activation = "relu", strides = 1,
       name = "conv1"#, trainable = FALSE
     ) %>%
-    layer_conv_1d(filters = 100, kernel_size = 3,
+    layer_conv_1d(filters = 100, kernel_size = 2,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv2") %>%
-    layer_conv_1d(filters = 100, kernel_size = 4,
+    layer_conv_1d(filters = 100, kernel_size = 3,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv3") %>%
-    layer_conv_1d(filters = 100, kernel_size = 5,
+    layer_conv_1d(filters = 100, kernel_size = 4,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv4") %>%
@@ -769,6 +771,7 @@ predictCNN <- function(dataPath, fileName,  epochs = 12) {
   predictMax <- t(apply(predictProb, 1, function(x) {
     return(names(x[which.max(x)]))
   }))
+  
   levels(predictMax) <- levels(testLabelRaw)
   confusionMatrix <- matrix(table(factor(predictMax, 
                                          levels =  levels(testLabelRaw)),
@@ -797,15 +800,14 @@ predictCNN <- function(dataPath, fileName,  epochs = 12) {
   ProbAccDT <- data.table(Prob = predictionsMaxProb,
                           Correct = correctBinary)
   
-  
-  
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
+  assert(all(accByClass <= 1))
   names(accByClass) <-  levels(trainLabelRaw)
-  
   
   return(list(acc = evaluationResult$acc,
               loss = evaluationResult$loss,
               confusionMatrix = confusionMatrix,
+              ProbAccDT = ProbAccDT,
               accByClass = accByClass,
               predictions = predictProb,
               testLabelRaw = testLabelRaw))
@@ -813,37 +815,35 @@ predictCNN <- function(dataPath, fileName,  epochs = 12) {
 
 
 
-predictSeq <- function(dataPath, fileName, 
+predictCNNSeq <- function(dataPath, fileName, 
                        upSampling = FALSE, epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
-  
+  assertNumber(epochs)
   assertFlag(upSampling)
   
   print("read in Data")
   data <- readRDS(paste0(dataPath, fileName))
-
-  label <- data$labelRaw
-
-  indexes <- readRDS(paste0(dataPath, indexName))[[1]]  
+  assertList(data)
+  assertSubset(names(data), choices = c("resultTrain", "resultTest",
+                                        "labelTrain", "labelTest",
+                                        "IndexDT", "maxWords", "channels"))
   
-
-  trainData <- data[indexes, , ]
+  trainData <- data$resultTrain
   if(upSampling) trainData <- generalizedSampling(data = trainData, 
                                                   method = "up", 
-                                             label = "labelRaw")
-  trainLabelRaw <- trainData$labelRaw
-  testData <- data[-indexes, , ]
+                                                  label = "labelRaw")
+  testData <- data$resultTest
+  trainLabelRaw <- data$labelTrain
+  assertFactor(trainLabelRaw)
+  testLabelRaw <- data$labelTest
+  assertFactor(testLabelRaw)
   
-  trainData[, labelRaw := NULL]
-  testData[, labelRaw := NULL]
+  maxWords <- data$maxWords
+  channels <- data$channels
+  rm(data)  
   
-  testLabelRaw <- label[-indexes]
-  
-  print(paste("in train are number of uniques:", 
-              length(unique(trainLabelRaw))))
-  print(paste("in test are number of uniques:", 
-              length(unique(testLabelRaw))))
+  assert(length(unique(trainLabelRaw)) == length(unique(testLabelRaw)))
   
   # setting up trainLabel
   trainLabelNumeric <- as.numeric(trainLabelRaw) - 1
@@ -863,7 +863,7 @@ predictSeq <- function(dataPath, fileName,
     layer_embedding(input_dim = nVocab,
                     output_dim = 50, 
                     input_length = ncol(trainData)) %>%
-    layer_dropout(0.2) %>%
+    layer_dropout(0.1) %>%
     
     # Add a Convolution1D, which will learn filters
     layer_conv_1d(filters = 100, kernel_size  = 2, 
@@ -874,16 +874,11 @@ predictSeq <- function(dataPath, fileName,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv2") %>%
-    # layer_dropout(0.1) %>%
-    # layer_conv_1d(filters = 100, kernel_size = 4,
-    #               padding = "same", activation = "relu",
-    #               strides = 1,
-    #               name = "conv3") %>%
-    # layer_dropout(0.1) %>%
-    # layer_conv_1d(filters = 100, kernel_size = 5,
-    #               padding = "same", activation = "relu",
-    #               strides = 1,
-    #               name = "conv4") %>%
+    layer_dropout(0.1) %>%
+    layer_conv_1d(filters = 100, kernel_size = 4,
+                  padding = "same", activation = "relu",
+                  strides = 1,
+                  name = "conv3") %>%
     layer_dropout(0.1) %>%
     # Apply max pooling:
     layer_global_max_pooling_1d() %>%
@@ -904,7 +899,7 @@ predictSeq <- function(dataPath, fileName,
   # Compiling model
   model %>% compile(
     loss = 'categorical_crossentropy',
-    optimizer = optimizer_rmsprop(lr = 0.0005),
+    optimizer = optimizer_adam(lr = 0.001),
     metrics = c('accuracy')
   )
   
@@ -959,6 +954,7 @@ predictSeq <- function(dataPath, fileName,
     print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
         
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
+  assert(all(accByClass <= 1))
   names(accByClass) <-  levels(trainLabelRaw)
 
   
@@ -972,35 +968,35 @@ predictSeq <- function(dataPath, fileName,
 }
 
 
-predictLSTM <- function(dataPath, fileName, 
+predictLSTMSeq <- function(dataPath, fileName, 
                         upSampling = FALSE, epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
-  
+  assertNumber(epochs)
+  assertFlag(upSampling)
   
   print("read in Data")
   data <- readRDS(paste0(dataPath, fileName))
-  label <- data$labelRaw
+  assertList(data)
+  assertSubset(names(data), choices = c("resultTrain", "resultTest",
+                                        "labelTrain", "labelTest",
+                                        "IndexDT", "maxWords", "channels"))
   
-  indexes <- readRDS(paste0(dataPath, indexName))[[1]]  
-  
-  trainData <- data[indexes, , ]
+  trainData <- data$resultTrain
   if(upSampling) trainData <- generalizedSampling(data = trainData, 
                                                   method = "up", 
                                                   label = "labelRaw")
-  trainLabelRaw <- trainData$labelRaw
+  testData <- data$resultTest
+  trainLabelRaw <- data$labelTrain
+  assertFactor(trainLabelRaw)
+  testLabelRaw <- data$labelTest
+  assertFactor(testLabelRaw)
   
-  testData <- data[-indexes, , ]
+  maxWords <- data$maxWords
+  channels <- data$channels
+  rm(data)  
   
-  trainData[, labelRaw := NULL]
-  testData[, labelRaw := NULL]
-  
-  testLabelRaw <- label[-indexes]
-  
-  print(paste("in train are number of uniques:", 
-              length(unique(trainLabelRaw))))
-  print(paste("in test are number of uniques:", 
-              length(unique(testLabelRaw))))
+  assert(length(unique(trainLabelRaw)) == length(unique(testLabelRaw)))
   
   # setting up trainLabel
   trainLabelNumeric <- as.numeric(trainLabelRaw) - 1
@@ -1023,7 +1019,6 @@ predictLSTM <- function(dataPath, fileName,
     bidirectional(layer_lstm(units = 128)) %>%
     layer_dropout(rate = 0.4) %>% 
 
-    
     # Add a vanilla hidden layer:
     layer_dense(units = 100) %>%
     
@@ -1039,7 +1034,7 @@ predictLSTM <- function(dataPath, fileName,
   # Compiling model
   model %>% compile(
     loss = 'categorical_crossentropy',
-    optimizer = optimizer_rmsprop(lr = 0.001),
+    optimizer = optimizer_adam(lr = 0.001),
     metrics = c('accuracy')
   )
   
@@ -1095,9 +1090,10 @@ predictLSTM <- function(dataPath, fileName,
                           Correct = correctBinary)
   
   
-  # accuracy by class
-  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
-  names(accByClass) <-  levels(trainLabelRaw)
+  # accuracy by class: colSums are the amount of true labels
+  accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
+  assert(all(accByClass <= 1))
+  names(accByClass) <-  levels(testLabelRaw)
   
   
   return(list(acc = evaluationResult$acc,
@@ -1113,42 +1109,37 @@ predictLSTMArray <- function(dataPath, fileName,
                              upSampling = FALSE, epochs = 12) {
   assertString(dataPath)
   assertString(fileName)
-  
+  assertNumber(epochs)
+  assertFlag(upSampling)
   
   print("read in Data")
-  dataRDS <- readRDS(paste0(dataPath, fileName))
-  data <- dataRDS[["wordVectorArray"]]
-  label <- as.factor(dataRDS[["label"]])
-  maxWords <- dataRDS[["maxWords"]]
-  channels <- dataRDS[["channels"]]
-  indexes <- readRDS(paste0(dataPath, indexName))[[1]] 
+  data <- readRDS(paste0(dataPath, fileName))
+  assertList(data)
+  assertSubset(names(data), choices = c("resultTrain", "resultTest",
+                                        "labelTrain", "labelTest",
+                                        "IndexDT", "maxWords", "channels"))
   
-  rm(dataRDS)
-  gc()
+  trainData <- data$resultTrain
+  if(upSampling) trainData <- generalizedSampling(data = trainData, 
+                                                  method = "up", 
+                                                  label = "labelRaw")
+  testData <- data$resultTest
+  trainLabelRaw <- data$labelTrain
+  assertFactor(trainLabelRaw)
+  testLabelRaw <- data$labelTest
+  assertFactor(testLabelRaw)
   
-  trainData <- data[indexes, , ]
-  testData <- data[-indexes, , ]
+  maxWords <- data$maxWords
+  channels <- data$channels
+  rm(data)  
   
-  rm(data)
-  gc()
-  
-  if(upSampling) print("sampling does not work for 3dim arrays, 
-                       continue without")
-  
-  trainLabelRaw <- label[indexes]
-  testLabelRaw <- label[-indexes]
-  
-  print(paste("in train are number of uniques:", 
-              length(unique(trainLabelRaw))))
-  print(paste("in test are number of uniques:", 
-              length(unique(testLabelRaw))))
+  assert(length(unique(trainLabelRaw)) == length(unique(testLabelRaw)))
   
   print("setting up train and test Label")
   trainLabelNumeric <- as.numeric(trainLabelRaw) - 1
   names(trainLabelNumeric) <- trainLabelRaw
   trainLabel <- to_categorical(trainLabelNumeric)
   
-
   testLabelNumeric <- as.numeric(testLabelRaw) - 1
   names(testLabelNumeric) <- testLabelRaw
   testLabel <- to_categorical(testLabelNumeric)
@@ -1235,6 +1226,7 @@ predictLSTMArray <- function(dataPath, fileName,
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
+  assert(all(accByClass <= 1))
   names(accByClass) <-  levels(trainLabelRaw)
   
   

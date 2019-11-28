@@ -515,7 +515,7 @@ prepareDataSeq = function(inPath = "03_computedData/03_integratedData/",
                IndexDT = IndexDT), 
           file = paste0(outPath, "Seq-", 
                         subsetSize, "-",
-                        "-", mergeSD, ".rds"),
+                        mergeSD, ".rds"),
           compress = FALSE)
 }
 

@@ -1,5 +1,6 @@
 source("05_src/Sourcer.R")
 sourcedFiles = sourceAll()
+dataPath <- "03_computedData/04_preparedData/"
 
 allFiles <- list.files(path = "05_src/", recursive = T, full.names = T)
 subFiles <- str_subset(allFiles, "[.][R]$") 

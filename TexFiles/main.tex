@@ -191,7 +191,7 @@ Es folgt nun eine gesamtheitliche Exploration des Textkorpus der Schlagzeilen. I
 \end{figure}
 
 Ein Wert von beispielsweise $0.15$ für eine bestimmte Nachrichtensparte in der Grafik ist so zu interpretieren, dass in 15 Prozent aller Schlagzeilen dieser Kategorie das entsprechende Symbol mindestens einmal aufgetaucht ist. Die im Folgenden beschriebenen Durchschnitte sind Mittelwerte über die Kategorien und nicht über den gesamten Datensatz. Betrachtet sei nun das Vorkommen eines Punktes in einer Schlagzeile. Dieses kann so interpretiert werden, dass eine Schlagzeile 2
-mehrere Sätze enthält. Dies ist insgesamt mit einem durchschnittlichen relativen Anteil von $0.051$ selten der Fall. In der Sparte \textit{world news} kommen mehrere Sätze am häufigsten vor, in \textit{fifty} am wenigsten. Der Mittelwert für Ausrufezeichen beträgt $0.014$ und die Kategorie \textit{style \& beauty} nimmt das Maximum, die Kategorie \textit{world news} das Minimum an. Fragezeichen kommen in durchschnittlich $0.059$ der Schlagzeilen vor, dabei am häufigsten in \textit{divorce} und am seltensten in \textit{crime}. Anführungszeichen sind mit durchschnittlich $0.127$ von den hier betrachteten Satzzeichen am meisten vertreten. Sie wurden besonders oft in der \textit{entertainment} Sparte genutzt und kamen am seltensten in \textit{education} zum Einsatz. Die Rubrik \say{komplementär} gibt an, zu welchem relativen Anteil keine der betrachteten Symbole vorkommt. Hier ist zu sehen, dass Kategorien wie \textit{entertainment}, \textit{comedy}, \textit{black voices} oder \textit{divorce} häufig Symbole beinhalten, die einen dramatischen Charakter ausdrücken. Sparten wie \textit{fifty}, \textit{food \& drink} und \textit{travel} bleiben mit weniger Symbolen sachlicher. Abbildung \ref{abb:barplotSymbols} zeigt insgesamt, dass Symbole für die Nachrichtensparten eine Rolle spielen und für die in Kapitel \ref{Kap:Bow} und \ref{Kap:Tfidf} beschriebenen \textit{bag-of-words} und \textit{tfidf} (todo, hier entfernen, falls die Algos doch nicht genutzt werden) Ansätze nicht entfernt werden sollten.\\
+mehrere Sätze enthält. Dies ist insgesamt mit einem durchschnittlichen relativen Anteil von $0.051$ selten der Fall. In der Sparte \textit{world news} kommen mehrere Sätze am häufigsten vor, in \textit{fifty} am wenigsten. Der Mittelwert für Ausrufezeichen beträgt $0.014$ und die Kategorie \textit{style \& beauty} nimmt das Maximum, die Kategorie \textit{world news} das Minimum an. Fragezeichen kommen in durchschnittlich $0.059$ der Schlagzeilen vor, dabei am häufigsten in \textit{divorce} und am seltensten in \textit{crime}. Anführungszeichen sind mit durchschnittlich $0.127$ von den hier betrachteten Satzzeichen am meisten vertreten. Sie wurden besonders oft in der \textit{entertainment} Sparte genutzt und kamen am seltensten in \textit{education} zum Einsatz. Die Rubrik \say{komplementär} gibt an, zu welchem relativen Anteil keine der betrachteten Symbole vorkommt. Hier ist zu sehen, dass Kategorien wie \textit{entertainment}, \textit{comedy}, \textit{black voices} oder \textit{divorce} häufig Symbole beinhalten, die einen dramatischen Charakter ausdrücken. Sparten wie \textit{fifty}, \textit{food \& drink} und \textit{travel} bleiben mit weniger Symbolen sachlicher. Abbildung \ref{abb:barplotSymbols} zeigt insgesamt, dass Symbole für die Nachrichtensparten eine Rolle spielen und für die in Kapitel \ref{Kap:Tfidf} beschriebenen \textit{bag-of-words} und \textit{tfidf} (todo, hier entfernen, falls die Algos doch nicht genutzt werden) Ansätze nicht entfernt werden sollten.\\
 \\
 Es folgt nun eine Betrachtung der vorkommenden Wörter im Datensatz. Abbildung \ref{abb:WordcloudAll} zeigt eine \textit{wordcloud}, in der die häufigsten $100$ Wörter aller Kategorien (nach Entfernung von Symbolen und \textit{stopwords}) abgebildet sind.
 
@@ -275,27 +275,81 @@ In der \textit{multiclass}-Klassifikation kann ein Gütemaß für das komplette 
 \[ precision_M = \frac{\sum_{i = 1}^n \frac{tp_i}{tp_i + fp_i} }{l}, \hspace{1cm} recall_M = \frac{\sum_{i = 1}^n \frac{tp_i}{tp_i + fn_i} }{l}\]
 die Maße für das gesamte Modell. Ein Maß, dass \textit{precision} und \textit{recall} kombiniert ist der \textit{fscore}. Mit der unterschiedlichen Durchschnittsbildung ergeben sich
 \[ fscore_{\mu} = \frac{(\beta^2+1) precision_{\mu} recall_{\mu}}{\beta^2 precision_{\mu}+ recall_{\mu}}, \hspace{1cm} fscore_{M} = \frac{(\beta^2+1) precision_{M} recall_{M}}{\beta^2 precision_{M}+ recall_{M}} \].
-Hierbei ist anzumerken, dass $fscore_{\mu}$ Klassen mit vielen Beobachtungen in der Güte begünstigt während für $fscore_M$ alle Kategorien gleich wichtig sind.(todo: $beta$ spezifizieren oder multiclass AUC beschreiben).  In der statistischen Auswertung in Kapitel \ref{Kap:statAus} werden beide Kennzahlen zur Bewertung der Modelle herangezogen.
+Hierbei ist anzumerken, dass $fscore_{\mu}$ Klassen mit vielen Beobachtungen in der Güte begünstigt während für $fscore_M$ alle Kategorien gleich wichtig sind.(todo: $beta$ spezifizieren oder multiclass AUC beschreiben).  In der statistischen Auswertung in Kapitel \ref{Kap:statAus} werden beide Kennzahlen zur Bewertung der Modelle herangezogen (vgl. \cite{sokolova}).\\
 
-\begin{itemize}
-    \item mlogloss/cross entropy, damit nachbarklassen nicht stark bestraft werden
-\end{itemize}{}
+Ein weiteres Maß, um die Güte eines Multiklassifikationsproblems zu bewerten ist die kategorische \textit{cross entropy}. Diese berechnet sich aus
+
+\[ CE = -\sum_{i=1}^N \sum_{j = 1}^n y_{ij} log(p_i(c_j)) \]
+
+(vgl. \cite{murphy}, S.571) wobei $y_{ij} \in \{0,1\}$ indiziert, ob die Beobachtung $i$ der wahren Klasse $j$ zugehörig ist und $p_i(c_j)$ die vom Modell vorgegebene Wahrscheinlichkeit ist, dass Beobachtung $i$ zu Klasse $j$ gehört. Da $y_{ij}$ immer $0$ für alle falschen Klassen ist, entspricht $CE$ der negativen Summe der logarithmierten Wahrscheinlichkeiten der wahren Klassen über alle Beobachtungen. So wird eine geschätzte Wahrscheinlichkeit nahe $0$ für die wahre Klasse hoch und eine hohe Wahrscheinlichkeit trotz einer Fehlklassifikation weniger bestraft. Je sicherer sich das Modell für die wahren Kategorien ist, desto niedrigere Werte wird das Gütemaß annehmen (vgl. \cite{proMachine}, S. 72). 
+Es gilt die \textit{cross entropy} zu minimieren. Sie nimmt ihr Minimum bei $0$ an, wenn für alle Beobachtungen eine Wahrscheinlichkeit von $1$ für die wahre Klasse prognostiziert wird.
+
+todo: test und training eingehen.
 
 \subsection{Repräsentationen der Wörter und Sätze (mit preprocessing der tokens} \label{kap:3.1Wordemb}
-\subsubsection{Bag-Of-Words} \label{Kap:Bow}
-\subsubsection{Term Frequency Inverse Document frequency} \label{Kap:Tfidf}
-\subsubsection{Sequentielle Darstellung}
-\subsubsection{Word-To-Vec Überwacht, Summe von Word-To-Vec}
-\subsubsection{Glove Embeddings} \label{Kap:Glove}
+
+Das Extrahieren von Informationen aus Texten ist keine triviale Aufgabe, für die es viele Methoden gibt. In diesem Unterabschnitt werden einige Methoden aufgezählt, die in dieser Thesis zum Einsatz kommen.
+
+
+\subsubsection{\textit{bag-of-words} und \textit{term frequency inverse document frequency}} \label{Kap:Tfidf}
+
+Bei diesen Methoden werden zuerst für den gesamten Textkorpus ein Vokabular gebildet, das für jedes vorkommende Wort die absolute Häufigkeit des Vorkommens sowie die Anzahl der Dokumente (ein Dokument ist ein Datenpunkt, also eine Schlagzeile) enthält, in der das Wort vorkommt. Aus diesem Vokabular wird anschließend die Datenmatrix $dtm$ (\textit{document-term-matrix}) geformt, die für jede der $N$ Beobachtungen eine Zeile und für jede der $V$ Wörter eine Spalte enthält. Die Einträge der Matrix bestehen aus Werten, die das Aufkommen der Wörter beschreiben. Im simplen \textit{bag-of-words} (kurz: \textit{bow}) Ansatz ist $dtm_{ij} = f_{d_i t_j}$ die Anzahl von Wort $t_j$ in Dokument $d_i$ (vgl. \cite{deepEssentials} S. 117f). Es gibt einige Wörter wie \textit{the} oder \textit{and} die häufig vorkommen aber eventuell nicht wichtig sind. Diese \textit{stopwords} können für die \textit{bow} Methode entfernt werden. Doch generell ist dies nicht der beste Ansatz, da manche Wörter in einigen Dokumenten eine höhere Bedeutung haben können als in anderen. \\
+
+Ein Ansatz, der diese Problematik berücksichtigt ist \textit{term frequency inverse document frequency} (kurz: \textit{tf-idf}). Hierbei werden die Gewichte $dtm_{ij}$  bei oft benutzten Ausdrücken verringert und erhöht für Wörter, die insgesamt selten benutzt werden (vlg. \cite{textMiningR} S.29). Die \textit{tf-idf} für das Dokument $d_i$ und das Wort $t_j$ berechnet sich aus 
+\[tfidf(d_i, t_j) = tf(d_i,t_j) \cdot idf(t_j)  \].
+Sowohl für die \textit{term-frequency} $tf$ als auch für die \textit{inverse-document-frequency} $idf$ gibt es verschiedene Berechnungsmöglichkeiten wobei in dieser Thesis folgende Formeln genutzt werden.
+Die \textit{augmented-term-frequency}
+
+\[tf(d_i,t_j) = 0.5 +  0.5 \cdot \frac{f_{d_i t_j}}{max \{ f_{d_i t_j'}: t_j' \in d_i \}} \].
+
+berücksichtigt eine Verzerrung bei längeren Dokumenten indem durch das Maximum der vorkommenden Wörter in dem Dokument dividiert wird. Der Summand $0.5$ und Multiplikator $0.5$ dienen zur Normalisierung. Als Quotient zwischen der Anzahl der Dokumente $N$ im Korpus und der Anzahl der Dokumente die das Wort enthalten ist
+
+\[idf(t_j) = log(\frac{N}{\# \{d_i: t_j \in d_i \}}) \]
+
+ein geeignetes Maß (vgl. \cite{deepEssentials} S. 118). Unter Nutzung von sowohl \textit{bow} als auch \textit{tfidf} für die Repräsentation von Wörtern vernachlässigt man die Reihenfolge in den Dokumenten (vgl. \cite{deepEssentials} S. 117). Die nachfolgend beschriebenen Methoden berücksichtigen hingegegen die Reihenfolge der Wörter in einem Satz.
+
+
+\subsubsection{\textit{GloVe: Global vectors for representation of words}} \label{Kap:Glove}
+
+Eine weitere Methode zur numerischen Repräsenation von Texten sind \textit{word embeddings}, bei denen Wörter zu Vektoren fester Länge mit numerischen Werten codiert werden. Mittlerweile haben sich \textit{word embeddings} als präferierte Methode für alle Bereiche der Sprachverarbeitung im \textit{machine-learning} durchgesetzt. Die beiden bekanntesten Methoden um \textit{word embeddings} zu generieren sind \textit{word2vec} und \textit{GloVe} (vgl. \cite{keras}, S. 139). Obwohl \textit{word2vec} auf dem Lernen durch ein neuronales Netz und \textit{GloVe} auf der Zählung des Vorkommens von Wörtern im Kontext basiert, sind die beiden Verfahren von der grundsätzlichen Herangehensweise und den Resultaten ähnlich. Beide Methoden konstruieren einen Vektorraum, in dem die Position eines Worts durch den Kontext bestimmt wird, in dem das Wort im Textkorpus auftritt.
+\textit{GloVe} liefert im Vergleich zu \textit{word2vec} generell etwas bessere Resultate und ist mit Paralellisierung schneller zu berechnen (vgl. \cite{keras}, S. 156). Aus diesen Gründen wird in dieser Thesis \textit{GloVe} verwendet und im Folgenden beschrieben. \\
+Die Methode nutzt ein unüberwachtes Lernen zur Konstruktion der Vektoren. Zuerst wird eine Matrix $R$ konstruiert, die in den Zeilen die Wörter des Vokabulars enthält. Die Spalten enthalten ebenso die Wörter des Vokabulars, allerdings als Kontext verstanden. In den Einträgen der Matrix stehen nun die Anzahl des Vorkommens der Wörter (Zeilen) im jeweiligen Kontext (Spalten). Ob ein Wort im Kontext vorkommt, ist so zu verstehen, dass es in einem vom Anwender wählbaren Fensterbereich um das Kontextwort enthalten ist. Zur Veranschaulichung sei folgender Satz gegeben: \textit{these quotes from kids are hilarious, adorable and oddly insightful}. So kommt für einen symmetrischen Bereich von $2$ dass Wort \textit{hilarious} im Kontext von \textit{kids} einmal vor, wobei \textit{insightful} nicht im Kontext von \textit{kids} vorkommt. 
+Die Matrix $R$ wird nun in das Produkt von 2 Matrizen $P$ und $Q$ zerlegt, die multipliziert eine fast identische Matrix $\Tilde{R}$ ergeben:
+
+\begin{equation*}
+\underset{N \times N}{R} = \underset{N \times F}{P} \cdot \underset{F \times N}{Q} \approx  \underset{N \times N}{\Tilde{R}} 
+\end{equation*}
+
+Die Matrix $P$ enthält in den Zeilen Wörter und in den Spalten Wort-Vektoren und die Matrix $Q$ in den Zeilen Wort-Vektoren und in den Spalten Kontext-Wörter. Sowohl $P$ als auch $Q$ werden mit zufälligen Werten gefüllt und die Matrix $\Tilde{R}$ berechnet. Mithilfe des stochastischen Gradienten-Abstieg wird nun der Inhalt von $P$ und $Q$ verändert, mit dem Ziel die Differenz zwischen $\Tilde{R}$ und $R$ zu minimieren. Dies ist ein numerischer iterativer Prozess, der wiederholt wird, bis der Fehler eine vorgegebene untere Grenze erreicht. Die Matrix $P$ enthält nun die gewünschten \textit{word-embeddings} (vgl. \cite{keras}, S. 155f). Für eine detailierte Beschreibung der Methode sei auf \cite{glovePaper} verwiesen. Die Dimension $F$ muss vom Anwender festgelegt werden. Es ist möglich diese Vektoren auf dem vorliegenden Datensatz zu trainieren, wenn der Textkorpus groß genug ist. In dem Fall des \textit{news category dataset} mit $200847$ ist dies durchaus plausibel. Das Trainieren der Vektoren erfolgte mit dem \texttt{R}-Paket \texttt{text2vec} (\cite{text2vec}) unter Verwendung der Parameter $skip\_grams\_window = 5$ für den symmetrischen Bereich des Kontextworts und die Dimension der Vektoren von $F = word\_vectors\_size = 50$.\\
+Eine Alternative zum Training der \textit{word-embeddings} auf dem vorliegenden Textkorpus ist der Griff zu einem der vortrainierten Datensätze, die von \cite{gloveOnline} zur Verfügung gestellt worden. Diese Vektoren wurden auf massiven Datenmengen trainiert. Für diese Arbeit wurden 2 Datensätze mit vor-trainierten Wortvektoren des \textit{GloVe} Projekts genutzt: Ein auf Wikipedia mit $6$ Milliarden Dokumenten trainierter Datensatz mit einer Länge der Vektoren von $F = 50$ (\cite{gloveWiki}) und ein auf $42$ Milliarden aus dem Internet stammenden Textdaten mit $F = 300$ Dimensionen (\cite{gloveCommon}).\\
+
+Allgemein haben die resultierenden Vektoren einige nützliche Eigenschaften. Als Ähnlichkeitsmaß zwischen 2 Vektoren kann das Kreuzprodukt genutzt werden. Wörter die einander ähnlich sind, sind auch im $F$-dimensionalen Vektorraum nahe beieinander angeordnet. Falls die \textit{word-embeddings} auf großen Datenmengen trainiert worden sind, können die Vektoren sogar semantische Beziehungen repräsentieren. So kann beispielsweise \textit{walking} zu \textit{walked} dieselbe Beziehung haben wie \textit{swimming} zu \textit{swam} (vlg. \cite{deepEssentials}, S. 122).
+
+
+\begin{itemize}
+\item Rcore team zitieren
+\item R packages für Seq, tfidf und bow hinzufügen
+    \item unsupervised auf dem korpus lernen
+    \item pretrained wikipedia
+    \item pretrained crawled
+\end{itemize}{}
+
+
+\subsubsection{Sequentielle Darstellung} \label{Kap:Seq}
+
+Eine weitere Möglichkeit, Sätze und Wörter zu repräsentieren ist als Sequenz von Indices. So bekommt jedes Wort eine natürliche Zahl aus dem Vokabular zugeordnet. Durch die Aneinanderreihung dieser Indices wird der dementsprechende Satz als Sequenz von natürlichen Zahlen dargestellt. Damit die codierten Datenpunkte jeweils die gleiche Dimension besitzen um zu einer Matrix geformt zu werden, hat jeder Vektor eine feste Länge. Dies kann die maximale Anzahl von Wörtern sein, die ein Satz enthält. Hier wurde jedoch als Kriterium $maxW$ die Anzahl Wörter genommen, die $99.9$ Prozent der News Schlagzeilen nicht überschreiten.
+Da für jede Beobachtung der Vektor für die verbleibenden Wörter mit Nullen aufgefüllt wird, wird so nicht unnötig Speicherplatz verbraucht. Die resultierende Datenmatrix hat die Dimensionen $N \times maxW$. Diese kann als Trainingsdatensatz für ein klassisches \textit{machine-learning} Modell wie \textit{random Forest} dienen, oder als Input für neuronale Netze wie \textit{CNN} oder \textit{LSTM} dienen. Eine \textit{embedding} Zwischenschicht konvertiert die Indizes zu Wort Vektoren einer vorgegebenen Größe $WVSize$ und jeder Datenpunkt wird intern zu einer Matrix der Dimension $maxW \times WVSize$ während des Trainieren des Netzes gelernt. Das Bilden der Wort Vektoren geschieht in diesem Fall durch überwachtes Lernen und nicht durch unüberwachtes Lernen wie bei \textit{GloVe} in Kapitel \ref{Kap:Glove} (vgl. \cite{keras}, S.159f).\\
+
+todo: notation der parameter checken
 
 
 \subsection{Algorithmen und Verfahren}
 
 \subsubsection{Extreme Gradient Boosting}
 \subsubsection{Random Forest}
-\subsubsection{Neuronales Netz: Multi-Layer-Perception}
-\subsubsection{Neuronales Netz: Convolutional Neural Net}
-\subsubsection{Neuronales Netz: Long-Short-Term-Memory Neural Net}
+\subsubsection{Multi-Layer-Perceptron Neural Net}
+\subsubsection{Convolutional Neural Net}
+\subsubsection{Long-Short-Term-Memory Neural Net}
 
 \begin{itemize}
     \item grafik über kombination von word embeddings und Algorithmen (was kann mit was verwendet werden)
@@ -304,7 +358,9 @@ Hierbei ist anzumerken, dass $fscore_{\mu}$ Klassen mit vielen Beobachtungen in 
 
 \section{Statistische Auswertung}\label{Kap:statAus}
 
-\subsection{Vorauswahl der Verfahren}
+Die Auswertung und Exploration der Daten sowie die Programmierung der Algorithmen erfolgte ausschließlich mit der Statistik-Software \texttt{R} (R Core Team, 2019).
+
+\subsection{Framework und Vorauswahl der Verfahren}
 
 \begin{itemize}
     \item grafik mit framework zu train/test/validation (10 prozent vorauswahl benchmarken, dann auf 90 prozent traintest/tuning. Die selben Modelle dann auf 10 prozent valdata validieren? 10 prozent war, weil dann in der kleinsten klasse noch mindestens $100$ Beobachtungen sind.

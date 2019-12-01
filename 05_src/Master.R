@@ -56,10 +56,15 @@ prepareDataSeq(inPath = "03_computedData/03_integratedData/",
                outPath = "03_computedData/04_preparedData/", 
                subsetSize = "10pc", mergeSD = FALSE)
 
+prepareDataGlove(inPath = "03_computedData/03_integratedData/",
+                 outPath = "03_computedData/04_preparedData/", 
+                 subsetSize = "10pc", word2VecSize = 50, mergeSD = FALSE,
+                 gloveName = "glove.6B.50d.txt")
 
 prepareDataGlove(inPath = "03_computedData/03_integratedData/",
                  outPath = "03_computedData/04_preparedData/", 
-                 subsetSize = "10pc", word2VecSize = 50, mergeSD = FALSE)
+                 subsetSize = "10pc", word2VecSize = 300, mergeSD = FALSE,
+                 gloveName = "glove.42B.300d.txt")
 
 
 # binary

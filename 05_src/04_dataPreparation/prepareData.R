@@ -139,8 +139,8 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
                    remove_punct = FALSE, remove_symbols = FALSE, 
                    remove_hyphens = FALSE)
   
-  # remove stopwords because are inducing meaning
-  tokens <- tokens_remove(tokens, c(stopwords("english")))
+  # dont remove stopwords because are inducing meaning
+  #tokens <- tokens_remove(tokens, c(stopwords("english")))
   
   # reduce to tokens > 0
   filter <- lengths(tokens) > 0
@@ -293,15 +293,16 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
   # Use our filtered vocabulary
   vectorizer <- text2vec::vocab_vectorizer(vocab)
   # use window of 5 for context words
-  tcm <- text2vec::create_tcm(itoken, vectorizer, skip_grams_window = 2L)
+  tcm <- text2vec::create_tcm(itoken, vectorizer, skip_grams_window = 5L,
+                              skip_grams_window_context = "symmetric")
   
   glove <- text2vec::GlobalVectors$new(word_vectors_size = word2VecSize, 
                                        vocabulary = vocab, x_max = 10, 
-                                       learning_rate = 0.1 * 100/word2VecSize,
+                                       #learning_rate = 0.1 * 100/word2VecSize,
                                        alpha = 0.75, lambda = 0)
   
   print("creating glove fit")
-  glove$fit_transform(tcm, n_iter = 20)
+  glove$fit_transform(tcm, n_iter = 30)
   
   wordVectors <- as.data.table(glove$components)
 
@@ -525,7 +526,8 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
                             outPath = "03_computedData/04_preparedData/",
                             subsetSize = c("1pc", "10pc", "100pc"),
                             word2VecSize = 50,
-                            mergeSD = FALSE){
+                            mergeSD = FALSE,
+                            gloveName = "glove.6B.50d.txt"){
   assertString(inPath)
   assertString(outPath)
   subsetSize <- match.arg(subsetSize)
@@ -585,8 +587,7 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   tcm <- text2vec::create_tcm(itoken, vectorizer, skip_grams_window = 2L)
   
   # insert glove here
-  glove <- fread(paste0("02_initialData/glove.6B.", 
-                        word2VecSize, "d.txt"), quote="")
+  glove <- fread(paste0("02_initialData/", gloveName), quote = "")
   
   # see how many words are in glove of the data words
   notFound <- as.data.table(vocab[!(vocab$term %in% glove$V1),])

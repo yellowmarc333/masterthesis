@@ -13,7 +13,7 @@ mod_TFIDF_RF_10 <- predictRF(dataPath, fileName,
                         sparse = TRUE) # 0.44358
 
 fileName <- "TFIDF-10pc-FALSE-FALSE.rds"
-mod_TFIDF_MLP_10 <- predictMLP(dataPath, fileName, epochs = 10) # 0.500
+mod_TFIDF_MLP_10 <- predictMLP(dataPath, fileName, epochs = 10) # 0.4913
 
 mod_TFIDF_LogReg_10 <- predictLogReg(dataPath, fileName) # 0.495
 
@@ -44,6 +44,8 @@ mod_Seq_LSTMSeq_10 <- predictLSTMSeq(dataPath, fileName,
 fileName <- "Seq-10pc-FALSE.rds"
 mod_Seq_RF_10 <- predictRF(dataPath, fileName, indexName, num.trees = 10) #0.221
 mod_Seq_XG_10 <- predictXG(dataPath, fileName, nrounds = 30) #0.219
+mod_Seq_MLP_10 <- predictMLP(dataPath, fileName,
+                             epochs = 12) # 0.1639
 
 # Sums of word2vec 10PC - 28-11
 fileName3 <- "W2VSums-10pc-50-FALSE.rds"
@@ -65,7 +67,16 @@ mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath,
                                                 fileName = fileName, 
                           epochs = 15) # 0.5126
 
+# Array Glove crawled 10PC 30-11
+fileName <- "GloveArray-10pc-300-FALSE.rds"
+mod_GloveArray_CNNArray_10 <- predictCNNArray(dataPath, fileName = fileName, 
+                                              epochs = 15) # 0.5140
+# Array LSTM 10PC 28-11
+mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath, 
+                                                fileName = fileName, 
+                                                epochs = 15) # 0.5494 
 
+test <- readRDS("03_computedData/04_preparedData/GloveArray-10pc-300-FALSE.rds")
 
 #----------------------- 100 percent models --------------------------------####
 

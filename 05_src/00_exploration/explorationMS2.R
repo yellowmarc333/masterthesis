@@ -1,19 +1,15 @@
 # next steps/ to dos:
 
-
 # [vor runter schreiben von methoden]
-# accuracyByClass fixen tfidf bzw andere
-# can't zu cant ersetzen option?, stopwords erweitern
+# can't statt von can not zu cant ersetzen option?, stopwords erweitern
 # validation data muss genauso preprocessed sein wie train Data
-valData <- read.fst("03_computedData/03_integratedData/valData.fst",
-                    as.data.table = TRUE)
 # in model predictors the only predict option einfügen (100% trainindizes) und
 # valdata seperat angeben (val. durchgehen)
-# preparation functions und predictors durchgehen und schauen dass überall same
-# (auch naming)
-# in bag of words vielleicht doch nicht symbols entfernen? und stopwords
+
 # [runterschreiben]
+# bei word embeddings R paket dazuschreiben
 # word embeddings from software, algorithms
+# tuning erklären bei NNs mit epochen
 
 # [vor finaler modellrechnung]
 # - framework bzgl splits muss 100%ig abgeklärt sein
@@ -21,25 +17,26 @@ valData <- read.fst("03_computedData/03_integratedData/valData.fst",
 #   fragen mehr aufkommen
 
 
-# [exploration]
-# word clouds for biggest categorys (parents/parenting)
-# (arts and style, worldpost/The worldpost)
+# [auswertung]
 # exploration function for word vectors (relate to wordclouds)
 
 # [liste für groll:]
 
 # wie wird die anzahl der epochen/ nrounds gewählt (ist ja schon tuning)
-# guetemass wahrscheinlichkeit der richtigen klasse implementieren
+# guetemass wahrscheinlichkeit der richtigen klasse implementieren (mlogloss)
 # validation/test bei xgboost und RF checken (muss gleich sein) (wird watchlist eigentlich gebraucht)
 #     im falle RF wird ja auf vollen 90% trainiert, auf 10% predicted
 #     im falle XG wird auf 80% von 90% trainiert, auf 10% predicted
 #     watchlist ist nur zum tunen.
 # framework update (RF und XGBoost watchlist/outofbag, aber gleiche trainingsmenge?) ist rechenbar
-# kategorien zusammenlegen Schema (vom menschen nicht auseinanderhaltbar, gemeinsame words)
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
-#xx seed problem lösen
+# xxin bag of words vielleicht doch nicht symbols entfernen? und stopwords A: in tfidf keine stopwords
+#xx preparation functions und predictors durchgehen und schauen dass überall same
+#xx (auch naming)
+# xxaccuracyByClass fixen tfidf bzw andere
+# xx seed problem lösen
 # xx neuen encoding Fehler beheben (uniform_enc = FALSE setzen)
 # xx prof gliederung schicken
 # xxlogloss überall reinnehmen + f1 score, + recall/precision (evaluation function schreiben)

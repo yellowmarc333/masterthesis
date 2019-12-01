@@ -706,6 +706,7 @@ predictCNNArray <- function(dataPath, fileName,
   names(testLabelNumeric) <- testLabelRaw
   testLabel <- to_categorical(testLabelNumeric)
   
+
   # building model with layers
   model <- keras_model_sequential()
   model %>% 

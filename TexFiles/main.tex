@@ -11,6 +11,7 @@
 \usepackage{array}
 \usepackage{dirtytalk}
 \usepackage{amsmath}
+\usepackage{bm}
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{amsfonts}
@@ -39,7 +40,7 @@
 \begin{figure}[t]
 \begin{flushright}
 \includegraphics[width = 7cm,  keepaspectratio]{Images/TULogo.png}
-\label{fig2}
+
 
 \end{flushright}
 \end{figure}
@@ -327,11 +328,9 @@ Allgemein haben die resultierenden Vektoren einige nützliche Eigenschaften. Als
 
 
 \begin{itemize}
-\item Rcore team zitieren
 \item R packages für Seq, tfidf und bow hinzufügen
-    \item unsupervised auf dem korpus lernen
-    \item pretrained wikipedia
-    \item pretrained crawled
+\item erwähnen wie der Datenpunkt dann geformt wird.
+\item quelle finden für summe der wort vektoren
 \end{itemize}{}
 
 
@@ -347,7 +346,69 @@ todo: notation der parameter checken
 
 \subsubsection{Extreme Gradient Boosting}
 \subsubsection{Random Forest}
+
+\subsection{Neuronale Netze}
+
+
+
 \subsubsection{Multi-Layer-Perceptron Neural Net}
+
+Dieser Abschnitt basiert größtenteils auf \cite{deepEssentials}, S.60- todo).
+Das \textit{Multi-Layer-Perceptron} (kurz \textit{MLP}) ist die einfachste Form eines neuronalen Netzes. Anhand des \textit{MLP} wird im Folgenden beschrieben, wie die Struktur und die Bestandteile eines neuronalen Netzes aussehen, wie es die Parameter lernt und welche Komponenten besonders wichtig sind für die erfolgreiche Anwendung. Abbildung \ref{abb:MLPScreen} zeigt die klassifische Struktur des \textit{MLP}:
+
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width = 10cm,  keepaspectratio]{Images/MLPScreenDeepLearningEssentials.PNG}
+\label{abb:MLPScreen}
+\caption{\textit{fully-connected feed-forward} Netz mit 2 Zwischenschichten  (\cite{deepEssentials}, S. 60) }
+\end{center}
+\end{figure}
+
+Das Netz ist organisiert in verschiedenen Schichten, die jeweils aus Neuronen (auch Knoten oder Zellen genannt) bestehen. Die Eingangsschicht (\textit{input layer}) besteht meistens aus den als numerischen Werten codierten Trainingsdaten und enthält entsprechend viele Neuronen. Darauf folgen mehrere Zwischenschichten (\textit{hidden layer}. Die Zwischenschichten können unterschiedliche Formen je nach Ziel und Architektur des Netzes haben und enthält oft eine vom Nutzer wählbare Anzahl von Neuronen. Die Ausgangsschicht (\textit{output layer}) schließt das Netz ab. Wieviele Knoten es enthält, ist abhängig von der Problemstellung. Im Falle einer Klassifikation mit $n$ Klassen enthält es ebenso viele Zellen. Nun bedeutet \textit{fully-connected}, dass jedes Neuron mit allen Neuronen aus der vorherigen und nachfolgenden Schicht verbunden ist. Die Verbindungslinien werden durch Gewichte repräsentiert, die den Einfluss des Eingangsneuron auf das Ausgangsneuron beschreiben. Bei einem \textit{feed-forward} Netz werden nur Signale in eine Richtung  zugelassen und zwar von Eingangs- bis Ausgangsschicht. Jede Schicht außer der Eingangsschicht besitzt in den Neurononen eine Aktivierungsfunktion, die bestimmt, welcher Anteil des Eingangssignal als Ausgangssignal weitergeleitet wird. Die Aktivierungsfunktion sollte differenzierbar sein, da das Netzwerk im Prozess des Lernens Gradienten berechnet. Dieser Aspekt soll später detailliert erläutert werden. Von der Vielzahl an verschiedenen Aktivierungsfunktionen werden folglich diejenigen vorgestellt, die in dieser Arbeit benutzten neuronalen Netze verwendet werden. Die \textit{rectified linear unit} (kurz \textit{relu}) hat in den letzten Jahren an Beliebtheit zugenommen.
+
+\[\sigma(x) = 
+\begin{cases}
+max(0,x), & x >= 0 \\
+0, & x <0
+\end{cases}{}
+\]
+
+Es wurde gezeigt, dass Konvergenz unter Nutzung von \textit{relu} bis zu 6-Mal schneller erreicht werden kann. Außerdem benötigt ihre Berechnung weniger Rechenleistung als klassische Aktivierungsfunktionen. \textit{relu} wird heutzutage aus diesen Gründen in den meisten neuronalen Netzen in den Zwischenschichten verwendet. Da die Ausgangssignale nicht im Wahrscheinlichkeitsintervall $\left[0, 1\right]$ liegt, kann sie nicht für die Ausgangsschicht verwendet werden. Hierbei wird im Klassifikationsfall zur \textit{softmax} Aktivierungsfunktion gegriffen. 
+
+\[p(y = j |z_j) = \phi(z_j) = \frac{e^{z_j}}{\sum_j^n z_j} \]
+
+Hierbei bezeichnet $z_j$ das Ausgangssignal des Neurons der $j$-ten Klasse und $y$ die wahre Klasse. $\phi$ normiert die Ausgangssignale für jedes der $n$ Neuronen in der Ausgangsschicht und modelliert für jede der Klassen eine Art Wahrscheinlichkeit in $\left[0, 1\right]$. Insgesamt ergibt sich $\sum_{j = 1}^n \phi(z_j) = 1$. Für die in dieser Arbeit verwendeten neuronalen Netze wird jeweils eine Ausgangsschicht mit $n = 35$ Knoten gewählt und die \textit{softmax} Aktivierungsfunktion zur Transformation der Eingangssignale genutzt.\\
+\\
+Nachdem nun die grundlegende Architektur des Netzwerkes und die Aktivierungsfunktionen erläutert wurden, soll nun der Lernprozess durch den Gradientenabstieg und die damit verbundene Anpassung der Gewichte beschrieben werden.\\
+
+Die Optimierung des Netzwerkes geht insofern von statten, dass die Funktion $f(x)$ bezüglich einer Verlustfunktion minimiert wird, indem $x$ geändert wird. Der Wert, der $f$ minimiert, wird notiert als 
+\[x^\ast = argmin f(x)\]
+Seien $x, y = f(x) \in \mathbb{R}$, so ist $f'(x) = \frac{\mathop{dx}}{dy}$ die Steigung in $x$ und gibt an, in was für einer Änderung $f(x)$ bei einer kleinen Änderung von $x$ resultiert. Unter Kenntnis von $f'(x)$ kann $f(x)$ schrittweise durch eine Änderung von $x$ in die Gegenrichtung der Ableitung minimiert werden. Diese Methode ist bekannt als Gradientenabstieg. Ist $f'(x) = 0$, so handelt es sich entweder um ein Minimum, Maximum oder einen Sattelpunkt. Ziel des Gradientenabstieg ist es, ein globales Minimum zu finden. Es ist möglich, dass die Funktion auch einige lokale Minima besitzt, die in denen $f(x)$ in einer gewissen Umgebung am kleinsten ist.
+
+
+In einem Netzwerk mit 2 Zwischenschichten sei $(a_0, y)$ die Ein- und Ausgangsvektoren und $(w_1, b_1)$, $(w_2, b_2)$ die Verbindungsgewichte und \textit{bias} der Zwischenschichten. Der erste Schritt ist die Initialisierung der Gewichte und der \textit{bias} Parameter. Die Gewichte werden mit kleinen zufällige Werten initialisiert und die \textit{bias} Parameter entweder auf $0$ gesetzt oder auch mit kleinen positiven Zufallszahlen belegt (vgl. \cite{deepL}, S. 177). Eine Ausnahme stellt die Nutzung eines vortrainierten Netzes dar, das bereits gelernte Gewichte enthält. Als nächstes werden die Eingangsvektoren im Rahmen der \textit{forward-propagation} vorwärts durch das Netz geleitet. Die Berechnung erfolgt sukzessive mit
+\begin{align*}
+    z_1 &= a_0 \cdot w_1 + b_1 \\
+    a_1 &= \sigma(z_1) \\
+    z_2 &= a_1 \cdot w_2 + b_2 \\
+    a_2 &= \sigma (z_2)
+\end{align*}{}
+$z_1, z_2$ sind die Vektoren, die in den Zwischenschichten eintreffen und $a_1, a_2$ die Signale, die die Neuronen der Zwischenschichten wieder verlassen. Anschließend wird der Fehler des Netzwerkes berechnet mit 
+\[ \delta a = a_2 - y \]
+oder einer anderen Kostenfunktion, die passend zum Problem ist.
+
+\begin{itemize}
+    \item backpropagation
+    \item vanishing gradient problem (bei relu eingehen?
+    \item batchsize/
+    \item learning rate
+    \item dropout
+    \item batch normalization
+    \item dead neurons, lieber leaky relu?
+\end{itemize}{}
+
+
 \subsubsection{Convolutional Neural Net}
 \subsubsection{Long-Short-Term-Memory Neural Net}
 

@@ -1,6 +1,15 @@
 # next steps/ to dos:
 
 # [vor runter schreiben von methoden]
+# jauß's korrektur runterbrechen
+# groll email schreiben mit explorationspart + titeländerung + methodenteil
+# kommt nach
+# wordembeddings korrigieren und jan/marcel schicken
+
+# [coding]
+# f1 scores wie in methoden umsetzen beim coding
+# explaining bei bag-of- words checken
+# explaining bzgl cnn filtern checken
 # can't statt von can not zu cant ersetzen option?, stopwords erweitern
 # validation data muss genauso preprocessed sein wie train Data
 # in model predictors the only predict option einfügen (100% trainindizes) und

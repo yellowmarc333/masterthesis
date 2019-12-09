@@ -53,6 +53,8 @@ predictMLP <- function(dataPath, fileName,
     # Add a vanilla hidden layer:
     layer_dense(units = 100) %>%
     
+    layer_batch_normalization() %>%
+    
     # Apply 20% layer dropout
     layer_dropout(0.2) %>%
     layer_activation("relu") %>%
@@ -482,7 +484,7 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
   assertString(fileName)
   assertFlag(upSampling)
   
-  
+
   print("read in Data")
   data <- readRDS(paste0(dataPath, fileName))
   assertList(data)
@@ -575,7 +577,7 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
   if (sparse){
     # quickfixes for new tfidf method
     if (class(trainData) != "dgCMatrix") {
-      trainData[is.na(data)] <- 0
+      trainData[is.na(trainData)] <- 0
       trainData <- as(trainData, "dgCMatrix")
       
       testData[is.na(testData)] <- 0
@@ -714,26 +716,28 @@ predictCNNArray <- function(dataPath, fileName,
     # Word group filters of size filter_length:
     layer_conv_1d(input_shape  = list(maxWords, channels),
                   data_format = "channels_last",
-      filters = 50, kernel_size = 2, 
+      filters = 100, kernel_size = 2, 
       padding = "same", activation = "relu", strides = 1,
       name = "conv1"#, trainable = FALSE
     ) %>%
-    layer_conv_1d(filters = 100, kernel_size = 2,
-                  padding = "same", activation = "relu",
-                  strides = 1,
-                  name = "conv2") %>%
     layer_conv_1d(filters = 100, kernel_size = 3,
                   padding = "same", activation = "relu",
                   strides = 1,
-                  name = "conv3") %>%
+                  name = "conv2") %>%
     layer_conv_1d(filters = 100, kernel_size = 4,
+                  padding = "same", activation = "relu",
+                  strides = 1,
+                  name = "conv3") %>%
+    layer_conv_1d(filters = 100, kernel_size = 5,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv4") %>%
     layer_global_max_pooling_1d() %>%
+    # layer_average_pooling_1d() %>%
+    # layer_flatten() %>%
     
     # Add a vanilla hidden layer:
-    layer_dense(100) %>%
+    #layer_dense(100) %>%
     
     # Apply 20% layer dropout
     layer_dropout(0.2) %>%
@@ -1148,26 +1152,30 @@ predictLSTMArray <- function(dataPath, fileName,
   model <- keras_model_sequential() %>%
     # Add a Convolution1D, which will learn filters
     # Word group filters of size filter_length:
-    layer_conv_1d(input_shape  = list(maxWords, channels),
-                  data_format = "channels_last",
-                  filters = 50, kernel_size = 2, 
-                  padding = "same", activation = "relu", strides = 1,
-                  name = "conv1"#, trainable = FALSE
-    ) %>%
-    bidirectional(layer_lstm(units = 128)) %>%
+    # layer_conv_1d(input_shape  = list(maxWords, channels),
+    #               data_format = "channels_last",
+    #               filters = 50, kernel_size = 2, 
+    #               padding = "same", activation = "relu", strides = 1,
+    #               name = "conv1"#, trainable = FALSE
+    # ) %>%
+    # bidirectional(layer_lstm(units = 128)) %>%
+    bidirectional(input_shape =  list(maxWords, channels),
+                  layer_lstm(units = 256)) %>%
     layer_dropout(rate = 0.4) %>% 
+    layer_activation("relu") %>%
     
-    # Add a vanilla hidden layer:
-    layer_dense(units = 100) %>%
+    # # Add a vanilla hidden layer:
+    # layer_dense(units = 100) %>%
     
     # Apply 20% layer dropout
-    layer_dropout(0.2) %>%
+    #layer_dropout(0.2) %>%
     layer_activation("relu") %>%
     
     # Project onto a single unit output layer, and squash it with a sigmoid
     layer_dense(units = ncol(trainLabel),
                 activation = "softmax", 
                 name = "predictions")
+  
   # Compiling model
   model %>% compile(
     loss = 'categorical_crossentropy',

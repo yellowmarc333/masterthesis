@@ -7,13 +7,21 @@ list.files(dataPath)
 # TFIDF 10pc #15-10
 fileName <- "TFIDF-10pc-TRUE-FALSE.rds"
 mod_TFIDF_XG_10 <- predictXG(dataPath, fileName,
-                        sparse = TRUE, nrounds = 30) #0.423
+                        sparse = TRUE, nrounds = 70) #0.455
 
 mod_TFIDF_RF_10 <- predictRF(dataPath, fileName, 
-                        sparse = TRUE) # 0.44358
+                        sparse = TRUE, num.trees = 3000) # 0.443 (3k trees tried)
 
 fileName <- "TFIDF-10pc-FALSE-FALSE.rds"
-mod_TFIDF_MLP_10 <- predictMLP(dataPath, fileName, epochs = 10) # 0.4913
+# now tuning
+mod_TFIDF_MLP_10 <- predictMLP(dataPath, fileName, epochs = 10) 
+# 1: std 0.4946
+# 2: with activation = relu everywhere: 0.4703
+# 3: 1 with batch norm 48,88
+# 4: 1 with dropout 0.3 0.4816
+# 5: 1 with learning rate = 0.0001: 0.4791
+# 6: 1 with optimizer rmsprop, 0.4924
+
 
 mod_TFIDF_LogReg_10 <- predictLogReg(dataPath, fileName) # 0.495
 
@@ -70,13 +78,26 @@ mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath,
 # Array Glove crawled 10PC 30-11
 fileName <- "GloveArray-10pc-300-FALSE.rds"
 mod_GloveArray_CNNArray_10 <- predictCNNArray(dataPath, fileName = fileName, 
-                                              epochs = 15) # 0.5140
+                                              epochs = 6) 
+# 1)tuning: normal 0.5264, 7 am besten mit 0.5355 (epoche 4)
+# 2, 1 mit 2x 50 vanilla layer : 0.5212
+# 3, 1 ohne vanillas: 0.5330
+# 4, 3 mit average pooling: und flatten: 0.5106
+# 5, 3 mit filter size 128, 64, 32, 16: 0.5001
+# 6, 3 mit filter size umgekehrt 128, 64, 32, 16: 0.5106
+# 7, 3 mit 100, 100, 100, 100 0.5317
+# 8, 7 mit kernels 2, 3, 4, 5, 0.5355
+# 9, 8 + neues layer mit 6 kernels 0.5129
+
 # Array LSTM 10PC 28-11
 mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath, 
                                                 fileName = fileName, 
-                                                epochs = 15) # 0.5494 
+                                                epochs = 8) # 0.5494 
+# tuning:
+# 1: ohne densenet 0.5449
+# 2: 1 ohne conv net 0.5701
+# 3: 2 mit 265 units 0.5657
 
-test <- readRDS("03_computedData/04_preparedData/GloveArray-10pc-300-FALSE.rds")
 
 #----------------------- 100 percent models --------------------------------####
 

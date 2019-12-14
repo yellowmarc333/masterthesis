@@ -1264,7 +1264,7 @@ ensembleMaxProb <- function(..., truth){
   # todo: fix hardcoding here
   confusionMatrix <- matrix(table(factor(predictions, levels = levels(truth)),
                            factor(truth, levels = levels(truth))), 
-                           ncol = 35)
+                           ncol = length(levels(truth)))
   row.names(confusionMatrix) <- levels(truth)
   
  return(list(acc = accuracy,

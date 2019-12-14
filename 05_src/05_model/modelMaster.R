@@ -10,7 +10,7 @@ mod_TFIDF_XG_10 <- predictXG(dataPath, fileName,
                         sparse = TRUE, nrounds = 70) #0.455
 
 mod_TFIDF_RF_10 <- predictRF(dataPath, fileName, 
-                        sparse = TRUE, num.trees = 3000) # 0.443 (3k trees tried)
+                        sparse = TRUE, num.trees = 500) # 0.443 (3k trees tried)
 
 fileName <- "TFIDF-10pc-FALSE-FALSE.rds"
 # now tuning
@@ -92,11 +92,12 @@ mod_GloveArray_CNNArray_10 <- predictCNNArray(dataPath, fileName = fileName,
 # Array LSTM 10PC 28-11
 mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath, 
                                                 fileName = fileName, 
-                                                epochs = 8) # 0.5494 
+                                                epochs = 5) # 0.5494 
 # tuning:
 # 1: ohne densenet 0.5449
 # 2: 1 ohne conv net 0.5701
 # 3: 2 mit 265 units 0.5657
+# 4: 2 mit nadam 0.5706
 
 
 #----------------------- 100 percent models --------------------------------####

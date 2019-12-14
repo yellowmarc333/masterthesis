@@ -25,36 +25,19 @@ plotWordClouds <- function(data, catFilter = "POLITICS", nWords = 50,
   #> Loading required package: ggplot2
   setorderv(vocab, c("term_count", "doc_count"), "-1")
   plotData <- vocab[1:nWords]
-  plotData[, plotSize := term_count/sum(term_count)]
+  if (returnData) return(plotData)
+  
+  plotData[, plotSize := term_count/sum(term_count)*2]
   plotData[, plotColor := sample(brewer.pal(8, "Dark2"), .N,
                                  replace = TRUE)]
-  # plotData[, term := c("Marc", "schmieder", "yellow", "smart", "333",
-  #                      "smartmarc333", "krass", "klug", "skilled", "gentle",
-  #                      "music", "poker", "statistik", "math", "genius",
-  #                      "empathic", "industrie 4.0", "jokes", "chips", "guitar",
-  #                      "keys", "visionary", "music genius", "solving", "problems")]
-  # alternative use
-  #brewer.pal(8, "Dark2")
-  #topo.colors(10)
-  # wordcloud(words = plotData$term, freq = plotData$term_count,
-  #           min.freq = 1, 
-  #           max.words = 50,
-  #           random.order = FALSE, rot.per = 0.35,
-  #           colors = brewer.pal(8, "Dark2"))
-  # plotData2 <- copy(plotData)
-  # setnames(plotData2, c("term", "term_count"), c("word", "freq"))
-  # 
-  # wordcloud2(data = plotData, size = 1.6, 
-  #                   color = 'random-dark')
-  # 
-  #barplot(1:100, col = plotData$plotColor)
+ 
+  
   ggObj <- ggplot(plotData, aes(label = term, size = plotSize)) +
     geom_text_wordcloud(shape = "square", color = plotData$plotColor) +
     scale_size_area(max_size = 24) +
     theme_minimal()
   
-  if (returnData) return(plotData)
-  else return(ggObj)
+  return(ggObj)
 }
 
 
@@ -74,15 +57,16 @@ barplotCategories <- function(data){
                                     y = count, fill = category, 
                                     label = category)) +
     geom_bar(stat = "identity", fill =  rev(colGenerator(nrow(categoryFreq)))) +
-    geom_text_repel(nudge_x = 2, nudge_y = 10000, segment.size = 0.8,
+    geom_text_repel(nudge_x = 3, nudge_y = 11000, segment.size = 0.8,
                     segment.alpha = 0.5, point.padding = 2.5,
-                    box.padding = 0.5, size = 7) +
+                    box.padding = 1, size = 7) +
     geom_text(aes(x = category, y = count, label = count),
-              vjust = -0.5, angle = 0, size = 4) +
+              vjust = -0.5, angle = 0, size = 4.2) +
     labs(x = "Nachrichtenkategorie",
          y = "Anzahl Datenpunkte") +
     theme(axis.text.x  = element_blank(),
-          axis.title = element_text(size = 22),
+          axis.text.y = element_text(size = 15),
+          axis.title = element_text(size = 28),
           axis.ticks.x = element_blank(),
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank())  
@@ -156,7 +140,7 @@ barplotSymbolInfo <- function(data){
     theme(axis.text.x  = element_text(angle = 45,
                                       vjust = 1, hjust = 1,
                                       size = 14),
-          axis.title = element_text(size = 22),
+          axis.title = element_text(size = 28),
           legend.text = element_text(size = 13),
           legend.title = element_text(size = 15),
           axis.ticks.x = element_line(),
@@ -167,7 +151,8 @@ barplotSymbolInfo <- function(data){
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank())
 
-  return(ggObj)
+  return(list(ggObj = ggObj,
+              plotData = plotData))
 }
 
 
@@ -209,4 +194,31 @@ tableWordInfo <- function(data) {
 }
 
 
+calcOverlap <- function(data, nWords) {
+  assertDataTable(data)
+  assertNumeric(nWords)
+  
+  categories <- unique(data$category)
+  categoryCombn <- data.table(t(combn(categories, 2)))
+  setnames(categoryCombn, c("cat1", "cat2"))
+  categoryCombn[, Overlap := 0]
+  
+  for(i in seq_len(nrow(categoryCombn))) {
+    if(i %% 10 == 0) print(paste("calculating", i, "/",
+                                 nrow(categoryCombn)))
+    cat1 <- categoryCombn[i, cat1]
+    cat2 <- categoryCombn[i, cat2]
+    
+    word1 <- plotWordClouds(dataRaw, catFilter = cat1, nWords = nWords, 
+                            returnData = TRUE)
+    word2 <- plotWordClouds(dataRaw, catFilter = cat2, nWords = nWords,
+                            returnData = TRUE)
+    res <- length(intersect(word1$term, word2$term))/nrow(word1)
+    categoryCombn[i, Overlap := res]
 
+  }
+  categoryCombn[, cat1 := tolower(cat1)]
+  categoryCombn[, cat2 := tolower(cat2)]
+
+  return(categoryCombn)
+}

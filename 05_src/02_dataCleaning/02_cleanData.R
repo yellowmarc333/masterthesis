@@ -19,16 +19,28 @@ cleanData = function(inPath = "03_computedData/01_importedData/",
   
   # that this still occurs is an fst problem
   # any(grepl(headlineTmp, pattern =  "â"))
-  
   # merge the categories together
-  data[category == "the worldpost", category := "worldpost"]
+  data[category == "healthy living", category := "wellness & healthy living"]
+  data[category == "wellness", category := "wellness & healthy living"]
+  
   data[category == "parenting", category := "parents"]
+
+  data[category == "taste", category := "food, drink & taste"]
+  data[category == "food & drink", category := "food, drink & taste"]
+  
+  data[category == "the worldpost", category := "world news"]
+  data[category == "worldpost", category := "world news"]
+  
   data[category == "culture & arts", category := "arts & culture"]
   data[category == "arts", category := "arts & culture"]
+  
   data[category == "style", category := "style & beauty"]
+  
   data[category == "green", category := "green & environment"]
   data[category == "environment", category := "green & environment"]
   
+  
+  print(paste("categories remaining:", length(unique(data$category))))
   # removing empty points if there are any
   emptyPoints <- sapply(as.list(headlineTmp), function(x) {
     length(strsplit(x, split = " ")[[1]]) == 0

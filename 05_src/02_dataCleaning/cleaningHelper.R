@@ -3,6 +3,8 @@ cleanTerms <- function(object){
   # replace some terms that are later not found by global word vectors
   object <- gsub(pattern = "â€Š", replacement = " ",
                           x = object, fixed = TRUE )
+  object <- gsub(pattern = "â€™", replacement = "'",
+                 x = object, fixed = TRUE )
   object <- gsub(pattern = "n't", replacement = " not",
                           x = object, fixed = TRUE )
   object <- gsub(pattern = "i'm", replacement = "i am",

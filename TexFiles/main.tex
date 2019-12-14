@@ -347,8 +347,9 @@ todo: notation der parameter checken
 \subsubsection{Extreme Gradient Boosting}
 \subsubsection{Random Forest}
 
-\subsection{Neuronale Netze}
+\subsection{Neuronale Netze} \label{kap:neuralNets}
 
+Dieser Abschnitt soll eine Einführung in das Gebiet der neuronalen Netze geben und die in dieser Arbeit verwendeten Architekturen erklären. Beginnend mit dem \textit{multi-layer-perceptron} Netz werden die allgemeinen Aspekte und Komponenten des \textit{deep learnings} erläutert. Daran anknüpfend werden mit dem Fokus auf \textit{natural language processing} (kurz \textit{NLP}, todo erklären) das \textit{convolutional neural net} und das \textit{long-short-term-memory neural net} beschrieben. Die Umsetzung im Programmiercode erfolgte mit dem \texttt{R}-Paket \texttt{keras} (\cite{kerasR}).
 
 
 \subsubsection{Multi-Layer-Perceptron Neural Net}
@@ -384,29 +385,60 @@ Nachdem nun die grundlegende Architektur des Netzwerkes und die Aktivierungsfunk
 
 Die Optimierung des Netzwerkes geht insofern von statten, dass die Funktion $f(x)$ bezüglich einer Verlustfunktion minimiert wird, indem $x$ geändert wird. Der Wert, der $f$ minimiert, wird notiert als 
 \[x^\ast = argmin f(x)\]
-Seien $x, y = f(x) \in \mathbb{R}$, so ist $f'(x) = \frac{\mathop{dx}}{dy}$ die Steigung in $x$ und gibt an, in was für einer Änderung $f(x)$ bei einer kleinen Änderung von $x$ resultiert. Unter Kenntnis von $f'(x)$ kann $f(x)$ schrittweise durch eine Änderung von $x$ in die Gegenrichtung der Ableitung minimiert werden. Diese Methode ist bekannt als Gradientenabstieg. Ist $f'(x) = 0$, so handelt es sich entweder um ein Minimum, Maximum oder einen Sattelpunkt. Ziel des Gradientenabstieg ist es, ein globales Minimum zu finden. Es ist möglich, dass die Funktion auch einige lokale Minima besitzt, die in denen $f(x)$ in einer gewissen Umgebung am kleinsten ist.
+Seien $x, y = f(x) \in \mathbb{R}$, so ist $f'(x) = \frac{\mathop{dx}}{\mathop{dy}}$ die Steigung in $x$ und gibt an, in was für einer Änderung $f(x)$ bei einer kleinen Änderung von $x$ resultiert. Unter Kenntnis von $f'(x)$ kann $f(x)$ schrittweise durch eine Änderung von $x$ in die Gegenrichtung der Ableitung minimiert werden. Diese Methode ist bekannt als Gradientenabstieg. Ist $f'(x) = 0$, so handelt es sich entweder um ein Minimum, Maximum oder einen Sattelpunkt. Ziel des Gradientenabstieg ist es, ein globales Minimum zu finden. Es ist möglich, dass die Funktion auch einige lokale Minima besitzt, die in denen $f(x)$ in einer gewissen Umgebung am kleinsten ist. Das Vorliegen von mehreren Sattelpunkten und lokalen Minima macht die Optimierung sehr schwierig, besonders, da es sich in der Praxis um multidimensionale Optimierungen handelt. Oft werden solche Lösungen akzeptiert, die nicht global minimal sind, aber einen signifikant niedrigen Wert der Verlustfunktion aufweisen. Abbildung \ref{abb:MinimaSearch} zeigt eine beispielhafte Darstellung einer eindimensionalen Verlustfunktion mit verschiedenen Minima und Sattelpunkten.
 
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width = 10cm,  keepaspectratio]{Images/MinimaSearch_DeepL.PNG}
+\label{abb:MinimaSearch}
+\caption{\textit{Darstellung von lokalen und globalen Minima sowie Sattelpunkten bei der Optimierung einer eindimensionalen Funktion (\cite{deepL}, S. 85)}}
+\end{center}
+\end{figure}
 
-In einem Netzwerk mit 2 Zwischenschichten sei $(a_0, y)$ die Ein- und Ausgangsvektoren und $(w_1, b_1)$, $(w_2, b_2)$ die Verbindungsgewichte und \textit{bias} der Zwischenschichten. Der erste Schritt ist die Initialisierung der Gewichte und der \textit{bias} Parameter. Die Gewichte werden mit kleinen zufällige Werten initialisiert und die \textit{bias} Parameter entweder auf $0$ gesetzt oder auch mit kleinen positiven Zufallszahlen belegt (vgl. \cite{deepL}, S. 177). Eine Ausnahme stellt die Nutzung eines vortrainierten Netzes dar, das bereits gelernte Gewichte enthält. Als nächstes werden die Eingangsvektoren im Rahmen der \textit{forward-propagation} vorwärts durch das Netz geleitet. Die Berechnung erfolgt sukzessive mit
+Die Verlustfunktion ist in Abhängigkeit des Parameter-Vektors $\theta$ meistens nicht-linear und nicht-konvex, wie beispielsweise in Abbildung \ref{abb:MinimaSearch} zu sehen ist. Oft ist es möglich, dass der Gradientenabstieg in einem ungenügenden lokalen Minimum endet. Verschiedene Optimierungsalgorithmen versuchen dieses Problem zu lösen und werden im weiteren Verlauf dieses Kapitels beschrieben.\\
+
+Ist $\bm{x} = (x_1, ..., x_l)$, ein Vektor mit $l$ Dimensionen, so werden partielle Ableitungen $\frac{\partial}{\partial x_i} f(\bm{x})$ gebildet, die die Richtungsänderung von $f$ darstellt, wenn nur $x_i$ in $\bm{x}$ modifiziert wird. Der Vektor aller partiellen Ableitungen $(\frac{\partial f(\bm{x})}{\partial x_i}, \dots, \frac{\partial f(\bm{x})}{\partial x_l)})$ ist der Gradient von $f$ und wird notiert als $\nabla_{\bm{x}} f(\bm{x})$ (vgl. \cite{deepL}, S.82 ff).\\
+
+Nun soll die Methode des Gradientenabstiegs an einem einfachen Beispiel erläutert werden. In einem Netzwerk mit 2 Zwischenschichten sei $(\bm{x_0}, \bm{y})$ der Eingangsvektor und die zugehörige abhängige Variable sowie $(\bm{w_1}, \bm{b_1})$, $(\bm{w_2}, \bm{b_2})$ die Vektoren der Verbindungsgewichte und \textit{bias} der Zwischenschichten. Der erste Schritt ist die Initialisierung der Gewichte und der \textit{bias} Parameter. Die Gewichte werden mit kleinen zufällige Werten initialisiert und die \textit{bias} Parameter entweder auf $0$ gesetzt oder auch mit kleinen positiven Zufallszahlen belegt (vgl. \cite{deepL}, S. 177). Eine Ausnahme stellt die Nutzung eines vortrainierten Netzes dar, das bereits gelernte Gewichte enthält. Als nächstes werden die Eingangsvektoren im Rahmen der \textit{forward-propagation} vorwärts durch das Netz geleitet. Die Berechnung erfolgt sukzessive mit
 \begin{align*}
-    z_1 &= a_0 \cdot w_1 + b_1 \\
-    a_1 &= \sigma(z_1) \\
-    z_2 &= a_1 \cdot w_2 + b_2 \\
-    a_2 &= \sigma (z_2)
+    \bm{z_1} &= \bm{x_0} \cdot \bm{w_1} + \bm{b_1} \\
+    \bm{a_1} &= \sigma(\bm{z_1}) \\
+    \bm{z_2} &= \bm{a_1} \cdot \bm{w_2} + \bm{b_2} \\
+    \bm{a_2} &= \sigma (\bm{z_2})
 \end{align*}{}
-$z_1, z_2$ sind die Vektoren, die in den Zwischenschichten eintreffen und $a_1, a_2$ die Signale, die die Neuronen der Zwischenschichten wieder verlassen. Anschließend wird der Fehler des Netzwerkes berechnet mit 
-\[ \delta a = a_2 - y \]
-oder einer anderen Kostenfunktion, die passend zum Problem ist.
+$\bm{z_1}, \bm{z_2}$ sind die Vektoren, die in den Zwischenschichten eintreffen und $\bm{a_1}, \bm{a_2}$ die Signale, die die Neuronen der Zwischenschichten wieder verlassen. Anschließend wird der Fehler des Netzwerkes berechnet mit 
+\[\nabla \bm{a} = \bm{a_2} - \bm{y} \].
+In diesem Beispiel wird die Verlustfunktion aus der Differenz des Ausgangssignales des letzten \textit{layers} und des Labels $y$ gebildet. Die Verlustfunktion ist natürlich je nach Zielstellung als eine andere zu wählen. Nun werden im Rahmen der \textit{backpropagation} die Gradienten berechnet:
+
+% bei align sind zeilen wichtig
+\begin{align*}
+    \nabla \bm{z_2} &= \nabla \bm{a} \cdot \sigma' (\bm{z_2}) \\
+    \nabla \bm{b_2} &= \nabla \bm{z_2} \\
+    \nabla \bm{w_2} &= a_1^T \cdot \nabla \bm{z_2} \\
+    \nabla \bm{z_1} &= \nabla \bm{a_1} \cdot \sigma (\bm{z_1}) \\
+    \nabla \bm{b_1} &= \nabla \bm{z_1} \\
+    \nabla \bm{w_1} &= a_0^T \cdot \nabla \bm{z_1} 
+\end{align*}{}
+
+Anschließend werden die Parameter des Netzwerkes wie folgt angepasst:
+
+\begin{align*}
+   \bm{w_1} &\leftarrow \bm{w_1} - \eta \cdot \nabla \bm{w_1} \\
+\bm{b_1} &\leftarrow \bm{b_1} - \eta \cdot \nabla \bm{b_1} \\
+ \bm{w_2} &\leftarrow \bm{w_2} - \eta \cdot \nabla \bm{w_2} \\
+    \bm{b_2} &\leftarrow \bm{b_2} - \eta \cdot \nabla \bm{b_2} \\
+\end{align*}{}
+
+Die Gewichte und \textit{bias} werden also in die negative Richtung ihrer partiellen Ableitung angepasst. Wie groß der Schritt des Abstiegs ist, bestimmt die Lernrate $eta$. 
+Wie genau $\eta$ bestimmt wird, hängt unter anderem vom dem verwendeten Optimierungsalgorithmus ab. Für die Durchführung der Methode des Gradientenabstiegs gibt es mehrere Varianten. Es wird davon abgesehen, den Gradienten mit allen Beobachtungen des Datensatzes zu berechnen. Dies ist sehr rechenintensiv und ineffizient in dem Sinne, dass in einem schlechten Szenario die Beobachtungen sehr ähnlich sind und eine kleine Auswahl der Datenpunkte zu einer ähnlichen Verbesserung der Verlustfunktion beiträgt wie unter Nutzung aller Datenpunkte. Auch wenn dies ein Extremfall ist, finden sich oft viele Beobachtungen, die ähnlich zur Berechnung des Gradienten beitragen. Optimierungsalgorithmen konvergieren in der Regel in einer schnelleren Rechenzeit, falls sie schnell hintereinander ungefähre Schätzungen des Gradienten erstellen, statt langsam den gesamten Gradienten zu berechnen. Methoden, die jeweils nur eine Beobachtung nutzen um den neuen Gradienten zu berechnen, werden als Stochastische Methoden bezeichnet. Optimierungsalgorithmen, die den kompletten Trainingsdatensatz nutzen, werden als \textit{batch} oder deterministische Gradienten Methoden bezeichnet. Das Wort \textit{batch} wird jedoch auch in dem anderen Kontext von \textit{batch}-Größe genutzt, um die Größe des \textit{minibatch} bei der Methode \textit{minibatch-stochastic-gradient-descent} zu beschreiben. Hierbei bezeichnet die \textit{batch}-Größe $m$ die Anzahl Datenpunkte aus dem Trainingsset, die herangezogen werden um die Gewichte des neuronalen Netzes in einem Schritt zu aktualisieren (vgl. \cite{keras}, S.19). Diese Methode ist ein Kompromiss aus \textit{batch}- und stochastischem Gradientenabstieg und wird bei von den meisten \textit{deep-learning}-Algorithmen genutzt. Die \textit{minibatch} Methode wird heutzutage einfach als \textit{stochastischer} Methode bezeichnet (vgl. \cite{deepL}, S. 279f). Nun gibt es viele \textit{minibatch} Optimierungsmethoden, die mit der Zeit immer verbesserte Ansätze zur Bildung der Lernrate $\eta$ lieferten. Die in dieser Thesis verwendete \textit{adam}-Methode nutzt adaptive Lernraten und kombiniert die Konzepte des Momentums und der Beschleunigung bei der Anpassung der Gewichte nach jedem Optimierungsschritt. \textit{adam} liefert verglichen mit anderen Methoden sehr gute Ergebnisse (vgl. \cite{keras}, S. 36). Für eine detaillierte Einführung in die Evolution der Optimierungsmethoden sei auf Kapitel 8 in \cite{deepL} verwiesen. Eine weitere Herausforderung für die erfolgreiche Anwendung eines neuronalen Netzes ist die Eigenschaft, dass das Netz nicht nur auf den Trainingsdaten gut abschneidet, sondern auch auf neuen Daten eine gute Vorhersage liefert. Ist das Gegenteil der Fall, so betreibt das Netz \textit{overfitting} und kann schlecht generalisieren. Strategien, die das Ziel dieser wünschenswerten Eigenschaft verfolgen, werden Regularisierungstechniken genannt. Eine effektive Methode, um \textit{overfitting} zu vermeiden, ist die Nutzung von \textit{dropout}. Hierbei wird während einer Trainings-Iteration eines \textit{minibatch} zufällig ein gewisser prozentualer Anteil der Eingangs-Neuronen einer Schicht auf $0$ gesetzt. Damit wird erzielt, dass verschiedene Fraktionen des Netzes aus unterschiedlicher Information lernen. So kann das Netz besser generalisieren, da während des Lernprozesses effizient mehrere Teil-Architekturen des Netzes kombiniert werden (vgl. \cite{deepEssentials}, S. 71). In dem Paket \texttt{keras} kann \textit{dropout} einfach implemtiert werden, indem zwischen den Schichten eine \textit{dropout} Schicht eingefügt wird (vgl. \cite{keras}, S. 68).
 
 \begin{itemize}
-    \item backpropagation
+    \item kostenfunktion bei multiclassifikation
     \item vanishing gradient problem (bei relu eingehen?
-    \item batchsize/
-    \item learning rate
-    \item dropout
     \item batch normalization
     \item dead neurons, lieber leaky relu?
 \end{itemize}{}
+
 
 
 \subsubsection{Convolutional Neural Net}

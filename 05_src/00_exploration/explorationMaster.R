@@ -1,6 +1,8 @@
 # global parameters
 fullWidth <- 15.49779
 fullHeight <- fullWidth * 9/16
+fullWidth2 <- 15.49779 * 3/4
+fullHeight2 <- fullWidth * 9/29
 
 # kapitel 2.1 ####
 dataRaw <- fread("03_computedData/01_importedData/News.csv")
@@ -11,62 +13,18 @@ print(range(dataRaw$date))
 
 # kapitel 2.2:  klassenmerging ####
 ##### word intersections (return data in plotWordClouds)
-word1 <- plotWordClouds(dataRaw, catFilter = "PARENTS", nWords = 50, 
-                        returnData = TRUE)
-word2 <- plotWordClouds(dataRaw, catFilter = "PARENTING", nWords = 50,
-                        returnData = TRUE)
-length(intersect(word1$term, word2$term))/50 # 0.74
+dataRaw <- fread("03_computedData/01_importedData/News.csv")
 
-word1 <- plotWordClouds(dataRaw, catFilter = "WORLDPOST", nWords = 50, 
-                        returnData = TRUE)
-word2 <- plotWordClouds(dataRaw, catFilter = "THE WORLDPOST", nWords = 50,
-                        returnData = TRUE)
-length(intersect(word1$term, word2$term))/50  # 0.46
+res <- calcOverlap(dataRaw, nWords = 100)
+setorderv(res, "Overlap", -1)
+resPrint <- res[c(1:10,13, 14, .N -1, .N)]
+write.fst(res, path = "03_computedData/07_deploymentData/categoryOverlap.fst")
+print(round(mean(res$Overlap), 2))
+print(xtable(resPrint, label = "tab:categoryMerge"), include.rownames = FALSE)
 
-word1 <- plotWordClouds(dataRaw, catFilter = "CULTURE & ARTS", nWords = 50, 
-                        returnData = TRUE)
-word2 <- plotWordClouds(dataRaw, catFilter = "ARTS & CULTURE", nWords = 50,
-                        returnData = TRUE) #0.38
-length(intersect(word1$term, word2$term))/50 
-
-word1 <- plotWordClouds(dataRaw, catFilter = "ARTS", nWords = 50, 
-                        returnData = TRUE)
-word2 <- plotWordClouds(dataRaw, catFilter = "ARTS & CULTURE", nWords = 50,
-                        returnData = TRUE) #0.4
-length(intersect(word1$term, word2$term))/50 
-
-word1 <- plotWordClouds(dataRaw, catFilter = "ARTS", nWords = 50, 
-                        returnData = TRUE)
-word2 <- plotWordClouds(dataRaw, catFilter = "CULTURE & ARTS", nWords = 50,
-                        returnData = TRUE) # 0.52
-length(intersect(word1$term, word2$term))/50 
-
-word1 <- plotWordClouds(dataRaw, catFilter = "STYLE", nWords = 50, 
-                        returnData = TRUE)
-word2 <- plotWordClouds(dataRaw, catFilter = "STYLE & BEAUTY", nWords = 50,
-                        returnData = TRUE)
-length(intersect(word1$term, word2$term))/50 #  0.52
-
-word1 <- plotWordClouds(dataRaw, catFilter = "GREEN", nWords = 50, 
-                        returnData = TRUE)
-word2 <- plotWordClouds(dataRaw, catFilter = "ENVIRONMENT", nWords = 50,
-                        returnData = TRUE)
-length(intersect(word1$term, word2$term))/50 # 0.5
-
-# beispiel für zwei unterscheidbare kategorien
-word1 <- plotWordClouds(dataRaw, catFilter = "WELLNESS", nWords = 50, 
-                        returnData = TRUE)
-word2 <- plotWordClouds(dataRaw, catFilter = "BLACK VOICES", nWords = 50,
-                        returnData = TRUE)
-length(intersect(word1$term, word2$term))/50 # 0.16
-
-word1 <- plotWordClouds(dataRaw, catFilter = "POLITICS", nWords = 50, 
-                        returnData = TRUE)
-word2 <- plotWordClouds(dataRaw, catFilter = "HOME & LIVING", nWords = 50,
-                        returnData = TRUE)
-length(intersect(word1$term, word2$term))/50 # 0.06
-
-
+#### should more stopwords be removed?
+vocab <- plotWordClouds(dataRaw, "none", nWords = 1000, returnData = TRUE)
+# no its okay like that
 
 # beispiele mit menschlicher intuition
 dataRaw <- fread("03_computedData/01_importedData/News.csv")
@@ -111,6 +69,23 @@ expTable <- data.table(var1 =
 print(xtable(expTable, label = "tab:greenMerge"), include.rownames = TRUE)
 #nicht unterscheidbar
 
+expTable <- data.table(var1 = 
+                               dataRaw[category == toupper("fifty"), ][1:7, headline],
+                       var2 = 
+                               dataRaw[category == toupper("parents"), ][1:7,
+                                                                             headline])
+print(xtable(expTable, label = "tab:greenMerge"), include.rownames = TRUE)
+# unterscheidbar
+
+expTable <- data.table(var1 = 
+                               dataRaw[category == toupper("taste"), ][1:7, headline],
+                       var2 = 
+                               dataRaw[category == toupper("food & drink"), ][1:7,
+                                                                         headline])
+print(xtable(expTable, label = "tab:greenMerge"), include.rownames = TRUE)
+
+
+
 # kapitel 2.3 ####
 outPath = "03_computedData/07_deploymentData/"
 inPath = "03_computedData/02_cleanedData/News.csv"
@@ -118,24 +93,26 @@ inPath2 = "03_computedData/02_cleanedData/News.fst"
 
 data <- read.fst(inPath2, as.data.table = TRUE)
 
-
 ggObj <- barplotCategories(data)
 ggsave(filename = paste0(outPath, "barplotCategories.pdf"),
        plot = ggObj, width = fullWidth, height = fullHeight, 
        device = "pdf")
 
-
-ggObj <- barplotSymbolInfo(data)
+# hier plot und info zu allen Symbols
+res <- barplotSymbolInfo(data)
+ggObj <- res$ggObj
+info <- res$plotData
+sapply(info[, .SD, .SDcols = -"category"], function(x) {
+        round(mean(x), 3)
+})
 ggsave(filename = paste0(outPath, "barplotSymbols.pdf"),
        plot = ggObj, width = fullWidth, height = fullHeight, 
        device = "pdf")
 
+# mittlere anzahl wörter pro Kategorie
 tableWordInfo <- tableWordInfo(data) # not sure if will be used
 print(tableWordInfo[which.max(nWordsByCategory)])
 print(tableWordInfo[which.min(nWordsByCategory)])
-# wieviele wörter pro kategorie überhaupt im korpus sind,
-# wieviele wörter es insgesamt gibt
-# wordcloud gesamt
 
 categoryFreq <- data[, .(count = .N), by = category][order(-count)]
 categoryFreq[, cumSumPart := round(cumsum(count)/sum(count), 3)]
@@ -146,7 +123,7 @@ print(nrow(data) / length(unique(data$category)))
 print(nrow(data))
 
 
-# evaluation on total data
+# evaluation on total data--------------------------------------##
 label <- data$category
 texts <- as.character(data$headline)
 
@@ -162,19 +139,18 @@ vocab <- as.data.table(text2vec::prune_vocabulary(vocab, term_count_min = 1L))
 
 # exploration of all tokens
 tokensLength <- sapply(tokens, length)
-print(round(mean(tokensLength),3))
-print(min(tokensLength))
-print(data[which.min(tokensLength), .(category, headline)])
+print(round(mean(tokensLength),3)) # wieviele wörter durchschnittlich/schlagzeile
+print(min(tokensLength)) # kleinste schlagzeile
+print(data[which.min(tokensLength), .(category, headline)]) # wie heißt kleinste schlagzeile
 
-print(max(tokensLength))
+print(max(tokensLength)) # länge maximale schlagzeile
 print(head(order(tokensLength, decreasing = TRUE)))
-tokens[which.max(tokensLength)]
-View(data[head(order(tokensLength, decreasing = TRUE)),
-          .(category, headline)])
+tokens[which.max(tokensLength)] # wie heißt längste schlagzeile
+
 
 # exploring vocab
-print(nrow(vocab))
-print(vocab[which.max(term_count)],)
+print(nrow(vocab)) # anzahl verschiedeener wörter
+print(vocab[which.max(term_count)],) # häufigstes wö
 print(nrow(vocab[term_count <= 1]))
 
 # how many headlines have 2 sentences
@@ -188,17 +164,18 @@ print(paste("this equals", pointOccurance/N, "percent of news headlines"))
 wordCloud <- plotWordClouds(data, catFilter = "none", 
                             nWords = 100)
 ggsave(filename = paste0(outPath, "wordCloudAll.pdf"),
-       plot = wordCloud, width = fullWidth, height = fullHeight, 
+       plot = wordCloud, width = fullWidth2, height = fullHeight2, 
        device = "pdf")
 
 wordCloud <- plotWordClouds(data, catFilter = "politics", nWords = 100)
 ggsave(filename = paste0(outPath, "wordCloudPolitics.pdf"),
-       plot = wordCloud, width = fullWidth, height = fullHeight, 
+       plot = wordCloud, width = fullWidth2, height = fullHeight2, 
        device = "pdf")
 
-wordCloud <- plotWordClouds(data, catFilter = "wellness", nWords = 100)
+wordCloud <- plotWordClouds(data, catFilter = "wellness & healthy living", 
+                            nWords = 100)
 ggsave(filename = paste0(outPath, "wordCloudWellness.pdf"),
-       plot = wordCloud, width = fullWidth, height = fullHeight, 
+       plot = wordCloud, width = fullWidth, height = fullHeight2, 
        device = "pdf")
 
 wordCloud <- plotWordClouds(data, catFilter = "education", nWords = 100)

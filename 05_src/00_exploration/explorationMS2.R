@@ -1,21 +1,22 @@
 # next steps/ to dos:
 
 # [vor runter schreiben von methoden]
-# jauß's korrektur runterbrechen
+
 # groll email schreiben mit explorationspart + titeländerung + methodenteil
 # kommt nach
 # wordembeddings korrigieren und jan/marcel schicken
 
 # [coding]
+# l1/l2 norm coden bei sums of word vectors
 # f1 scores wie in methoden umsetzen beim coding
 # explaining bei bag-of- words checken
 # explaining bzgl cnn filtern checken
-# can't statt von can not zu cant ersetzen option?, stopwords erweitern
 # validation data muss genauso preprocessed sein wie train Data
 # in model predictors the only predict option einfügen (100% trainindizes) und
 # valdata seperat angeben (val. durchgehen)
 
 # [runterschreiben]
+# Kap 3.1 gecheckt: notation bzgl Klassen C (vorher n)
 # bei word embeddings R paket dazuschreiben
 # word embeddings from software, algorithms
 # tuning erklären bei NNs mit epochen
@@ -31,7 +32,6 @@
 
 # [liste für groll:]
 
-# wie wird die anzahl der epochen/ nrounds gewählt (ist ja schon tuning)
 # guetemass wahrscheinlichkeit der richtigen klasse implementieren (mlogloss)
 # validation/test bei xgboost und RF checken (muss gleich sein) (wird watchlist eigentlich gebraucht)
 #     im falle RF wird ja auf vollen 90% trainiert, auf 10% predicted
@@ -41,6 +41,7 @@
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xxjauß's korrektur runterbrechen
 # xxin bag of words vielleicht doch nicht symbols entfernen? und stopwords A: in tfidf keine stopwords
 #xx preparation functions und predictors durchgehen und schauen dass überall same
 #xx (auch naming)

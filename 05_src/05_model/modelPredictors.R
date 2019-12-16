@@ -408,7 +408,7 @@ predictXG <- function(dataPath, fileName,
 
   # add Parameters
   numClass <- numClass
-  eval_metric <- "merror"
+  eval_metric <- c("mlogloss", "merror")
   objective <- "multi:softprob"
   nrounds <- nrounds
   

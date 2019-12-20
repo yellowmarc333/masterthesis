@@ -2,13 +2,9 @@
 
 # [vor runter schreiben von methoden]
 
-# groll email schreiben mit explorationspart + titeländerung + methodenteil
-# kommt nach
-# wordembeddings korrigieren und jan/marcel schicken
-
 # [coding]
 # l1/l2 norm coden bei sums of word vectors
-# f1 scores wie in methoden umsetzen beim coding
+# checken wieso precision_mu = recall_mu  und accuracy = f1_mu
 # explaining bei bag-of- words checken
 # explaining bzgl cnn filtern checken
 # validation data muss genauso preprocessed sein wie train Data
@@ -16,9 +12,6 @@
 # valdata seperat angeben (val. durchgehen)
 
 # [runterschreiben]
-# Kap 3.1 gecheckt: notation bzgl Klassen C (vorher n)
-# bei word embeddings R paket dazuschreiben
-# word embeddings from software, algorithms
 # tuning erklären bei NNs mit epochen
 
 # [vor finaler modellrechnung]
@@ -41,6 +34,15 @@
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xxKap 3.1 gecheckt: notation bzgl Klassen C (vorher n)
+# xxbei word embeddings R paket dazuschreiben
+# xxword embeddings from software, algorithms
+# xxaverage accuracy proggen? 
+# xxf1 scores wie in methoden umsetzen beim coding (mllogloss checken)
+# xxconfusion matrix invertieren bei allen predictors
+# xxgroll email schreiben mit explorationspart + titeländerung + methodenteil
+# xxkommt nach
+# xxwordembeddings korrigieren und jan/marcel schicken
 # xxjauß's korrektur runterbrechen
 # xxin bag of words vielleicht doch nicht symbols entfernen? und stopwords A: in tfidf keine stopwords
 #xx preparation functions und predictors durchgehen und schauen dass überall same

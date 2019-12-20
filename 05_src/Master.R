@@ -2,6 +2,7 @@ source("05_src/Sourcer.R")
 sourcedFiles = sourceAll()
 dataPath <- "03_computedData/04_preparedData/"
 
+
 allFiles <- list.files(path = "05_src/", recursive = T, full.names = T)
 subFiles <- str_subset(allFiles, "[.][R]$") 
 lineSum <- sum(sapply(subFiles, function(x) {
@@ -65,6 +66,15 @@ prepareDataGlove(inPath = "03_computedData/03_integratedData/",
                  outPath = "03_computedData/04_preparedData/", 
                  subsetSize = "10pc", word2VecSize = 300, mergeSD = FALSE,
                  gloveName = "glove.42B.300d.txt")
+
+# 100 pc
+prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
+                 outPath = "03_computedData/04_preparedData/", 
+                 subsetSize = "100pc", saveSparse = TRUE)
+
+
+eval_Test <- evaluateData(inPath = "03_computedData/05_modelData/",
+             outPath = "03_computedData/06_evaluatedData/")
 
 
 # binary

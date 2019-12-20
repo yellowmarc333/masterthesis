@@ -33,37 +33,80 @@ getModelMetrics <- function(fileName,
   predictions <- model$predictions
   assertDataTable(predictions)
   testLabelRaw <- model$testLabelRaw
+  categoryNames <- levels(testLabelRaw)
+  C <- nrow(confMat)
   
   # calc basic measures
   # prevent that row or colsums are 0 (divided later)
-  rowSums <- ifelse(rowSums(confMat) == 0, 0.000000001,
-                    rowSums(confMat))
-  colSums <- ifelse(colSums(confMat) == 0, 0.000000001,
-                    colSums(confMat))
+  # quelle https://www.youtube.com/watch?v=HBi-P5j0Kec & wiki
+  
+  true_positives <- diag(confMat)
+  false_positives <- colSums(confMat) - diag(confMat)
+  false_negatives <- rowSums(confMat) - diag(confMat)
+  true_negatives <- rep(sum(confMat), C) - (colSums(confMat) +
+                                               rowSums(confMat) -
+                                               diag(confMat))
+ 
+  # check of measures are calculated correctly
+  assert(all(sum(confMat) == (true_positives + false_positives +
+                             true_negatives + false_negatives)))
   
   accuracy <- round(sum(diag(confMat)) / sum(confMat),
                     digits = 3)
-  precision <- round(mean(diag(confMat) / colSums),
+  accuracy_mean <- round(mean(diag(confMat) / rowSums(confMat)), 3)
+  
+  # compute zähler seperate in case that no observations get classified in
+  # a class and thus there will be no division by 0
+  precision_frac <- ifelse(true_positives + false_positives != 0,
+                             true_positives + false_positives,
+                             0.00001)
+  recall_frac <- ifelse(true_positives + false_negatives != 0,
+                          true_positives + false_negatives,
+                          0.00001)
+  
+  precision_mu <- round(sum(true_positives) / 
+                         sum(precision_frac),
+                       digits = 3)
+  recall_mu <- round(sum(true_positives) / 
+                       sum(recall_frac),
                      digits = 3)
-  recall <- round(mean(diag(confMat) / rowSums, ),
-                  digits = 3)
-  f1 <- 2 * precision * recall / (precision + recall)
+  precision_M <- round(sum(true_positives / 
+                             precision_frac) / C,
+                        digits = 3)
+  recall_M <- round(sum(true_positives / 
+                          recall_frac) / C ,
+                     digits = 3)
+  
+  f1_mu <- 2 * precision_mu * recall_mu / (precision_mu + recall_mu)
+  f1_M <- 2 * precision_M * recall_M / (precision_M + recall_M)
   
   # calc multiclassif logloss / categorical cross entropy
+  colIndexes <- sapply(testLabelRaw, function(x) {
+    which(x == categoryNames)
+  })
+  predictedLabel <- t(apply(predictions, 1, function(x) {
+    return(names(x[which.max(x)]))
+  }))
   truthProb <- predictions[, mapply(function(x, y) {
-    .SD[y, get(x, pos = -1, inherits = FALSE)]
-  }, as.character(testLabelRaw), 1:length(testLabelRaw))]
+    .SD[y, x, with = FALSE][[1]]
+  }, colIndexes, 1:length(testLabelRaw))]
   
+  # this is a check that the confusion matrix is the right way
+  #sum((testLabelRaw == "black voices") & (predictedLabel == "entertainment"))
   
   # take mean of log loss, then can be compared with different sample sizes
-  mlogloss <- mean( log(truthProb)) * (-1)
+  mlogloss <- mean(log(truthProb)) * (-1)
   
   return(list(modelName = fileName,
               accuracy = accuracy,
-              precision = precision,
-              recall = recall,
-              f1 = f1,
-              mlogloss = mlogloss))
+              accuracy_mean = accuracy_mean,
+              mlogloss = mlogloss,
+              precision_mu = precision_mu,
+              recall_mu = recall_mu,
+              precision_M = precision_M,
+              recall_M = recall_M,
+              f1_mu = f1_mu,
+              f1_M = f1_M))
   
 }
 

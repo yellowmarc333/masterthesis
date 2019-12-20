@@ -104,11 +104,11 @@ predictMLP <- function(dataPath, fileName,
                           Correct = correctBinary)
   
   levels(predictMax) <- levels(testLabelRaw)
-  confusionMatrix <- matrix(table(factor(predictMax, 
+  confusionMatrix <- t(matrix(table(factor(predictMax, 
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))),
-                            ncol = length(levels(testLabelRaw)))
+                            ncol = length(levels(testLabelRaw))))
   
   confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
   
@@ -119,6 +119,7 @@ predictMLP <- function(dataPath, fileName,
   # naming rows and cols
   rownames(confusionMatrix) <- levels(testLabelRaw)
   colnames(confusionMatrix) <- levels(testLabelRaw)
+  
   
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
@@ -208,11 +209,11 @@ predictLogReg <- function(dataPath, fileName,
   meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
   accuracy <- mean(correctBinary)
   
-  confusionMatrix <- matrix(table(factor(predictionsMax, 
+  confusionMatrix <- t(matrix(table(factor(predictionsMax, 
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))), 
-                            ncol = numClass)
+                            ncol = numClass))
   
   confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
   
@@ -300,11 +301,11 @@ predictNB <- function(dataPath, fileName,
   meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
   accuracy <- mean(correctBinary)
   
-  confusionMatrix <- matrix(table(factor(predictionsMax, 
+  confusionMatrix <- t(matrix(table(factor(predictionsMax, 
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))), 
-                            ncol = numClass)
+                            ncol = numClass))
   
   confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
   
@@ -444,11 +445,11 @@ predictXG <- function(dataPath, fileName,
   meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
   accuracy <- mean(correctBinary)
   
-  confusionMatrix <- matrix(table(factor(predictionsMax, 
+  confusionMatrix <- t(matrix(table(factor(predictionsMax, 
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))), 
-                            ncol = numClass)
+                            ncol = numClass))
   
   confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
   
@@ -518,7 +519,8 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
     model = ranger::ranger(dependent.variable.name = "labelRaw", 
                            data = trainData,
                            importance = "impurity",
-                           probability = TRUE, num.trees = num.trees)
+                           probability = TRUE, num.trees = num.trees,
+                           save.memory = TRUE)
     
     predictions = as.data.table(predict(model, 
                                         testData, 
@@ -549,11 +551,11 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
     meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
     accuracy <- mean(testLabelRaw == predictionsMax)
     
-    confusionMatrix <- matrix(table(factor(predictionsMax, 
+    confusionMatrix <- t(matrix(table(factor(predictionsMax, 
                                            levels =  levels(testLabelRaw)),
                                     factor(testLabelRaw, 
                                            levels =  levels(testLabelRaw))), 
-                              ncol = length(levels(testLabelRaw)))
+                              ncol = length(levels(testLabelRaw))))
     
     confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
     
@@ -575,19 +577,39 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
   }
   
   if (sparse){
-    # quickfixes for new tfidf method
+    # quickfixes for new tfidf method, dfm is not supported by ranger
+    
     if (class(trainData) != "dgCMatrix") {
-      trainData[is.na(trainData)] <- 0
-      trainData <- as(trainData, "dgCMatrix")
+      # cleaning NA values
+      train_x <- trainData@x
+      train_x[is.na(train_x)] <- 0
+      trainData@x <- train_x
       
-      testData[is.na(testData)] <- 0
+      test_x <- testData@x
+      test_x[is.na(test_x)] <- 0
+      testData@x <- test_x
+      
+      trainData <- as(trainData, "dgCMatrix")
       testData <- as(testData, "dgCMatrix")
+      
+      assert(!any(is.na(trainData@x)))
+      assert(!any(is.na(testData@x)))
+    } else {
+      # cleaning NA values
+      train_x <- trainData@x
+      train_x[is.na(train_x)] <- 0
+      trainData@x <- train_x
+      
+      test_x <- testData@x
+      test_x[is.na(test_x)] <- 0
+      testData@x <- test_x
     }
-   
+
 
     # because of naming transition use not "-1"
     trainLabel <- Matrix::Matrix(data = as.numeric(trainLabelRaw),
                                  sparse = TRUE, ncol = 1)
+    #trainLabel <- as.dfm(trainLabel)
     dimnames(trainLabel)[[2]] <- "trainLabel"
     testLabel <- as.numeric(testLabelRaw)
     
@@ -599,7 +621,8 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
                            data = trainSparse,
                            importance = "impurity",
                            probability = TRUE, num.trees = num.trees,
-                           classification = TRUE, verbose = TRUE)
+                           classification = TRUE, verbose = TRUE,
+                           save.memory = TRUE)
     # when calc. with a sparse matrix, the column names are ordered along
     # the true classes of the first training examples
     orderOfNames <- as.integer(colnames(model$predictions))
@@ -632,11 +655,11 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
     meanSquareError <- sum(resultDiffProb)/prod(dim(resultDiffProb))
     accuracy <- mean(testLabelRaw == predictionsMax)
     
-    confusionMatrix <- matrix(table(factor(predictionsMax, 
+    confusionMatrix <- t(matrix(table(factor(predictionsMax, 
                                            levels =  levels(testLabelRaw)),
                                     factor(testLabelRaw, 
                                            levels =  levels(testLabelRaw))), 
-                              ncol = length(levels(testLabelRaw)))
+                              ncol = length(levels(testLabelRaw))))
     
     confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
     
@@ -778,11 +801,11 @@ predictCNNArray <- function(dataPath, fileName,
   }))
   
   levels(predictMax) <- levels(testLabelRaw)
-  confusionMatrix <- matrix(table(factor(predictMax, 
+  confusionMatrix <- t(matrix(table(factor(predictMax, 
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))), 
-                            ncol = length(levels(testLabelRaw)))
+                            ncol = length(levels(testLabelRaw))))
 
   confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
   
@@ -940,11 +963,11 @@ predictCNNSeq <- function(dataPath, fileName,
                           Correct = correctBinary)
   
   levels(predictMax) <- levels(testLabelRaw)
-  confusionMatrix <- matrix(table(factor(predictMax, 
+  confusionMatrix <- t(matrix(table(factor(predictMax, 
                                   levels =  levels(testLabelRaw)),
                            factor(testLabelRaw, 
                                   levels =  levels(testLabelRaw))),
-                           ncol = length(levels(testLabelRaw)))
+                           ncol = length(levels(testLabelRaw))))
   
   confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
   
@@ -1066,11 +1089,11 @@ predictLSTMSeq <- function(dataPath, fileName,
   }))
   
   levels(predictMax) <- levels(testLabelRaw)
-  confusionMatrix <- matrix(table(factor(predictMax, 
+  confusionMatrix <- t(matrix(table(factor(predictMax, 
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))),
-                            ncol = length(levels(testLabelRaw)))
+                            ncol = length(levels(testLabelRaw))))
   
   confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
   
@@ -1207,11 +1230,11 @@ predictLSTMArray <- function(dataPath, fileName,
     return(names(x[which.max(x)]))
   }))
   levels(predictMax) <- levels(testLabelRaw)
-  confusionMatrix <- matrix(table(factor(predictMax, 
+  confusionMatrix <- t(matrix(table(factor(predictMax, 
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))),
-                            ncol = length(levels(testLabelRaw)))
+                            ncol = length(levels(testLabelRaw))))
  
   confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
   
@@ -1262,9 +1285,9 @@ ensembleMaxProb <- function(..., truth){
   accuracy <- mean(predictions == truth)
   
   # todo: fix hardcoding here
-  confusionMatrix <- matrix(table(factor(predictions, levels = levels(truth)),
+  confusionMatrix <- t(matrix(table(factor(predictions, levels = levels(truth)),
                            factor(truth, levels = levels(truth))), 
-                           ncol = length(levels(truth)))
+                           ncol = length(levels(truth))))
   row.names(confusionMatrix) <- levels(truth)
   
  return(list(acc = accuracy,

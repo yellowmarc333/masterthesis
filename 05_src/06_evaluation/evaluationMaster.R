@@ -20,12 +20,15 @@ evaluateData <- function(inPath = "03_computedData/05_modelData/",
   }
   
   allModels <- list.files(path = inPath)
-  
-  resList <- lapply(allModels[3:7], function(x) {
+  # subset to only .rds files
+  allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
+
+  resList <- lapply(allModels, function(x) {
     getModelMetrics(fileName = x)
   })
   
   res <- rbindlist(resList)
   
   write.fst(res, path = paste0(outPath, "evaluationResult.fst"))
+  return(res)
 }

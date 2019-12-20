@@ -31,7 +31,7 @@ fileName <- "BOW-10pc-TRUE-FALSE.rds"
 mod_BOW_XG_10 <- predictXG(dataPath, fileName,
                            sparse = TRUE, nrounds = 30) # 0.4329
 mod_BOW_RF_10 <- predictRF(dataPath, fileName, 
-                           sparse = TRUE, num.trees = 500) # 0.449
+                           sparse = TRUE, num.trees = 10) # 0.449
 fileName <- "BOW-10pc-FALSE-FALSE.rds"
 
 mod_BOW_MLP_10 <- predictMLP(dataPath, fileName,
@@ -114,13 +114,11 @@ mod_BOW_XG_100 <- predictXG(dataPath, fileName,
 
 # TFIDF 100pc # 13-10
 fileName <- "TFIDF-100pc-TRUE-FALSE.rds"
-indexName <- "TFIDF-Indexes-100pc-TRUE-FALSE.rds"
-labelName <- "TFIDF-Label-100pc-TRUE-FALSE.rds"
 mod_TFIDF_RF_100 <- predictRF(dataPath, fileName,
-                              sparse = TRUE) # 
+                              sparse = TRUE, num.trees = 500) # 
 mod_TFIDF_XG_100 <- predictXG(dataPath, fileName, 
-                              sparse = TRUE) # 
-
+                              sparse = TRUE, nrounds = 100)  
+# 0.590 (nrounds = 100 (mehr wählen))
 
 # LSTM 100pc #06-10
 fileName <- "Seq-100pc-FALSE.rds"

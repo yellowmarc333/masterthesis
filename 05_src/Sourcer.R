@@ -1,5 +1,7 @@
 sourceAll = function() {
   # source external libraries
+  require(wdl)
+  require(wdlViz)
   require(xtable)
   require(fst)
   require(plotly)

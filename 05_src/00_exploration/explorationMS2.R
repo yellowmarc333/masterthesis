@@ -4,7 +4,7 @@
 
 # [coding]
 # l1/l2 norm coden bei sums of word vectors
-# checken wieso precision_mu = recall_mu  und accuracy = f1_mu
+# xxchecken wieso precision_mu = recall_mu  und accuracy = f1_mu (ist richtig)
 # explaining bei bag-of- words checken
 # explaining bzgl cnn filtern checken
 # validation data muss genauso preprocessed sein wie train Data
@@ -12,6 +12,7 @@
 # valdata seperat angeben (val. durchgehen)
 
 # [runterschreiben]
+# measures TP, FN etc besser erklären
 # tuning erklären bei NNs mit epochen
 
 # [vor finaler modellrechnung]
@@ -34,6 +35,7 @@
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xxchecken wieso precision_mu = recall_mu  und accuracy = f1_mu (ist richtig)
 # xxKap 3.1 gecheckt: notation bzgl Klassen C (vorher n)
 # xxbei word embeddings R paket dazuschreiben
 # xxword embeddings from software, algorithms

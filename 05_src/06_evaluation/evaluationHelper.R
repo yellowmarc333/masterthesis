@@ -63,7 +63,8 @@ getModelMetrics <- function(fileName,
   recall_frac <- ifelse(true_positives + false_negatives != 0,
                           true_positives + false_negatives,
                           0.00001)
-  
+  browser()
+  # precision_mu and recall_mu are always the same. I checked
   precision_mu <- round(sum(true_positives) / 
                          sum(precision_frac),
                        digits = 3)

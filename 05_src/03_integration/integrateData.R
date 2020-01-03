@@ -19,18 +19,28 @@ integrateData = function(inPath = "03_computedData/02_cleanedData/",
   indexes100pc <- sample.int(nrow(trainSubset100pc), 
                             floor(nrow(trainSubset100pc) * trainSize))
 
+  # pick from training set 10% (not from all data, valData has to be unseen)
   set.seed(100)
   trainSubset10pc <- trainSubset100pc[sample.int(.N, size = round(.N * 0.1))]
   set.seed(100)
   indexes10pc <- sample.int(nrow(trainSubset10pc), 
                         floor(nrow(trainSubset10pc) * trainSize))
+  
+  # full set on which validation will occur
+  trainSubsetFull <- data
+  indexesFull <- c(1:nrow(trainSubsetFull))[-valIndexes]
  
   write.fst(trainSubset100pc, path = paste0(outPath, "trainSubset100pc.fst"),
             compress = 0, uniform_encoding = FALSE)
   saveRDS(indexes100pc, file = paste0(outPath, "indexes100pc.rds"))
+  
   write.fst(trainSubset10pc, path = paste0(outPath, "trainSubset10pc.fst"),
             compress = 0, uniform_encoding = FALSE)
   saveRDS(indexes10pc, file = paste0(outPath, "indexes10pc.rds"))
+  
+  write.fst(trainSubsetFull, path = paste0(outPath, "trainSubsetFull.fst"),
+            compress = 0, uniform_encoding = FALSE)
+  saveRDS(indexesFull, file = paste0(outPath, "indexesFull.rds"))
 
   
   write.fst(valData, path = paste0(outPath, "valData.fst"),

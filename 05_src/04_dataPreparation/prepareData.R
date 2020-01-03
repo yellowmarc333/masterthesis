@@ -1,12 +1,12 @@
 prepareDataBOW = function(inPath = "03_computedData/03_integratedData/", 
                           outPath = "03_computedData/04_preparedData/",
-                          subsetSize = c("1pc", "10pc", "100pc"),
+                          subsetSize = c("1pc", "10pc", "100pc", "Full"),
                           saveSparse = FALSE, mergeSD = FALSE){
   assertString(inPath)
   assertString(outPath)
   subsetSize <- match.arg(subsetSize)
   assertFlag(mergeSD)
-  
+
   # readin files
   fileName <- paste0("trainSubset", subsetSize, ".fst")
   subsetData <- read.fst(path = paste0(inPath, fileName), 
@@ -111,7 +111,7 @@ prepareDataBOW = function(inPath = "03_computedData/03_integratedData/",
 
 prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/", 
                             outPath = "03_computedData/04_preparedData/",
-                            subsetSize = c("1pc", "10pc", "100pc"),
+                            subsetSize = c("1pc", "10pc", "100pc", "Full"),
                             saveSparse = FALSE, mergeSD = FALSE){
   assertString(inPath)
   assertString(outPath)
@@ -230,7 +230,7 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
 
 prepareDataW2V = function(inPath = "03_computedData/03_integratedData/", 
                           outPath = "03_computedData/04_preparedData/",
-                          subsetSize = c("1pc", "10pc", "100pc"),
+                          subsetSize = c("1pc", "10pc", "100pc", "Full"),
                           word2VecSize = 50,
                           mergeSD = FALSE){
   assertString(inPath)
@@ -395,6 +395,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
                            function(x, data = wordVectors) {
                              cols <- wordVectorsNames[wordVectorsNames %in% x]
                              res <- rowSums(data[, .SD, .SDcols = cols])
+                             res <- res/sum(abs(res)) # L1 norm
                              if(length(res) == 0) return(rep(0, word2VecSize))
                              return(res)
                            })
@@ -421,7 +422,7 @@ prepareDataW2V = function(inPath = "03_computedData/03_integratedData/",
 
 prepareDataSeq = function(inPath = "03_computedData/03_integratedData/", 
                           outPath = "03_computedData/04_preparedData/",
-                          subsetSize = c("1pc", "10pc", "100pc"),
+                          subsetSize = c("1pc", "10pc", "100pc", "Full"),
                           mergeSD = FALSE){
   
   assertString(inPath)
@@ -524,7 +525,7 @@ prepareDataSeq = function(inPath = "03_computedData/03_integratedData/",
 
 prepareDataGlove = function(inPath = "03_computedData/03_integratedData/", 
                             outPath = "03_computedData/04_preparedData/",
-                            subsetSize = c("1pc", "10pc", "100pc"),
+                            subsetSize = c("1pc", "10pc", "100pc", "Full"),
                             word2VecSize = 50,
                             mergeSD = FALSE,
                             gloveName = "glove.6B.50d.txt"){
@@ -698,6 +699,7 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
                            function(x, data = wordVectors) {
                              cols <- wordVectorsNames[wordVectorsNames %in% x]
                              res <- rowSums(data[, .SD, .SDcols = cols])
+                             res <- res/sum(abs(res)) # L1 norm
                              if(length(res) == 0) return(rep(0, word2VecSize))
                              return(res)
                            })
@@ -725,7 +727,7 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
 
 pipelineEmbBinary = function(inPath = "03_computedData/03_integratedData/", 
                              outPath = "03_computedData/04_preparedData/",
-                             subsetSize = c("1pc", "10pc", "100pc"),
+                             subsetSize = c("1pc", "10pc", "100pc", "Full"),
                              mergeSD = FALSE, 
                              binary = FALSE){
   assertString(inPath)

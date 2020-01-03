@@ -3,13 +3,7 @@
 # [vor runter schreiben von methoden]
 
 # [coding]
-# l1/l2 norm coden bei sums of word vectors
-# xxchecken wieso precision_mu = recall_mu  und accuracy = f1_mu (ist richtig)
-# explaining bei bag-of- words checken
-# explaining bzgl cnn filtern checken
-# validation data muss genauso preprocessed sein wie train Data
-# in model predictors the only predict option einfügen (100% trainindizes) und
-# valdata seperat angeben (val. durchgehen)
+
 
 # [runterschreiben]
 # measures TP, FN etc besser erklären
@@ -23,10 +17,13 @@
 
 # [auswertung]
 # exploration function for word vectors (relate to wordclouds)
+# explaining bei bag-of- words checken
+# explaining bzgl cnn filtern checken
+
 
 # [liste für groll:]
 
-# guetemass wahrscheinlichkeit der richtigen klasse implementieren (mlogloss)
+
 # validation/test bei xgboost und RF checken (muss gleich sein) (wird watchlist eigentlich gebraucht)
 #     im falle RF wird ja auf vollen 90% trainiert, auf 10% predicted
 #     im falle XG wird auf 80% von 90% trainiert, auf 10% predicted
@@ -35,6 +32,10 @@
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xxvalidation data muss genauso preprocessed sein wie train Data
+# xxvaldata seperat angeben (val. durchgehen)
+# xxguetemass wahrscheinlichkeit der richtigen klasse implementieren (mlogloss)
+# xxl1/l2 norm coden bei sums of word vectors
 # xxchecken wieso precision_mu = recall_mu  und accuracy = f1_mu (ist richtig)
 # xxKap 3.1 gecheckt: notation bzgl Klassen C (vorher n)
 # xxbei word embeddings R paket dazuschreiben

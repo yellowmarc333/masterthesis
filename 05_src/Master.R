@@ -73,6 +73,11 @@ prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
                  subsetSize = "100pc", saveSparse = TRUE)
 
 
+# full
+prepareDataBOW(inPath = "03_computedData/03_integratedData/",
+               outPath = "03_computedData/04_preparedData/", 
+               subsetSize = "Full", saveSparse =  TRUE,  mergeSD = FALSE)
+
 eval_Test <- evaluateData(inPath = "03_computedData/05_modelData/",
              outPath = "03_computedData/06_evaluatedData/")
 

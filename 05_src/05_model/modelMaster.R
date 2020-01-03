@@ -56,10 +56,15 @@ mod_Seq_MLP_10 <- predictMLP(dataPath, fileName,
                              epochs = 12) # 0.1639
 
 # Sums of word2vec 10PC - 28-11
-fileName3 <- "W2VSums-10pc-50-FALSE.rds"
-mod_W2V_NN_10 <- predictMLP(dataPath, fileName3) # 0.2762
-mod_W2V_XG_10 <- predictXG(dataPath, fileName3) # 0.233
-mod_W2V_RF_10 <- predictRF(dataPath, fileName3) # 0.26
+fileName <- "W2VSums-10pc-50-FALSE.rds"
+mod_W2V_NN_10 <- predictMLP(dataPath, fileName) # 0.31
+mod_W2V_XG_10 <- predictXG(dataPath, fileName, nrounds = 20) # 0.233
+mod_W2V_RF_10 <- predictRF(dataPath, fileName) # 0.26
+
+fileName <- "GloveSums-10pc-300-FALSE.rds"
+mod_GloveSum_NN_10 <- predictMLP(dataPath, fileName, epochs = 20) # 0.5693
+mod_GloveSum_XG_10 <- predictXG(dataPath, fileName, nrounds = 20) # 0.4747
+mod_GloveSum_RF_10 <- predictRF(dataPath, fileName) # 
 
 # Array word2vec 10PC
 fileName5 <- "W2VArray-10pc-50-FALSE.rds"
@@ -92,7 +97,7 @@ mod_GloveArray_CNNArray_10 <- predictCNNArray(dataPath, fileName = fileName,
 # Array LSTM 10PC 28-11
 mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath, 
                                                 fileName = fileName, 
-                                                epochs = 5) # 0.5494 
+                                                epochs = 9) # 0.6011 
 # tuning:
 # 1: ohne densenet 0.5449
 # 2: 1 ohne conv net 0.5701
@@ -150,7 +155,16 @@ indexName <- "Glove-Indexes-100pc-50-TRUE.rds"
 mod_LSTMGloveTRUE <- predictLSTMArray(dataPath, fileName = fileName, 
                                     indexName = indexName) #0.635
 
-#--------------------------- Ensembling ------------------------------------####
+#-------------------------- Full predictions ---------------####
+
+# BOW full # 03.01
+fileName <- "BOW-Full-TRUE-FALSE.rds"
+mod_BOW_XG_10 <- predictXG(dataPath, fileName,
+                           sparse = TRUE, nrounds = 100) # 0.5968
+# funktioniert
+
+
+  #--------------------------- Ensembling ------------------------------------####
 
 accComparison <- data.table(category = names(mod_SeqCNN10$accByClass),
                             SeqCNN10 = mod_SeqCNN10$accByClass,

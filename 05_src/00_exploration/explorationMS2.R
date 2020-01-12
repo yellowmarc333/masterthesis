@@ -3,11 +3,23 @@
 # [vor runter schreiben von methoden]
 
 # [coding]
-
+# batch normalization besser verstehen und überall reinmachen/rausnehmen
+# input daten normalisieren (gleiche parameter für training und test nehmen)
 
 # [runterschreiben]
-# measures TP, FN etc besser erklären
-# tuning erklären bei NNs mit epochen
+
+# quellen immer mitnotieren (zumindest in itemize)
+# gradientenabstieg erklären anhand anderer Quelle? MIT S.170
+# convolution mathematisch überhaupt nötig zu definieren?
+
+# [MA korrigeiren:]
+# -aus jeder korrektur die Sachen rauspicken, auf die ich achten muss
+# - englische wörter groß
+#- dieser Abschnitt soll -> dieser Abschnitt gibt
+#- captions nicht alles in textit
+#- label under caption
+
+
 
 # [vor finaler modellrechnung]
 # - framework bzgl splits muss 100%ig abgeklärt sein
@@ -23,7 +35,7 @@
 
 # [liste für groll:]
 
-
+# tiefe der erklärung im methodenteil abklären
 # validation/test bei xgboost und RF checken (muss gleich sein) (wird watchlist eigentlich gebraucht)
 #     im falle RF wird ja auf vollen 90% trainiert, auf 10% predicted
 #     im falle XG wird auf 80% von 90% trainiert, auf 10% predicted
@@ -32,6 +44,7 @@
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xxmeasures TP, FN etc besser erklären
 # xxvalidation data muss genauso preprocessed sein wie train Data
 # xxvaldata seperat angeben (val. durchgehen)
 # xxguetemass wahrscheinlichkeit der richtigen klasse implementieren (mlogloss)

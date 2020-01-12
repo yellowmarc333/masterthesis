@@ -83,7 +83,7 @@ mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath,
 # Array Glove crawled 10PC 30-11
 fileName <- "GloveArray-10pc-300-FALSE.rds"
 mod_GloveArray_CNNArray_10 <- predictCNNArray(dataPath, fileName = fileName, 
-                                              epochs = 6) 
+                                              epochs = 3) 
 # 1)tuning: normal 0.5264, 7 am besten mit 0.5355 (epoche 4)
 # 2, 1 mit 2x 50 vanilla layer : 0.5212
 # 3, 1 ohne vanillas: 0.5330

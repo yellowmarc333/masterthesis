@@ -68,7 +68,7 @@ predictMLP <- function(dataPath, fileName,
   # Compiling model
   model %>% compile(
     loss = 'categorical_crossentropy',
-    optimizer = optimizer_adam(lr = 0.001),
+    optimizer = optimizer_adam(lr = 0.0005),
     metrics = c('accuracy')
   )
   
@@ -81,8 +81,10 @@ predictMLP <- function(dataPath, fileName,
     batchsize = 32,
     validation_data = list(as.matrix(testData), testLabel),
     view_metrics = FALSE,
-    verbose = 2)
-  
+    verbose = 2,
+    callbacks = list(
+      callback_early_stopping(min_delta = 0.002)))
+
   evaluationResult <- model %>% 
     evaluate(as.matrix(testData), testLabel, batch_size = 32)
   
@@ -134,7 +136,8 @@ predictMLP <- function(dataPath, fileName,
               ProbAccDT = ProbAccDT,
               accByClass = accByClass,
               predictions = predictProb,
-              testLabelRaw = testLabelRaw))
+              testLabelRaw = testLabelRaw,
+              history = history))
 }
 
 
@@ -732,25 +735,28 @@ predictCNNArray <- function(dataPath, fileName,
   testLabel <- to_categorical(testLabelNumeric)
   
 
-  # building model with layers
+  #building model with layers
   model <- keras_model_sequential()
-  model %>% 
+  model %>%
     # Add a Convolution1D, which will learn filters
     # Word group filters of size filter_length:
     layer_conv_1d(input_shape  = list(maxWords, channels),
                   data_format = "channels_last",
-      filters = 100, kernel_size = 2, 
+      filters = 300, kernel_size = 2,
       padding = "same", activation = "relu", strides = 1,
       name = "conv1"#, trainable = FALSE
     ) %>%
+    layer_batch_normalization() %>%
     layer_conv_1d(filters = 100, kernel_size = 3,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv2") %>%
+    layer_batch_normalization() %>%
     layer_conv_1d(filters = 100, kernel_size = 4,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv3") %>%
+    layer_batch_normalization() %>%
     layer_conv_1d(filters = 100, kernel_size = 5,
                   padding = "same", activation = "relu",
                   strides = 1,
@@ -758,18 +764,20 @@ predictCNNArray <- function(dataPath, fileName,
     layer_global_max_pooling_1d() %>%
     # layer_average_pooling_1d() %>%
     # layer_flatten() %>%
-    
+
     # Add a vanilla hidden layer:
     #layer_dense(100) %>%
-    
+
     # Apply 20% layer dropout
     layer_dropout(0.2) %>%
     layer_activation("relu") %>%
-    
+
     # Project onto a single unit output layer, and squash it with a sigmoid
     layer_dense(units = ncol(trainLabel),
-                activation = "softmax", 
+                activation = "softmax",
                 name = "predictions")
+  
+
 
   # Compiling model
   model %>% compile(
@@ -779,7 +787,7 @@ predictCNNArray <- function(dataPath, fileName,
   )
 
   print("fitting model")
-  
+  browser()
   history <- model %>% fit(
     x = trainData,
     y = trainLabel,
@@ -787,7 +795,17 @@ predictCNNArray <- function(dataPath, fileName,
     batchsize = 32,
     validation_data = list(testData, testLabel),
     view_metrics = FALSE,
-    verbose = 2)
+    verbose = 2,
+    callbacks = list(
+      callback_early_stopping(min_delta = 0.002)))
+  
+  
+   # browser()
+  # config = get_config(object = model)
+  # hierraus können die filter weights rausgezogen werden
+  weights = keras::get_weights(model)
+   output = keras::get_output_at(model, node_index = 1)
+  
   
   evaluationResult <- model %>% 
     evaluate(testData, testLabel, batch_size = 32)
@@ -838,7 +856,9 @@ predictCNNArray <- function(dataPath, fileName,
               ProbAccDT = ProbAccDT,
               accByClass = accByClass,
               predictions = predictProb,
-              testLabelRaw = testLabelRaw))
+              testLabelRaw = testLabelRaw,
+              history = history,
+              model = model))
 }
 
 
@@ -940,7 +960,9 @@ predictCNNSeq <- function(dataPath, fileName,
     batchsize = 32,
     validation_data = list(as.matrix(testData), testLabel),
     view_metrics = FALSE,
-    verbose = 2)
+    verbose = 2,
+    callbacks = list(
+      callback_early_stopping(min_delta = 0.002)))
   
   evaluationResult <- model %>% 
     evaluate(as.matrix(testData), testLabel, batch_size = 32)
@@ -992,7 +1014,8 @@ predictCNNSeq <- function(dataPath, fileName,
               ProbAccDT = ProbAccDT,
               accByClass = accByClass,
               predictions = predictProb,
-              testLabelRaw = testLabelRaw))
+              testLabelRaw = testLabelRaw,
+              history = history))
 }
 
 
@@ -1075,7 +1098,9 @@ predictLSTMSeq <- function(dataPath, fileName,
     batchsize = 32,
     validation_data = list(as.matrix(testData), testLabel),
     view_metrics = FALSE,
-    verbose = 2)
+    verbose = 2,
+    callbacks = list(
+      callback_early_stopping(min_delta = 0.002)))
   
   evaluationResult <- model %>% 
     evaluate(as.matrix(testData), testLabel, batch_size = 32)
@@ -1130,7 +1155,8 @@ predictLSTMSeq <- function(dataPath, fileName,
               ProbAccDT = ProbAccDT,
               accByClass = accByClass,
               predictions = predictProb,
-              testLabelRaw = testLabelRaw))
+              testLabelRaw = testLabelRaw,
+              history = history))
 }
 
 predictLSTMArray <- function(dataPath, fileName, 
@@ -1215,7 +1241,9 @@ predictLSTMArray <- function(dataPath, fileName,
     batchsize = 32,
     validation_data = list(testData, testLabel),
     view_metrics = FALSE,
-    verbose = 2)
+    verbose = 2,
+    callbacks = list(
+      callback_early_stopping(min_delta = 0.002)))
   
   evaluationResult <- model %>% 
     evaluate(testData, testLabel, batch_size = 32)
@@ -1268,7 +1296,8 @@ predictLSTMArray <- function(dataPath, fileName,
               ProbAccDT = ProbAccDT,
               accByClass = accByClass,
               predictions = predictProb,
-              testLabelRaw = testLabelRaw))
+              testLabelRaw = testLabelRaw,
+              history = history))
 }
 
 

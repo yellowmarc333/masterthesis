@@ -94,6 +94,8 @@ mod_GloveArray_CNNArray_10 <- predictCNNArray(dataPath, fileName = fileName,
 # 8, 7 mit kernels 2, 3, 4, 5, 0.5355
 # 9, 8 + neues layer mit 6 kernels 0.5129
 
+
+
 # Array LSTM 10PC 28-11
 mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath, 
                                                 fileName = fileName, 
@@ -101,10 +103,10 @@ mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath,
 # tuning:
 # 1: ohne densenet 0.5449
 # 2: 1 ohne conv net 0.5701
-# 3: 2 mit 265 units 0.5657
+# 3: 2 mit 256 units 0.5657
 # 4: 2 mit nadam 0.5706
 
-
+# gru: 0.61
 #----------------------- 100 percent models --------------------------------####
 
 

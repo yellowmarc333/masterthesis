@@ -14,6 +14,7 @@
 
 # [MA korrigeiren:]
 # -aus jeder korrektur die Sachen rauspicken, auf die ich achten muss
+# - matze: nicht zu umgspr. Fuellwoerter weglassen
 # - englische wörter groß
 #- dieser Abschnitt soll -> dieser Abschnitt gibt
 #- captions nicht alles in textit

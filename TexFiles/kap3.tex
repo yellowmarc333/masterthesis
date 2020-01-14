@@ -262,19 +262,20 @@ Es ist zu sehen, dass \textit{overfitting} ab dem Zeitpunkt eintritt, bei dem de
 \begin{itemize}
     \item todo:  vanishing gradient problem (bei relu eingehen?
     \item todo: batch normalization/normalizierung
+    \item todo: gradientenabschnitt neu machen
 \end{itemize}{}
 
 \subsubsection{Convolutional Neural Net} \label{kap:CNN}
 
 Dieser Abschnitt basiert größtenteils auf \cite{deepEssentials}, S. 71-76 und S.93-95.
-\textit{convolutional neural networks} (kurz \textit{CNN}) wurden ursprünglich für das Feld des maschinellen Sehens entwickelt und stellen dort die erste Wahl für Aufgaben wie Klassifikation von Bildern dar. Aber auch für \textit{natural language processing} erwiesen sich \textit{CNN} als äußerst effektiv (\cite{cnnSentence}, S. 1746). Liegt ein Datenpunkt in einer Gitterform vor, wie beispielsweise ein Bild aus Pixeln oder eine Matrix aus Wort-Vektoren, so müsste in der Organisation eines traditionellen \textit{MLP} jeder Eintrag der Matrix mit jedem Neuron in der ersten Zwischenschicht verbunden werden. Bei einem Satz mit $20$ Wörtern und einer Dimension der Wort-Vektoren $F = 300$ gäbe es bei $100$ Neuronen bereits $20 \times 300 \times 100  = 600000$ Gewichte, die angepasst werden müssten. Um diese Gewichte angemessen zu trainieren, wäre eine massive Datenmenge und Rechenleistung nötig. Des Weiteren wäre \textit{overfitting} bei dieser großen Parameter-Menge unvermeidbar. \textit{CNN} stellen eine Lösung dieses Problems dar. Eine \textit{convolution}, oder auch Faltung ist die Messung der Auswirkung des Aufeinandertreffens zweier Signale. Das eine Signal ist der Datenpunkt, das andere der Faltungskern der \textit{convolution}. In Abbildung \ref{abb:convolution} ist die Faltungsoperation beispielhaft dargestellt.
+\textit{convolutional neural networks} (kurz \textit{CNN}) wurden ursprünglich für das Feld des maschinellen Sehens entwickelt und stellen dort die erste Wahl für Aufgaben wie Klassifikation von Bildern dar. Aber auch für \textit{natural language processing} erwiesen sich \textit{CNN} als äußerst effektiv (\cite{cnnSentence}, S. 1746). Liegt ein Datenpunkt in einer Gitterform vor, wie beispielsweise ein Bild aus Pixeln oder eine Matrix aus Wort-Vektoren, so müsste in der Organisation eines traditionellen \textit{MLP} jeder Eintrag der Matrix mit jedem Neuron in der ersten Zwischenschicht verbunden werden. Bei einem Satz mit $20$ Wörtern und einer Dimension der Wort-Vektoren von $F = 300$ gäbe es bei $100$ Neuronen in der ersten Zwischenschicht bereits $20 \times 300 \times 100  = 600000$ Gewichte, die angepasst werden müssten. Um diese Gewichte angemessen zu trainieren, wäre eine massive Datenmenge und Rechenleistung nötig. Des Weiteren wäre \textit{overfitting} bei dieser großen Parameter-Menge unvermeidbar. \textit{CNN} stellen eine Lösung dieses Problems dar. Eine \textit{convolution}, oder auch Faltung ist die Messung der Auswirkung des Aufeinandertreffens zweier Signale. Das eine Signal ist der Datenpunkt, das andere der Faltungskern der \textit{convolution}. In Abbildung \ref{abb:convolution} ist die Faltungsoperation beispielhaft dargestellt.
 
 
 \begin{figure}[!ht]
 \begin{center}
 \includegraphics[width = 0.7 \textwidth,  keepaspectratio]{Images/convolution.PNG}
-\label{abb:convolution}
 \caption{Beispiel einer Faltungsoperation mit einem $3 \times 4$ Datenpunkt und einem $2 \times 2$ Faltungskern (\cite{deepL}, S. 334)}
+\label{abb:convolution}
 \end{center}
 \end{figure}
 
@@ -282,21 +283,21 @@ Anschaulich bewegt sich der Kern schrittweise über das Eingangssignal und für 
 
 \[s(t) = (x \odot w)(t) =  \int_{- \infty}^{\infty} x(k)w(t-k) \partial k  .\]
 
-Hierbei ist $x$ der Datenpunkt (Eingangssignal), $w$ der Faltungskern und $s$ das Ausgangssignal oder auch \textit{feature map}. Auffallend ist in Abbildung \ref{abb:convolution}, dass die Dimension des Abbilds kleiner ist als die des Eingangssignals. Allgemein entsteht bei einem Datenpunkt der Dimension $x \times y$ und einem Kern der Dimension $v \times w$ ein $(x-v + 1) \times (y - w +1)$ Ausgangssignal. Eine solche Faltung wird auch als enge Faltung bezeichnet. Ist es von Interesse, dass sich die Dimension des Ausgangssignals nicht verändert, so werden die Ränder der Eingangsmatrix mit Nullen aufgefüllt. Dementsprechend geht keine Information an den Rändern verloren. Dieses Vorgehen induziert eine weite Faltung und wird als \textit{zero padding} oder \textit{same padding} bezeichnet. Die Kalkulation der Ausgangsdimension geht von der Annahme aus, dass sich das Fenster des Kerns immer nur um eine Einheit bewegt. Die Größe des Sprungs des Fensters heißt \textit{stride} und kann auch größer als $1$ gewählt werden. Je größer der Sprung desto kleiner die Dimension der \textit{feature map} beziehungsweise desto mehr Nullen müssen am Rand für das \textit{zero padding} aufgefüllt werden. In dem Feld des maschinellen Sehens ist der Faltungskern üblicherweise zweidimensional oder dreidimensional (Höhe $\times$ Breite $\times$ RGB Farbe). Dienen Texte in Form von Sequenzen aus Word-Vektoren als Eingangsdaten, so ist die eine Dimension $F$ des Faltungskern fest (die Dimension der \textit{word embeddings}) und die \textit{convolution} erfolgt in eine Richtung. In Abbildung \ref{abb:CNN_NLP} ist die Architektur eines \textit{CNN} für einen \textit{NLP} Anwendungsfall zu sehen.
+Hierbei ist $x$ der Datenpunkt (Eingangssignal), $w$ der Faltungskern und $s$ das Ausgangssignal oder auch \textit{feature map}. Auffallend ist in Abbildung \ref{abb:convolution}, dass die Dimension des Abbilds kleiner ist als die des Eingangssignals. Allgemein entsteht bei einem Datenpunkt der Dimension $x \times y$ und einem Kern der Dimension $v \times w$ ein $(x-v + 1) \times (y - w +1)$ Ausgangssignal. Eine solche Faltung wird auch als enge Faltung bezeichnet. Ist es von Interesse, dass sich die Dimension des Ausgangssignals nicht verändert, so werden an den Rändern der Eingangsmatrix mit Nullen hinzugefügt und somit die Matrix in beiden Dimensionen um $1$ erhöht. Dementsprechend geht keine Information an den Rändern verloren. Dieses Vorgehen wird als \textit{zero padding} oder \textit{same padding} bezeichnet und die \textit{convolution} ist dann eine weite Faltung. Die Kalkulation der Ausgangsdimension geht von der Annahme aus, dass sich das Fenster des Kerns immer nur um eine Einheit bewegt. Die Größe des Sprungs des Fensters heißt \textit{stride} und kann auch größer als $1$ gewählt werden. Je größer der Sprung, desto kleiner die Dimension der \textit{feature map} beziehungsweise desto mehr Nullen müssen am Rand für das \textit{zero padding} hinzugefügt werden. In dem Feld des maschinellen Sehens ist der Faltungskern üblicherweise zweidimensional (Höhe $\times$ Breite) oder dreidimensional (inklusive des Farbkanals). Dienen Texte in Form von Sequenzen aus Wort-Vektoren als Eingangsdaten, so ist Breite des Faltungskerns mit $F$ (die Dimension der \textit{word embeddings}) fest und die \textit{convolution} erfolgt in eine Richtung. In Abbildung \ref{abb:CNN_NLP} ist die Architektur eines \textit{CNN} für einen \textit{NLP} Anwendungsfall zu sehen.
 
 \begin{figure}[!ht]
 \begin{center}
 \includegraphics[width = \textwidth,  keepaspectratio]{Images/CNN_NLP.PNG}
-\label{abb:CNN_NLP}
 \caption{Architektur eines \textit{CNN} für einen NLP Anwendungsfall (\cite{cnnSentence}, S. 1747)}
+\label{abb:CNN_NLP}
 \end{center}
 \end{figure}
 
-Links in der Graphik ist ein Satz als Sequenz von $9$ Wort-Vektoren zu sehen. Nach der Anwendung von mehreren Faltungskernen der Dimension $2 \times 6$ und $3 \times 6$ entstehen eindimensionale \textit{feature map} Vektoren. Unter Verwendung eines \textit{zero padding} hätten diese die gleiche Länge des Satzes. Es können mehrere \textit{convolution}-Zwischenschichten mit unterschiedlichen Größen des Kerns und \textit{strides} hintereinander geschaltet werden. Dies erhöht die tiefe des Modells und die sein Fähigkeit komplexe hierarchische Strukturen zu lernen. Nach jeder Zwischenschicht folgt eine Aktivierungsfunktion, wobei auch hier \textit{Relu} üblicherweise verwendet wird.
+Links in der Graphik ist ein Satz als Sequenz von $9$ Wort-Vektoren zu sehen. Nach der Anwendung von mehreren Faltungskernen der Dimension $2 \times 6$ und $3 \times 6$ entstehen eindimensionale \textit{feature map} Vektoren. Unter Verwendung eines \textit{zero padding} hätten diese die gleiche Länge des Satzes. Es können mehrere \textit{convolution}-Zwischenschichten mit unterschiedlichen Größen des Kerns und \textit{strides} hintereinander geschaltet werden. Dies erhöht die Tiefe des Modells und seine Fähigkeit komplexe hierarchische Strukturen zu lernen. Nach jeder Zwischenschicht folgt eine Aktivierungsfunktion, wobei auch hier \textit{relu} üblicherweise verwendet wird.
 
-Im nächsten Schritt erfolgt eine Dimensionsreduktion der \textit{feature maps} durch eine \textit{pooling} Operation. Mit besseren Resultaten in der Praxis hat sich \textit{max-pooling} als geläufigste Form des \textit{poolings} gegenüber anderen Arten durchgesetzt. Hierbei wird aus jedem der \textit{feature maps} der maximale Wert extrahiert. Die dahinterstehende Idee ist es, die Information auf den wichtigsten Teil zu reduzieren. In dem Beispiel aus Abbildung \ref{abb:CNN_NLP} könnte es von Interesse sein zu klassifizieren, ob eine Rezension für einen Film positiv oder negativ ist. Das Netz könnte dann die Gewichte eines Faltungskerns so lernen, dass dieser speziell bei Wort-Tupeln wie \textit{do not} oder \textit{is not} eine hohe \textit{convolution} erzeugt. Unter \textit{max-pooling} wird dann das \textit{feature map} auf diesen Informationsteil reduziert (vgl. \cite{cnnSentence}, S. 1747). Das Netzwerk kann also Muster variabler Länge in den Sätzen erkennen, doch durch die \textit{pooling} Operation geht die Position des Musters im Satz verloren und wird nicht mit modelliert.
-Im letzten Teil der Architektur folgen reguläre Zwischenschichten eines \textit{MLP} und eine \textit{softmax} Ausgangsschicht für den Multiklassifikation Anwendungsfall.\\
-Das Lernen der Gewichte, \textit{tuning} und Regularisierung erfolgt bei einem \textit{CNN} analog wie bei einem traditionellen \textit{MLP} wie in Kapitel \ref{kap:neuralNets} beschrieben.
+Im nächsten Schritt erfolgt eine Dimensionsreduktion der \textit{feature maps} durch eine \textit{pooling} Operation. Mit besseren Resultaten in der Praxis hat sich \textit{max-pooling} als geläufigste Form des \textit{poolings} gegenüber anderen Arten durchgesetzt. Hierbei wird aus jedem der \textit{feature maps} der maximale Wert extrahiert. Die dahinterstehende Idee ist es, die Information auf den wichtigsten Teil zu reduzieren. In dem Beispiel aus Abbildung \ref{abb:CNN_NLP} könnte es von Interesse sein zu klassifizieren, ob eine Rezension für einen Film positiv oder negativ ist. Das Netz könnte dann die Gewichte eines Faltungskerns so lernen, dass dieser speziell bei Wort-Tupeln wie \say{do not} oder \say{is not} eine hohe \textit{convolution} erzeugt. Unter \textit{max-pooling} wird dann das \textit{feature map} auf diesen Informationsteil reduziert (vgl. \cite{cnnSentence}, S. 1747). Das Netzwerk kann also Muster variabler Länge in den Sätzen erkennen, doch durch die \textit{pooling} Operation geht die Position des Musters im Satz verloren und wird nicht mit modelliert.
+Im letzten Teil der Architektur in Abbildung \ref{abb:CNN_NLP} folgen reguläre Zwischenschichten eines \textit{MLP} und eine \textit{softmax} Ausgangsschicht für den Multiklassifikations Anwendungsfall.\\
+Das Lernen der Gewichte sowie \textit{tuning} und Regularisierung erfolgt bei einem \textit{CNN} analog wie bei dem in Kapitel \ref{kap:neuralNets} beschrieben traditionellen \textit{MLP}.
 
 
 \begin{itemize}
@@ -307,6 +308,62 @@ Das Lernen der Gewichte, \textit{tuning} und Regularisierung erfolgt bei einem \
 
 
 \subsubsection{Long-Short-Term-Memory Neural Net} \label{kap:LSTM}
+
+Dieses Unterkapitel erläutert die Idee der \textit{recurrent neural networks} (kurz \textit{RNN} und motiviert anschließend die darauf basierende \textit{long-short-term-memory neural networks} (kurz \textit{LSTM}). Der Abschnitt basiert größtenteils auf \cite{deepNLP}, S.126-169 (todo updaten).
+
+Liegen Daten in sequentieller Form vor, wie beispielsweise Sprachaufnahmen als Signale über die Zeit, Videos als Serie von Bildern oder Kurztexte als Sequenz von Wörtern, so sind traditionelle \textit{MLP} aufgrund ihrer Limitierungen nicht geeignet. Sie erwarten statische Daten, wo jedes Variable unabhängig von allen anderen ist und es fehlt die Fähigkeit Informationen über einen zeitlichen Verlauf hinweg zu speichern. In der Architektur eines \textit{feed-forward} Netzes, dass auf einer sequentiellen Darstellung der Wörter (Kapitel \ref{Kap:Seq}) aufbaut, verarbeitet jedes Wort unabhängig von den anderen. Im Modell wird also keinerlei Korrelation von dem nächstem Wort im Satz zu den vorherigen modelliert (vgl. \cite{deepEssentials}, S.145). Im Bereich des \textit{deep learning} werden Klassifikationsprobleme, die auf sequentiellen Daten basieren, meist mit \textit{RNN} bewältigt. \textit{LSTM} haben sich als Unterklasse der \textit{RNN} sehr erfolgreich im Bereich des \textit{NLP} erwiesen (vgl. \cite{deepEssentials}, S.150 und \cite{keras}, S.175). In Abbildung \ref{abb:RNNExample} ist die Verarbeitung eines Satzes von einem \textit{RNN} dargestellt.
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/RNN_Example_DeepNLPpage128.PNG}
+\caption{\textit{RNN} Model bei Input des Satzes: Sachin is a great (\cite{deepNLP}, S.128)}
+\label{abb:RNNExample}
+\end{center}
+\end{figure}
+
+In der Grafik ist zu sehen, dass die Wörter dem \textit{hidden layer} sequentiell als Input dienen. Die Wörter sind entweder Wort-Vektoren oder werden einem \textit{embedding layer} transformiert. Unter Input der Sequenz \say{Sachin is a great} sagt das Netz genau eine Sequenz vorher, welche das nächste Wort im Satz ist und von den vorherigen abhängt. 
+Eine solche Architektur wird als \textit{many-to-one}
+bezeichnet und kann mit einer Klasse als Ausgabewert auch in der Multiklassifikation als Anwendung dienen (vgl. \cite{deepEssentials}, S. 14). Die \textit{hidden neurons} in der Grafik \ref{abb:RNNExample} sind mit jeweils $6$ Einheiten sequentiell in den $4$ \textit{RNN} Zellen (eine für jeden Teil der Input Sequenz) organisiert. Die Bestandteile des Prozesses des \textit{RNN} sind in Abbildung \ref{abb:RNNArch} dargestellt.
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width = 0.7 \textwidth,  keepaspectratio]{Images/RNN_MIT_S382.PNG}
+\caption{Bestandteile eines \textit{RNN} Models mit einer \textit{many-to-one} Struktur (\cite{deepL}, S.382)}
+\label{abb:RNNArch}
+\end{center}
+\end{figure}
+
+$x^{(t)}$ ist der $t$-te Teil der Input Sequenz, also das $t$-te Wort. $h^{(t)}$ ist der \textit{hidden state} zum Zeitpunkt $t$ der Sequenz. $o^{(r)}$ ist das Ausgangssignal zum $r$-ten Zeitpunkt, dem Ende der Sequenz.
+Die Verbindung zwischen Input und \textit{hidden neurons} wird durch die Gewichtsmatrix $\bm{U}$, die \textit{hidden state} zu \textit{hidden state} Verbindung durch die Gewichtsmatrix $\bm{W}$. Eine weitere Gewichtsmatrix $\bm{V}$ parametrisiert die Verbindung zwischen \textit{hidden state} und Ausgangssignal. Über die wahre Zielvariable $y^{(r)}$, die den 
+
+
+
+\begin{itemize}
+\item hidden noch gescheit erklären
+    \item deepEssentials: S.143-165, bidirectional 159
+    \item keras: 174-213 (bidirectional included) (gute quelle)
+    \item deepNLP: 119-169, LSTM 138-145
+    \item MIT: 373-416, (bidirectional 394-396, LSTM 408- 413)
+    \item many to one schöne grafik: deepEssentials S.147
+    \item nachteile von traditionellen MLP: deepEssentials S.145
+    \item schöne grafiken für lstm: essentials 152, 153
+    \item noch schönere grafiken: deepNLP S.140
+    \item lstm erhöhen performance: keras 175, zusätzlich 
+    \item vanishing gradient lösung: essentials S.150, MIT S.385, 8.2.5, und S. 401
+    \item lstm ist nur drop in für RNN: keras 175
+    \item struktur mit fully connected/softmax: keras 179 unten
+    \item vanishing gradient problem und lösung: keras 184-186, essentials: 149-150
+    \item binary classification mit LSTM: keras ab 188
+    \item tuning RNNs: deepNLP 138
+    \item stoped: deepNLP S. 128, keras:176  MIT 409
+    \item Das \textit{RNN} modelliert Vergangene Ereignisse um ein zukünftiges Ereignis vorauszusagen. 
+    \item softmax benutzt deepNLP S: 132
+    \item sirach: (input plus previous input) can not remember the whole sequence
+\end{itemize}{}
+
+
+
+
 
 \begin{itemize}
     \item grafik über kombination von word embeddings und Algorithmen (was kann mit was verwendet werden)

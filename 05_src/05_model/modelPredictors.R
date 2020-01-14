@@ -1065,9 +1065,9 @@ predictLSTMSeq <- function(dataPath, fileName,
     # Start off with an efficient embedding layer which maps
     # the vocab indices into embedding_dims dimensions
     layer_embedding(input_dim = nVocab,
-                    output_dim = 50, 
+                    output_dim = 300, 
                     input_length = ncol(trainData)) %>%
-    bidirectional(layer_lstm(units = 128)) %>%
+    bidirectional(layer_lstm(units = 256)) %>%
     layer_dropout(rate = 0.4) %>% 
 
     # Add a vanilla hidden layer:
@@ -1207,9 +1207,10 @@ predictLSTMArray <- function(dataPath, fileName,
     #               padding = "same", activation = "relu", strides = 1,
     #               name = "conv1"#, trainable = FALSE
     # ) %>%
-    # bidirectional(layer_lstm(units = 128)) %>%
-    bidirectional(input_shape =  list(maxWords, channels),
-                  layer_lstm(units = 256)) %>%
+    bidirectional(layer_lstm(units = 256)) %>%
+    # bidirectional(input_shape =  list(maxWords, channels),
+    #               layer_gru(units = 256),
+    #               layer_lstm(units = 256)) %>%
     layer_dropout(rate = 0.4) %>% 
     layer_activation("relu") %>%
     
@@ -1218,7 +1219,6 @@ predictLSTMArray <- function(dataPath, fileName,
     
     # Apply 20% layer dropout
     #layer_dropout(0.2) %>%
-    layer_activation("relu") %>%
     
     # Project onto a single unit output layer, and squash it with a sigmoid
     layer_dense(units = ncol(trainLabel),
@@ -1231,6 +1231,7 @@ predictLSTMArray <- function(dataPath, fileName,
     optimizer = optimizer_adam(lr = 0.001),
     metrics = c('accuracy')
   )
+  
   
   print("fitting model")
   

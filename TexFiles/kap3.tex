@@ -177,9 +177,20 @@ Das Gewicht $w_{i_l}^{(k)}$ gehört zur Verbindungslinie von Knoten $i$ der $k-1
 \[ a_{l}^{(k)} = \sigma (b_l + \sum_{i=1}^{m^{(k-1)}} w_{il}^{(k)} a_{i}^{(k-1)}).\]
 
 Der \textit{bias} $b_l$ ist ein weiterer Parameter, der im Laufe des Trainings des Netzes gelernt wird.
-Für die erste Zwischenschicht und die Eingangsschicht berechnen sich Signale analog indem die Eingangssignale $a_{1}^{(k-1)},..., a_{m^{(k-1)}}^{(k-1)}$ durch die Einträge des Datenvektors $x_1, ..., x_F$ ersetzt werden, mit $F$ der Anzahl der Variablen oder der Dimension des Wort-Vektors. Die Aktivierungsfunktion $\sigma$ transformiert die gewichtete Summe dann anschließend und bestimmt wie hoch das finale Signal ist. Jede Schicht außer der Eingangsschicht besitzt eine solche Aktivierungsfunktion. Sie sollte differenzierbar sein, da das Netzwerk im Prozess des Lernens Gradienten berechnet. Dieser Aspekt wird später detailliert erläutert. Es existiert eine Vielzahl an Aktivierungsfunktionen. Es werden im Folgenden Aktivierungsfunktionen vorgestellt, die in dieser Arbeit genutzt werden. Für eine detailliertere Übersicht sei auf \cite{deepEssentials}, S.62 verwiesen. Die \textit{rectified linear unit} (kurz \textit{relu}) hat in den letzten Jahren an Beliebtheit zugenommen. Sei $x$ die gewichtete Summe der Eingangssignale, so ist
+Für die erste Zwischenschicht und die Eingangsschicht berechnen sich Signale analog indem die Eingangssignale $a_{1}^{(k-1)},..., a_{m^{(k-1)}}^{(k-1)}$ durch die Einträge des Datenvektors $x_1, ..., x_F$ ersetzt werden, mit $F$ der Anzahl der Variablen oder der Dimension des Wort-Vektors. Die Aktivierungsfunktion $\sigma$ transformiert die gewichtete Summe dann anschließend und bestimmt wie hoch das finale Signal ist. Jede Schicht außer der Eingangsschicht besitzt eine solche Aktivierungsfunktion. Sie sollte differenzierbar sein, da das Netzwerk im Prozess des Lernens Gradienten berechnet. Dieser Aspekt wird später detailliert erläutert. Es existiert eine Vielzahl an Aktivierungsfunktionen. Es werden im Folgenden Aktivierungsfunktionen vorgestellt, die in dieser Arbeit genutzt werden (vgl. \cite{deepEssentials}, S.62-65). 
 
-\[\sigma(x) = 
+Die \textit{sigmoid} Aktivierungsfunktion bildet die Urmenge in das Intervall $\left[0, 1\right]$ ab. Sei $x \in \mathbb{R}$ ein Input, dann ist 
+
+\[\sigma(x) =  \frac{1}{1+ e^{-x}}.\]
+
+Eine Funktion, die die Urmenge in das Intervall $\left[-1, 1\right]$ abbildet, ist der \textit{tangens hyperbolicus}, der wie folgt definiert ist:
+
+\[tanh(x) =  \frac{1- e^{-2x}}{1+ e^{-2x}}.\]
+
+
+Die Konvergenz der Parameter erfolgt schneller als unter der Nutzung von einer \textit{sigmoid} Aktivierung. Dennoch leidet $tanh$ wie die \textit{sigmoid} Funktion unter dem \textit{vanishing gradient} Problem, weshalb in der Praxis die \textit{rectified linear unit} (kurz \textit{relu}) genutzt wird. \textit{sigmoid} und \textit{tanh} finden in dieser Thesis ausschließlich Anwendung bei den in Kapitel \ref{kap:LSTM} beschriebenen \textit{long-short-term-memory neural networks}. Die \textit{relu} Funktion ist wie folgt definiert:
+
+\[relu(x) = 
 \begin{cases}
 max(0,x), & x >= 0 \\
 0, & x <0
@@ -307,9 +318,9 @@ Das Lernen der Gewichte sowie \textit{tuning} und Regularisierung erfolgt bei ei
 
 
 
-\subsubsection{Long-Short-Term-Memory Neural Net} \label{kap:LSTM}
+\subsubsection{Recurrent Neural net und Long-Short-Term-Memory Neural Net} \label{kap:LSTM}
 
-Dieses Unterkapitel erläutert die Idee der \textit{recurrent neural networks} (kurz \textit{RNN} und motiviert anschließend die darauf basierende \textit{long-short-term-memory neural networks} (kurz \textit{LSTM}). Der Abschnitt basiert größtenteils auf \cite{deepNLP}, S.126-169 (todo updaten).
+Dieses Unterkapitel erläutert die Idee der \textit{recurrent neural networks} (kurz \textit{RNN}) und motiviert anschließend die darauf basierenden \textit{long-short-term-memory neural networks} (kurz \textit{LSTM}). Die Informationen über das \textit{RNN} entspringen größtenteils \cite{deepL}, S. 378-381, der darauf folgende Abschnitt über \textit{LSTM} basiert auf \cite{deepNLP}, S.138-143.\\
 
 Liegen Daten in sequentieller Form vor, wie beispielsweise Sprachaufnahmen als Signale über die Zeit, Videos als Serie von Bildern oder Kurztexte als Sequenz von Wörtern, so sind traditionelle \textit{MLP} aufgrund ihrer Limitierungen nicht geeignet. Sie erwarten statische Daten, wo jedes Variable unabhängig von allen anderen ist und es fehlt die Fähigkeit Informationen über einen zeitlichen Verlauf hinweg zu speichern. In der Architektur eines \textit{feed-forward} Netzes, dass auf einer sequentiellen Darstellung der Wörter (Kapitel \ref{Kap:Seq}) aufbaut, verarbeitet jedes Wort unabhängig von den anderen. Im Modell wird also keinerlei Korrelation von dem nächstem Wort im Satz zu den vorherigen modelliert (vgl. \cite{deepEssentials}, S.145). Im Bereich des \textit{deep learning} werden Klassifikationsprobleme, die auf sequentiellen Daten basieren, meist mit \textit{RNN} bewältigt. \textit{LSTM} haben sich als Unterklasse der \textit{RNN} sehr erfolgreich im Bereich des \textit{NLP} erwiesen (vgl. \cite{deepEssentials}, S.150 und \cite{keras}, S.175). In Abbildung \ref{abb:RNNExample} ist die Verarbeitung eines Satzes von einem \textit{RNN} dargestellt.
 
@@ -328,46 +339,82 @@ bezeichnet und kann mit einer Klasse als Ausgabewert auch in der Multiklassifika
 \begin{figure}[!ht]
 \begin{center}
 \includegraphics[width = 0.7 \textwidth,  keepaspectratio]{Images/RNN_MIT_S382.PNG}
-\caption{Bestandteile eines \textit{RNN} Models mit einer \textit{many-to-one} Struktur (\cite{deepL}, S.382)}
+\caption{Bestandteile eines zeitlich aufgeschlüsselten \textit{RNN} Modells mit einer \textit{many-to-one} Struktur (\cite{deepL}, S.382)}
 \label{abb:RNNArch}
 \end{center}
 \end{figure}
 
-$x^{(t)}$ ist der $t$-te Teil der Input Sequenz, also das $t$-te Wort. $h^{(t)}$ ist der \textit{hidden state} zum Zeitpunkt $t$ der Sequenz. $o^{(r)}$ ist das Ausgangssignal zum $r$-ten Zeitpunkt, dem Ende der Sequenz.
-Die Verbindung zwischen Input und \textit{hidden neurons} wird durch die Gewichtsmatrix $\bm{U}$, die \textit{hidden state} zu \textit{hidden state} Verbindung durch die Gewichtsmatrix $\bm{W}$. Eine weitere Gewichtsmatrix $\bm{V}$ parametrisiert die Verbindung zwischen \textit{hidden state} und Ausgangssignal. Über die wahre Zielvariable $y^{(r)}$, die den 
+In der Grafik gehört jeder Knoten des Netzwerkes zu einem spezifischen Zeitpunkt in der Sequenz.
+Dort ist $\bm{x}^{(t)}$ der $t$-te Teil der Input Sequenz, also der $t$-te Wort-Vektor. $\bm{h}^{(t)}$ ist der \textit{hidden state} zum Zeitpunkt $t$ der Sequenz. $\bm{o}^{(r)}$ ist der Vektor des Outputs zum $\tau$-ten Zeitpunkt, dem Ende der Sequenz. Er nimmt die nicht-normalisierten log-likelihood Wahrscheinlichkeiten für jede der möglichen Ausprägungen der Zielvariable an.
+Die Verbindung zwischen Input und \textit{hidden} Neuronen wird durch die Gewichtsmatrix $\bm{U}$, die \textit{hidden state} zu \textit{hidden state} Verbindung durch die Gewichtsmatrix $\bm{W}$. Eine weitere Gewichtsmatrix $\bm{V}$ parametrisiert die Verbindung zwischen \textit{hidden state} und Ausgangssignal. Eine Verlustfunktion $L$ misst dann den Abstand der Zielvariable $\bm{y}^{(r)}$ und der Vorhersage $\bm{\hat{y}}$. Diese Vorhersage wird erhalten, indem intern auf den Output die \textit{softmax} Aktivierungsfunktion (Kapitel \ref{kap:neuralNets}) angewandt wird. Nach den Neuronen der \textit{hidden layer} wird die $tanh$ Aktivierungsfunktion angewandt (vgl. \cite{deepL}, S. 378). Die \textit{forward propagation} beginnt mit der Initiierung des \textit{hidden state} $h^{(0)}$. Für jeden der Zeitpunkte $t=1$ bis $t = \tau$ wird dann sukzessive 
+
+\begin{align*}
+    \bm{a}^{(t)} &= \bm{b} + \bm{W} \bm{h}^{(t-1)} + \bm{U}\bm{x}^{(t)} \\
+    \bm{h}^{(t)} &= tanh(\bm{a}^{(t)}) 
+\end{align*}
+    und schließlich zum letzten Zeitpunkt $\tau$
+\begin{align*}
+    \bm{o}^{(\tau)} &= \bm{c} + \bm{V}\bm{h}^{(\tau)} \\
+    \bm{\hat{y}}^{(\tau)} &= softmax(\bm{o}^{(\tau)})
+\end{align*}
+
+berechnet. Hier bezeichnen $\bm{b}$ und $\bm{c}$ die \textit{bias} Vektoren, die zu $\bm{W} \bm{h}^{(t-1)} $ und $\bm{V}\bm{h}^{(\tau)} $ addiert werden (vgl. \cite{deepL}, S.381).\\
+Die Berechnung der Gradienten durch die \textit{backpropagation} Operation funktioniert analog wie bei einem \textit{MLP} aus Kapitel \ref{kap:neuralNets}. Sie wird auf das zeitlich aufgeschlüsselte Modell (vgl. Abbildung \ref{abb:RNNArch}) angewendet und heißt deshalb auch \textit{backpropagation-through-time} (kurz \textit{BPTT}). \\
+Bei dem Versuch lange zeitliche Abhängigkeiten zu lernen, entsteht bei \textit{RNN} häufig das Problem, dass die Gradienten entweder verschwinden oder explodieren. 
+Die Gewichte werden bei der \textit{BPTT} exponentiell kleiner bei langen Sequenzen (vgl. \cite{deepL}, S.401). Wird die zeitliche Komponente $\tau$ der Sequenz erhöht, so erhöht sich auch die Schwierigkeit der gradienten-basierten Optimierung.
+Bereits bei Sequenzen der Länge von $\tau = 10$ oder $\tau = 20$ kann ein \textit{RNN} nicht mehr erfolgreich gelernt werden (vgl. \cite{deepL}, S.418).\\
+
+Zur Lösung des Problems des verschwindenden Gradienten gibt es mehrere Herangehensweisen. Eine davon ist die Nutzung der Architektur eines \textit{long-short-term-memory} Netzwerkes, welches eine Klasse der \textit{RNN} ist. Diese Netzwerke wurden speziell zur Lösung des \textit{vanishing gradient} Problems konzipiert und können Abhängigkeiten über einen langen Zeitraum besser lernen (vgl. \cite{keras}, S. 186). Mit der Einführung von \textit{gates} wird bei der \textit{BPTT} der Gradient additiv statt multiplikativ berechnet. Durch die additive Zusammensetzung wird der Effekt des \textit{vanishing gradients} Problems reduziert (vgl. \cite{deepEssentials}, S. 150, todo: ausführlicher?).
+
+Die verschiedenen \textit{gates} bestimmen welcher Teil der Informationen über die Vergangenheit vergessen und erhalten bleibt. (vgl. \cite{deepNLP}, S.133). Die grundlegende Struktur des \textit{LSTM} entspricht der eines \textit{RNN}, nur dass die \textit{RNN}-Zelle durch eine \textit{LSTM}-Zelle ersetzt wird, welche gegen das \textit{vanishing gradient} Problem resistent ist (vgl. \cite{keras}, S.188). Statt nur einem \textit{hidden layer} in einer \textit{RNN}-Zelle interagieren nun $4$ Zwischenschichten miteinander. In Abbildung \ref{abb:LSTMArch} ist die Struktur für den Zeitpunkt $t$ der Sequenz dargestellt, welche im Folgenden erläutert wird.
+
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/LSTMArch_DeepNLPS134.PNG}
+\caption{Struktur des \textit{LSTM} Modells (\cite{deepNLP}, S.382)}
+\label{abb:LSTMArch}
+\end{center}
+\end{figure}
+
+Im Folgenden sei der Zeitpunkt $t$ nicht wie bisher oben stehend in Klammern notiert, sondern basierend auf Abbildung \ref{abb:LSTMArch} als unten stehender Index notiert. Die folgenden Formeln zur Berechnung der Variablen aus Abbildung \ref{abb:LSTMArch} stammen aus \cite{deepNLP}, S.140-142.
+Die \textit{input gate} Zwischenschicht $\bm{i}_t$ zum Zeitpunkt $t$ (mit vorheriger Notation $i^{(t)}$)  berechnet sich aus
+
+\[ \bm{i}_t = \sigma(\bm{W}_i [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_i),\]
+
+wobei $\bm{x}_t$ der Input zum Zeitpunkt $t$ ist, $\bm{h}_{t-1}$ der \textit{hidden state} zum Zeitpunkt $t-1$, $\bm{b}_i$ ein \textit{bias} Vektor und $\bm{W}_i$ die zum \textit{input gate} zugehörige Gewichtsmatrix. $\sigma$ und $tanh$ bezeichnen die entsprechenden Aktivierungsfunktionen, die in Kapitel \ref{kap:neuralNets} definiert sind. Des Weiteren wird ein Kandidaten-Vektor $\bm{\acute{c}}_t$ 
+\[\bm{\acute{c}}_t = tanh(\bm{W}_c [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_c),\]
+
+erstellt, der potentielle Werte enthält, die zum \textit{input gate} Output addiert werden. $\bm{W}_c$ ist die zugehörige Gewichtsmatrix und $\bm{b}_c$ der zugehörige \textit{bias} Vektor. Die nächste Komponente ist das \textit{forget gate} $\bm{f}_t$
+
+\[  \bm{f}_t = \sigma(\bm{W}_f [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_f), \]
+
+welches kontrolliert, bis zu welchem Teil Information im Gedächtnis des Netzes zum Zeitpunkt $t$ erhalten bleibt. $\bm{W}_f$ bezeichnet die Gewichtsmatrix und $\bm{b}_f)$ den zugehörigen \textit{bias}. Neben dem \textit{hidden state} gibt es jetzt nun auch einen \textit{cell state} $\bm{c}_t$ . Inhaltlich repräsentiert dieser das interne Langzeitgedächnis der \textit{LSTM}-Zelle (vgl. \cite{keras}, S. 186). Dieser wird berechnet aus
+\[\bm{c}_t = \bm{f}_t \cdot \bm{c}_{t-1} + \bm{i}_t \cdot \bm{\acute{c}}_t ,\]
+
+also aus der Summe von $2$ Komponenten. Der eine Teil ist der \textit{cell state} zum Zeitpunkt $t-1$, gefiltert durch das \textit{forget gate}. Die andere Komponente ist der Kandidaten-Vektor, der durch das \textit{input gate} ebenfalls gefiltert ist.\\
+Letztlich kontrolliert das \textit{output gate} $\bm{o_t}$, den \textit{hidden state} zum Zeitpunkt $t$ (todo verbessern):
+\[  \bm{o}_t = \sigma(\bm{W}_o [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_o), .\]
+
+$\bm{W}_o$ ist die Gewichtsmatrix und $\bm{b}_o$ der \textit{bias}. Der \textit{hidden state} zum Zeitpunkt $t$ ergibt sich durch
+\[\bm{h}_t = \bm{o}_t \cdot tanh(\bm{c}_t) , \]
+also aus dem \textbf{cell state}, auf den eine Aktivierungsfunktion angewandt wird und durch das \textit{output gate} gefiltert wird. Verglichen mit der Kalkulation des \textit{hidden state} einer \textit{RNN} Zelle, ist die Berechnung bei einer \textit{LSTM} Zelle deutlich aufwendiger (todo: da stehen lassen oder streichen?).\\
+
+In der bisher beschriebenen Struktur ist der Output zum Zeitpunkt $t$ von allen vergangenen Zeitpunkten $1,...,t-1$ abhängig. Nun ist es möglich, dass der Output zum Zeitpunkt $t$ auch von den zukünftigen Zeitpunkten $t+1,..., \tau$ abhängt. Dies kann von einem regulären \textit{LSTM} nicht modelliert werden. Eine Erweiterung der Architektur ist das \textit{bidirectional LSTM}. Dort werden $2$ \textit{LSTM} Schichten genutzt, wobei die eine Schicht den Input regulär nutzt und die andere die Sequenz rückwärts ließt. So kann sowohl der Kontext aus der Vergangenheit als auch von der Zukunft modelliert werden (vgl. \cite{deepEssentials}, S.159).
+\textit{bidirectional LSTM} zeichnen sich generell durch eine gute Performance für viele \textit{NLP} Probleme aus (vgl. \cite{deepNLP}, S.142).
+
+
 
 
 
 \begin{itemize}
-\item hidden noch gescheit erklären
-    \item deepEssentials: S.143-165, bidirectional 159
-    \item keras: 174-213 (bidirectional included) (gute quelle)
-    \item deepNLP: 119-169, LSTM 138-145
-    \item MIT: 373-416, (bidirectional 394-396, LSTM 408- 413)
-    \item many to one schöne grafik: deepEssentials S.147
-    \item nachteile von traditionellen MLP: deepEssentials S.145
-    \item schöne grafiken für lstm: essentials 152, 153
-    \item noch schönere grafiken: deepNLP S.140
-    \item lstm erhöhen performance: keras 175, zusätzlich 
-    \item vanishing gradient lösung: essentials S.150, MIT S.385, 8.2.5, und S. 401
-    \item lstm ist nur drop in für RNN: keras 175
-    \item struktur mit fully connected/softmax: keras 179 unten
-    \item vanishing gradient problem und lösung: keras 184-186, essentials: 149-150
-    \item binary classification mit LSTM: keras ab 188
+\item was bedeutet hidden im kontext
+\item wie wird verlust berechnet? (1, 0, 0, 0) verglichen mit (0.7, 0.1, 0.2, 0.1)?
+    \item Quellen: deepEssentials: S.143-165, bidirectional 159,  keras: 174-213 (bidirectional included) (gute quelle),  deepNLP: 119-169, LSTM 138-145, MIT: 373-416, (bidirectional 394-396, LSTM 408- 413)
+    \item vanishing gradient lösung: MIT S.385, 8.2.5, und S. 401, keras 184-186, essentials: 149-150
     \item tuning RNNs: deepNLP 138
-    \item stoped: deepNLP S. 128, keras:176  MIT 409
-    \item Das \textit{RNN} modelliert Vergangene Ereignisse um ein zukünftiges Ereignis vorauszusagen. 
-    \item softmax benutzt deepNLP S: 132
-    \item sirach: (input plus previous input) can not remember the whole sequence
 \end{itemize}{}
 
-
-
-
-
-\begin{itemize}
-    \item grafik über kombination von word embeddings und Algorithmen (was kann mit was verwendet werden)
-\end{itemize}{}
 
 
 

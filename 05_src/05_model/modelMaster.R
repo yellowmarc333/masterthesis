@@ -100,6 +100,8 @@ mod_GloveArray_CNNArray_10 <- predictCNNArray(dataPath, fileName = fileName,
 mod_GloveArray_LSTMArray_10 <- predictLSTMArray(dataPath, 
                                                 fileName = fileName, 
                                                 epochs = 9) # 0.6011 
+# ohne bidirectional 0.5919
+
 # tuning:
 # 1: ohne densenet 0.5449
 # 2: 1 ohne conv net 0.5701

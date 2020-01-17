@@ -8,6 +8,7 @@
 
 # [runterschreiben]
 
+# matze diskutieren, macht bidirectional überhaupt sinn?
 # quellen immer mitnotieren (zumindest in itemize)
 # gradientenabstieg erklären anhand anderer Quelle? MIT S.170
 # convolution mathematisch überhaupt nötig zu definieren?

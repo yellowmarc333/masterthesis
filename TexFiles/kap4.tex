@@ -1,0 +1,123 @@
+\documentclass[a4paper,11pt]{article}
+
+\parindent0cm
+\usepackage
+[backend=biber,style=apa,sorting=nyt]
+{biblatex}
+\addbibresource{literature.bib}
+
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+\usepackage{array}
+\usepackage{dirtytalk}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{multirow}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage{layouts}
+% printing the textsize used
+% \printinunitsof{cm}
+% \prntlen{\textwidth}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage[ngerman]{babel}
+\usepackage[left=3cm,right=2.5cm,top=2cm,bottom=2cm]{geometry}
+\renewcommand{\baselinestretch}{1.5}\normalsize % Zeilenabstand 1.5
+
+
+
+
+\begin{document}
+
+\section{Statistische Auswertung}\label{Kap:statAus}
+
+In diesem Kapitel werden die in Kapitel \ref{kap:machineLearning} vorgestellten \textit{Machine Learning} Modelle auf die verschiedenen numerischen Repräsentationen (Kapitel \ref{kap:3.1Wordemb}) der Nachrichten-Schlagzeilen angewandt. Dieses Kapitel ist in $3$ Teile unterteilt. Im ersten Teil wird das Trainings-, Validierungs- und Test- \textit{Framework} beschrieben. Es folgt eine Beschreibung über die Vorauswahl der Modelle. Der zweite Teil behandelt die Evaluation der ausgewählten Modelle anhand der Gütemaße aus Abschnitt \ref{kap:guetemass}. Im dritten Teil werden die Modelle analysiert (todo: vervollständigen)\\
+Die Auswertung und Exploration der Daten sowie die Programmierung der Algorithmen erfolgte ausschließlich mit der Statistik-Software \texttt{R} (R Core Team, 2019).
+
+\subsection{Framework und Vorauswahl der Modelle}
+
+Dieses Unterkapitel erläutert das verwendete \textit{Framework} und beschreibt anschließend die stattgefundene Vorauswahl der finalen Modelle, welche in dieser Arbeit verglichen werden.
+
+\subsubsection{Framework}
+
+
+Dieser Abschnitt erklärt, wie die $200847$ Beobachtungen des gesamten Datensatzes in Trainings-, Test- und Validierungsdaten unterteilen.\\
+Die Testdaten ist der Teil der Daten, auf den die finalen Modelle eine Vorhersage der Nachrichtenkategorie treffen und anschließend die Gütemaße aus Kapitel \ref{kap:guetemass} berechnet und evaluiert werden. Wichtig dabei ist, dass die Testdaten den Modellen nie als Input gedient haben. Der Grund dafür ist, dass die Testdaten als Kriterium dafür dienen, wie gut die gelernten Modelle auf ungesehenen Daten generalisieren können. Zur Ermittlung einer geeigneten Größe der Testdaten, wird das Kriterium genommen, dass im Mittel $100$ Beobachtungen in der am niedrigsten repräsentierten Nachrichtensparte enthalten sind. Dies resultiert in einer Stichprobe von $20005$ Beobachtungen, was etwa 10 Prozent der gesamten Daten entspricht. Mit dieser Größe ist eine aussagekräftige Evaluation möglich und gleichzeitig stehen den Algorithmen eine größtmögliche Anzahl von Beobachtungen zum Training zur Verfügung. Von den verbleibenden $90$ der Daten wurde wiederum eine Stichprobe von $10$ Prozent gezogen (insgesamt $9$ Prozent der gesamten Daten). Auf dieser Stichprobe der Größe $18084$ erfolgt die im nächsten Abschnitt beschriebene Vorauswahl der Algorithmen und Repräsentationen. Die Daten für die Vorauswahl (folglich Vorauswahldaten genannt) werden wiederum in $80$ Prozent Trainingsdaten ($14467$ Datenpunkte) und $20$ Prozent  Validierungsdaten ($3617$ Datenpunkte) geteilt. Auf den Vorauswahldaten werden die verschiedenen Repräsentationen der Wörter, sowohl für Training als auch Validierung erstellt. Dabei werden je nach Art des \textit{Embeddings} einige wenige Datenpunkte entfernt. Der Grund hierfür ist beispielsweise, dass  unter Nutzung von \textit{BOW} nach Entfernung der \textit{Stopwords} einige Beobachtungen keine Wörter mehr enthalten. Im Falle von \textit{Glove} werden im Zuge des \textit{paddings} alle Datenpunkte entfernt, die mehr als $W_{max}$ Wörter enthalten.
+Letztlich erhalten alle Algorithmen die selben Teilmengen der Vorauswahldaten zum Trainieren und Validieren. 
+
+\subsubsection{Vorauswahl der Modelle}\label{kap:preselection}
+
+Es gibt viele Kombinationen aus Repräsentationen der Wörter und Algorithmen, die auf diese \textit{Embeddings} angewandt werden. In der in diesem Unterabschnitt beschriebenen Vorauswahl wird die Menge auf $4$ (todo: sinnvoll?)  Kombinationen aus \textit{Word Embeddings} und Modellen reduziert. Dabei sollen mindestens ein neuronales Netze als auch ein baumbasiertes Verfahren in die Auswahl aufgenommen werden. Des Weiteren ist eine gute Performance im Sinne der Gütemaße aus Kapitel \ref{kap:guetemass} maßgebend. Für die Vorauswahl werden $4$ Gütemaße betrachtet, $accuracy$, $CE$, $fscore_\mu^{(1)}$ und $fscore_M^{(1)}$. Die auf den Validierungsdaten evaluierten Ergebnisse sind in Tabelle \ref{tab:preselection} dargestellt.
+
+
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{|m{2cm}|m{1.4cm}m{1.4cm}m{1.4cm}m{1.4cm}m{1.4cm}m{1.4cm}m{1.4cm}|}
+\hline
+ & \multicolumn{7}{c|}{Modelle}  \\
+ \hline
+  \textit{Word}\newline \textit{Embeddings} & \textit{XGBoost} & \textit{Random Forest} & \textit{MLP} & \textit{CNN \newline Sequenz} & \textit{CNN Glove} & \textit{Bi-LSTM \newline Sequenz} &  \textit{Bi-LSTM \newline Glove} \\
+ \hline
+ \hline
+\textit{BOW} & $0.04, 0.005$ \newline $0.00, 1.24$ & & & & & & \\
+\textit{TFIDF} & & & & & & & \\
+\textit{GloVe unsup. 50D} & & & & & & & \\
+\textit{GloVe 50D} & & & & & & & \\
+\textit{GloVe 300D} & & & & & & & \\
+\textit{SOW GloVe unsup. 50D} & & & & & & & \\
+\textit{SOW GloVe 50D} & & & & & & & \\
+\textit{SOW Glove 300D}  & & & & & & & \\
+\textit{Sequence} & & & & & & & \\
+   \hline
+\end{tabular}
+
+  \caption{}  
+  \label{tab:preselection}
+\end{center}
+\end{table}
+
+% \cellcolor[HTML]{AA0044}
+
+\begin{itemize}
+\item testdaten: 
+    \item grafik über kombination von word embeddings und Algorithmen (was kann mit was verwendet werden), 2-3 guetemasse, dann farblich die besten markieren
+\end{itemize}{}
+
+\begin{itemize}
+    \item grafik mit framework zu train/test/validation (10 prozent vorauswahl benchmarken, dann auf 90 prozent traintest/tuning. Die selben Modelle dann auf 10 prozent valdata validieren? 10 prozent war, weil dann in der kleinsten klasse noch mindestens $100$ Beobachtungen sind.
+    \item außerdem welche tokens entfernt wurden.
+    \item tabelle mit allem was ich ausprobiert habe
+    \item tuning wurde klein gehalten, die Modelle werden auf 90 \% der Daten nicht nochmal verändert. (ausser nrounds, epochen, numtrees etc)
+\end{itemize}{}
+
+\subsection{Evaluation und Vergleich der Modelle} \label{kap:evalFinal}
+\subsubsection{Performanzmaße}
+
+\begin{itemize}
+    \item accuracy, mse etc
+    \item accuracy by class comparison
+    \item confidence vs accuracy plots
+    \item maß wie sicher ist sich das Verfahren, wenn es die richtige klasse ist?
+\end{itemize}{}
+
+\subsection{Analyse der Modelle}
+
+\begin{itemize}
+
+    \item beobachtungen verändern, wörter wegnehmen, hinzufügen, reihenfolge ändern und schauen ob das verfahren stabil /sensitiv zur reihenfolge
+    \item variablenwichtigkeit bei xgboost als wordcloud plotten, dalex und sonstiges
+    \item random forest direkt variablenwichtigkeit
+    \item nachbarklassen identifizieren durch confusionmatrix
+    \item convolutional filters holen und ähnlichkeiten zu combinationen aus word vectors erhalten über tupel/tripel von wortvectoren laufen lassen und schauen wo die ähnlichkeit am größten ist
+\end{itemize}{}
+
+\subsubsection{Anpassung des besten Modell auf den gesamten Datensatz}
+
+
+
+\end{document}

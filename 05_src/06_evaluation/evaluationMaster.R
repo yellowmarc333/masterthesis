@@ -10,7 +10,7 @@
 evaluateData <- function(inPath = "03_computedData/05_modelData/", 
                          outPath = "03_computedData/06_evaluatedData/",
                          subfolder) {
-  
+
   assertString(inPath)
   assertString(outPath)
   
@@ -24,7 +24,7 @@ evaluateData <- function(inPath = "03_computedData/05_modelData/",
   allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
 
   resList <- lapply(allModels, function(x) {
-    getModelMetrics(fileName = x)
+    getModelMetrics(fileName = x, path = inPath)
   })
   
   res <- rbindlist(resList)

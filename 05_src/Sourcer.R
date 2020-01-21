@@ -41,6 +41,7 @@ sourceAll = function() {
                   "05_src/04_dataPreparation/prepareData.R",
                   #"05_src/04_dataPreparation/prepareDataOld.R",
                   
+                  "05_src/05_model/modelMaster.R",
                   "05_src/05_model/modelPredictors.R",
                   "05_src/05_model/generalizedSampling.R",
                   "05_src/06_evaluation/evaluationHelper.R",

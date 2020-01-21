@@ -27,6 +27,7 @@ getModelMetrics <- function(fileName,
                      "predictions",
                      "testLabelRaw"),
                choices = names(model))
+ 
   
   confMat <- model$confusionMatrix
   namesConfMat <- colnames(confMat)
@@ -63,8 +64,10 @@ getModelMetrics <- function(fileName,
   recall_frac <- ifelse(true_positives + false_negatives != 0,
                           true_positives + false_negatives,
                           0.00001)
-  browser()
+
   # precision_mu and recall_mu are always the same. I checked
+  # they are also the same as accuracy cause it gets divided by 
+  # the sum of the whole confusion matrix
   precision_mu <- round(sum(true_positives) / 
                          sum(precision_frac),
                        digits = 3)
@@ -78,8 +81,8 @@ getModelMetrics <- function(fileName,
                           recall_frac) / C ,
                      digits = 3)
   
-  f1_mu <- 2 * precision_mu * recall_mu / (precision_mu + recall_mu)
-  f1_M <- 2 * precision_M * recall_M / (precision_M + recall_M)
+  f1_mu <- round(2 * precision_mu * recall_mu / (precision_mu + recall_mu), 3)
+  f1_M <- round(2 * precision_M * recall_M / (precision_M + recall_M), 3)
   
   # calc multiclassif logloss / categorical cross entropy
   colIndexes <- sapply(testLabelRaw, function(x) {
@@ -92,11 +95,16 @@ getModelMetrics <- function(fileName,
     .SD[y, x, with = FALSE][[1]]
   }, colIndexes, 1:length(testLabelRaw))]
   
+  truthProb <- ifelse(truthProb == 0, 1/500, truthProb)
+  
   # this is a check that the confusion matrix is the right way
   #sum((testLabelRaw == "black voices") & (predictedLabel == "entertainment"))
   
   # take mean of log loss, then can be compared with different sample sizes
-  mlogloss <- mean(log(truthProb)) * (-1)
+  mlogloss <- round(mean(log(truthProb)) * (-1), 3)
+  
+  # occurs if no tree from random forest votes for a class
+  #if(is.infinite(mlogloss)) 
   
   return(list(modelName = fileName,
               accuracy = accuracy,

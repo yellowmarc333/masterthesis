@@ -1,6 +1,5 @@
 source("05_src/Sourcer.R")
 sourcedFiles = sourceAll()
-dataPath <- "03_computedData/04_preparedData/"
 
 
 allFiles <- list.files(path = "05_src/", recursive = T, full.names = T)
@@ -67,6 +66,10 @@ prepareDataGlove(inPath = "03_computedData/03_integratedData/",
                  subsetSize = "10pc", word2VecSize = 300, mergeSD = FALSE,
                  gloveName = "glove.42B.300d.txt")
 
+
+
+#-----------------------------------------------------------------------------
+
 # 100 pc
 prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
                  outPath = "03_computedData/04_preparedData/", 
@@ -78,8 +81,12 @@ prepareDataBOW(inPath = "03_computedData/03_integratedData/",
                outPath = "03_computedData/04_preparedData/", 
                subsetSize = "Full", saveSparse =  TRUE,  mergeSD = FALSE)
 
-eval_Test <- evaluateData(inPath = "03_computedData/05_modelData/",
-             outPath = "03_computedData/06_evaluatedData/")
+#------------------modelling-----------####
+predictPreselection()
+
+#------------------evaluation----------####
+evalPreselection <- evaluateData(inPath = "03_computedData/05_modelData/preselection/",
+                                 outPath = "03_computedData/06_evaluatedData/")
 
 
 # binary

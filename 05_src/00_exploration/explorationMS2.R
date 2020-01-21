@@ -3,19 +3,22 @@
 # [vor runter schreiben von methoden]
 
 # [coding]
-# batch normalization besser verstehen und überall reinmachen/rausnehmen
-# input daten normalisieren (gleiche parameter für training und test nehmen)
+
 
 # [runterschreiben]
 
+# tabelle über wie die neuronalen netze aufgestellt sind, vor vorauswahl?
+# wording: modelle statt algorithmen
 # matze diskutieren, macht bidirectional überhaupt sinn?
-# quellen immer mitnotieren (zumindest in itemize)
+# vanishing gradient problem erklären
 # gradientenabstieg erklären anhand anderer Quelle? MIT S.170
 # convolution mathematisch überhaupt nötig zu definieren?
+# alle textit großschreiben/korrigieren
 
 # [MA korrigeiren:]
 # -aus jeder korrektur die Sachen rauspicken, auf die ich achten muss
 # - matze: nicht zu umgspr. Fuellwoerter weglassen
+# - marcel: keine aussagen wie "meistens" treffen.
 # - englische wörter groß
 #- dieser Abschnitt soll -> dieser Abschnitt gibt
 #- captions nicht alles in textit
@@ -37,6 +40,8 @@
 
 # [liste für groll:]
 
+# Explaining auflisten und nachfragen, auflisten was noch fehlt
+# (tabelle der vorauswahl kann ausgefüllt, aber nicht beschrieben werden)
 # tiefe der erklärung im methodenteil abklären
 # validation/test bei xgboost und RF checken (muss gleich sein) (wird watchlist eigentlich gebraucht)
 #     im falle RF wird ja auf vollen 90% trainiert, auf 10% predicted
@@ -46,6 +51,11 @@
 # human experiment
 # fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xxerwähnen dass accuracy, f1_micro precision und f1_micro recall immer gleich sind.
+# xxbei wordembeddings namen für später erwähnen
+# xxwieso ist f1_mu = accuracy, wenn precision_mu = recall_mu = accuray, dann f1
+# xx     score auch accuracy (quelle gefunden)
+# xxbatch normalization besser verstehen und überall reinmachen/rausnehmen (rausgenommen)
 # xxmeasures TP, FN etc besser erklären
 # xxvalidation data muss genauso preprocessed sein wie train Data
 # xxvaldata seperat angeben (val. durchgehen)

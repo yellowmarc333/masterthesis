@@ -41,23 +41,20 @@ predictMLP <- function(dataPath, fileName,
   model <- keras_model_sequential() %>% 
     
     # Add a vanilla hidden layer:
-    layer_dense(units = 100) %>%
+    layer_dense(units = 100, activation = "relu") %>%
     # Apply 20% layer dropout
     layer_dropout(0.2) %>%
     
     # Add a vanilla hidden layer:
-    layer_dense(units = 100) %>%
+    layer_dense(units = 100, activation = "relu") %>%
     # Apply 20% layer dropout
     layer_dropout(0.2) %>%
     
     # Add a vanilla hidden layer:
-    layer_dense(units = 100) %>%
-    
-    layer_batch_normalization() %>%
+    layer_dense(units = 100, activation = "relu") %>%
     
     # Apply 20% layer dropout
     layer_dropout(0.2) %>%
-    layer_activation("relu") %>%
     
     # Project onto a single unit output layer, and squash it with a sigmoid
     layer_dense(units = ncol(trainLabel),
@@ -126,11 +123,12 @@ predictMLP <- function(dataPath, fileName,
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
-  assert(all(accByClass <= 1))
+  
   names(accByClass) <-  levels(trainLabelRaw)
   
   
-  return(list(acc = evaluationResult$acc,
+  return(list(model = model,
+              acc = evaluationResult$acc,
               loss = evaluationResult$loss,
               confusionMatrix = confusionMatrix,
               ProbAccDT = ProbAccDT,
@@ -231,11 +229,12 @@ predictLogReg <- function(dataPath, fileName,
   
   # accuracy by class: colSums are the amount of true labels
   accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
-  assert(all(accByClass <= 1))
+  
   names(accByClass) <-  levels(testLabelRaw)
   
   
-  return(list(acc = accuracy,
+  return(list(model = model,
+              acc = accuracy,
               meanSquareError = meanSquareError,
               confusionMatrix = confusionMatrix,
               ProbAccDT = ProbAccDT,
@@ -323,11 +322,13 @@ predictNB <- function(dataPath, fileName,
   
   # accuracy by class: colSums are the amount of true labels
   accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
-  assert(all(accByClass <= 1))
+  
+  
   names(accByClass) <-  levels(testLabelRaw)
   
   
-  return(list(acc = accuracy,
+  return(list(model = model,
+              acc = accuracy,
               meanSquareError = meanSquareError,
               confusionMatrix = confusionMatrix,
               ProbAccDT = ProbAccDT,
@@ -423,7 +424,8 @@ predictXG <- function(dataPath, fileName,
                              data = watchTrainMat, 
                              nrounds = nrounds, 
                              verbose = 1, 
-                             watchlist = watchlist)
+                             watchlist = watchlist,
+                             early_stopping_rounds = 3)
 
   # evaluating predictions and eval metrics
   predictions <- as.data.table(predict(model, 
@@ -467,11 +469,13 @@ predictXG <- function(dataPath, fileName,
   
   # accuracy by class: colSums are the amount of true labels
   accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
-  assert(all(accByClass <= 1))
+  
+  
   names(accByClass) <-  levels(testLabelRaw)
   
   
-  return(list(acc = accuracy,
+  return(list(model = model,
+              acc = accuracy,
               meanSquareError = meanSquareError,
               confusionMatrix = confusionMatrix,
               ProbAccDT = ProbAccDT,
@@ -574,7 +578,7 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
     
     # accuracy by class: colSums are the amount of true labels
     accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
-    assert(all(accByClass <= 1))
+    
     names(accByClass) <-  levels(testLabelRaw)
     
   }
@@ -678,13 +682,14 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
     
     # accuracy by class: colSums are the amount of true labels
     accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
-    assert(all(accByClass <= 1))
+    
     names(accByClass) <-  levels(testLabelRaw)
     
   }
   
   
-  return(list(acc = accuracy,
+  return(list(model = model,
+              acc = accuracy,
               meanSquareError = meanSquareError,
               confusionMatrix = confusionMatrix,
               ProbAccDT = ProbAccDT,
@@ -742,25 +747,29 @@ predictCNNArray <- function(dataPath, fileName,
     # Word group filters of size filter_length:
     layer_conv_1d(input_shape  = list(maxWords, channels),
                   data_format = "channels_last",
-      filters = 300, kernel_size = 2,
+      filters = 100, kernel_size = 2,
       padding = "same", activation = "relu", strides = 1,
       name = "conv1"#, trainable = FALSE
     ) %>%
-    layer_batch_normalization() %>%
+    layer_dropout(0.2) %>%
+    #layer_batch_normalization() %>%
     layer_conv_1d(filters = 100, kernel_size = 3,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv2") %>%
-    layer_batch_normalization() %>%
+    layer_dropout(0.2) %>%
+    #layer_batch_normalization() %>%
     layer_conv_1d(filters = 100, kernel_size = 4,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv3") %>%
-    layer_batch_normalization() %>%
+    layer_dropout(0.2) %>%
+    #layer_batch_normalization() %>%
     layer_conv_1d(filters = 100, kernel_size = 5,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv4") %>%
+    layer_dropout(0.2) %>%
     layer_global_max_pooling_1d() %>%
     # layer_average_pooling_1d() %>%
     # layer_flatten() %>%
@@ -768,26 +777,21 @@ predictCNNArray <- function(dataPath, fileName,
     # Add a vanilla hidden layer:
     #layer_dense(100) %>%
 
-    # Apply 20% layer dropout
-    layer_dropout(0.2) %>%
-    layer_activation("relu") %>%
-
     # Project onto a single unit output layer, and squash it with a sigmoid
     layer_dense(units = ncol(trainLabel),
                 activation = "softmax",
                 name = "predictions")
   
 
-
   # Compiling model
   model %>% compile(
     loss = 'categorical_crossentropy',
-    optimizer = optimizer_adam(lr = 0.001),
+    optimizer = optimizer_adam(lr = 0.0005),
     metrics = c('accuracy')
   )
 
   print("fitting model")
-  browser()
+  
   history <- model %>% fit(
     x = trainData,
     y = trainLabel,
@@ -800,7 +804,7 @@ predictCNNArray <- function(dataPath, fileName,
       callback_early_stopping(min_delta = 0.002)))
   
   
-   # browser()
+   # 
   # config = get_config(object = model)
   # hierraus können die filter weights rausgezogen werden
   weights = keras::get_weights(model)
@@ -847,10 +851,11 @@ predictCNNArray <- function(dataPath, fileName,
                           Correct = correctBinary)
   
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
-  assert(all(accByClass <= 1))
+  
   names(accByClass) <-  levels(trainLabelRaw)
   
-  return(list(acc = evaluationResult$acc,
+  return(list(model = model,
+              acc = evaluationResult$acc,
               loss = evaluationResult$loss,
               confusionMatrix = confusionMatrix,
               ProbAccDT = ProbAccDT,
@@ -909,34 +914,34 @@ predictCNNSeq <- function(dataPath, fileName,
     # Start off with an efficient embedding layer which maps
     # the vocab indices into embedding_dims dimensions
     layer_embedding(input_dim = nVocab,
-                    output_dim = 50, 
+                    output_dim = 300, 
                     input_length = ncol(trainData)) %>%
-    layer_dropout(0.1) %>%
-    
+    #layer_dropout(0.2) %>%
     # Add a Convolution1D, which will learn filters
     layer_conv_1d(filters = 100, kernel_size  = 2, 
       padding = "valid", activation = "relu", strides = 1,
       name = "conv1") %>%
-    layer_dropout(0.1) %>%
+    layer_dropout(0.2) %>%
     layer_conv_1d(filters = 100, kernel_size = 3,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv2") %>%
-    layer_dropout(0.1) %>%
+    layer_dropout(0.2) %>%
     layer_conv_1d(filters = 100, kernel_size = 4,
                   padding = "same", activation = "relu",
                   strides = 1,
                   name = "conv3") %>%
-    layer_dropout(0.1) %>%
+    layer_dropout(0.2) %>%
+    # layer_conv_1d(filters = 100, kernel_size  = 5, 
+    #               padding = "valid", activation = "relu", strides = 1,
+    #               name = "conv4") %>%
+    # layer_dropout(0.2) %>%
     # Apply max pooling:
     layer_global_max_pooling_1d() %>%
     
     # Add a vanilla hidden layer:
-    layer_dense(units = 100) %>%
-    
-    # Apply 20% layer dropout
+    layer_dense(units = 100, activation = "relu") %>%
     layer_dropout(0.2) %>%
-    layer_activation("relu") %>%
     
     # Project onto a single unit output layer, and squash it with a sigmoid
     layer_dense(units = ncol(trainLabel),
@@ -947,7 +952,7 @@ predictCNNSeq <- function(dataPath, fileName,
   # Compiling model
   model %>% compile(
     loss = 'categorical_crossentropy',
-    optimizer = optimizer_adam(lr = 0.001),
+    optimizer = optimizer_adam(lr = 0.0005),
     metrics = c('accuracy')
   )
   
@@ -1004,11 +1009,12 @@ predictCNNSeq <- function(dataPath, fileName,
     print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
         
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
-  assert(all(accByClass <= 1))
+  
   names(accByClass) <-  levels(trainLabelRaw)
 
   
-  return(list(acc = evaluationResult$acc,
+  return(list(model = model,
+              acc = evaluationResult$acc,
               loss = evaluationResult$loss,
               confusionMatrix = confusionMatrix,
               ProbAccDT = ProbAccDT,
@@ -1067,15 +1073,16 @@ predictLSTMSeq <- function(dataPath, fileName,
     layer_embedding(input_dim = nVocab,
                     output_dim = 300, 
                     input_length = ncol(trainData)) %>%
+    
     bidirectional(layer_lstm(units = 256)) %>%
-    layer_dropout(rate = 0.4) %>% 
+    #layer_activation(activation = "relu")
+    layer_dropout(rate = 0.2) %>% 
 
     # Add a vanilla hidden layer:
-    layer_dense(units = 100) %>%
+    layer_dense(units = 100, activation = "relu") %>%
     
     # Apply 20% layer dropout
     layer_dropout(0.2) %>%
-    layer_activation("relu") %>%
     
     # Project onto a single unit output layer, and squash it with a sigmoid
     layer_dense(units = ncol(trainLabel),
@@ -1085,7 +1092,7 @@ predictLSTMSeq <- function(dataPath, fileName,
   # Compiling model
   model %>% compile(
     loss = 'categorical_crossentropy',
-    optimizer = optimizer_adam(lr = 0.001),
+    optimizer = optimizer_adam(lr = 0.0005),
     metrics = c('accuracy')
   )
   
@@ -1145,11 +1152,12 @@ predictLSTMSeq <- function(dataPath, fileName,
   
   # accuracy by class: colSums are the amount of true labels
   accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
-  assert(all(accByClass <= 1))
+  
   names(accByClass) <-  levels(testLabelRaw)
   
   
-  return(list(acc = evaluationResult$acc,
+  return(list(model = model,
+              acc = evaluationResult$acc,
               loss = evaluationResult$loss,
               confusionMatrix = confusionMatrix,
               ProbAccDT = ProbAccDT,
@@ -1199,20 +1207,13 @@ predictLSTMArray <- function(dataPath, fileName,
   testLabel <- to_categorical(testLabelNumeric)
   
   model <- keras_model_sequential() %>%
-    # Add a Convolution1D, which will learn filters
-    # Word group filters of size filter_length:
-    # layer_conv_1d(input_shape  = list(maxWords, channels),
-    #               data_format = "channels_last",
-    #               filters = 50, kernel_size = 2, 
-    #               padding = "same", activation = "relu", strides = 1,
-    #               name = "conv1"#, trainable = FALSE
-    # ) %>%
+   
     bidirectional(layer_lstm(units = 256)) %>%
     # bidirectional(input_shape =  list(maxWords, channels),
     #               layer_gru(units = 256),
     #               layer_lstm(units = 256)) %>%
-    layer_dropout(rate = 0.4) %>% 
-    layer_activation("relu") %>%
+    #layer_activation("relu") %>%
+    layer_dropout(rate = 0.2) %>% 
     
     # # Add a vanilla hidden layer:
     # layer_dense(units = 100) %>%
@@ -1228,7 +1229,7 @@ predictLSTMArray <- function(dataPath, fileName,
   # Compiling model
   model %>% compile(
     loss = 'categorical_crossentropy',
-    optimizer = optimizer_adam(lr = 0.001),
+    optimizer = optimizer_adam(lr = 0.0005),
     metrics = c('accuracy')
   )
   
@@ -1287,11 +1288,12 @@ predictLSTMArray <- function(dataPath, fileName,
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
-  assert(all(accByClass <= 1))
+  
   names(accByClass) <-  levels(trainLabelRaw)
   
   
-  return(list(acc = evaluationResult$acc,
+  return(list(model = model,
+              acc = evaluationResult$acc,
               loss = evaluationResult$loss,
               confusionMatrix = confusionMatrix,
               ProbAccDT = ProbAccDT,

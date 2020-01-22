@@ -3,17 +3,21 @@
 # [vor runter schreiben von methoden]
 
 # [coding]
-
+# explaining schon für CNN anfangen
+# grafiken für Evaluation der Modelle anfertigen
+# 
 
 # [runterschreiben]
-
-# tabelle über wie die neuronalen netze aufgestellt sind, vor vorauswahl?
-# wording: modelle statt algorithmen
-# matze diskutieren, macht bidirectional überhaupt sinn?
+# next steps:
 # vanishing gradient problem erklären
 # gradientenabstieg erklären anhand anderer Quelle? MIT S.170
+# matzes CNN teil korrigieren
+
+# wording: modelle statt algorithmen
+# matze diskutieren, macht bidirectional überhaupt sinn?
 # convolution mathematisch überhaupt nötig zu definieren?
 # alle textit großschreiben/korrigieren
+# tabelle über wie die neuronalen netze aufgestellt sind, vor vorauswahl?
 
 # [MA korrigeiren:]
 # -aus jeder korrektur die Sachen rauspicken, auf die ich achten muss
@@ -24,33 +28,33 @@
 #- captions nicht alles in textit
 #- label under caption
 
-
-
-# [vor finaler modellrechnung]
-# - framework bzgl splits muss 100%ig abgeklärt sein
-# - methoden müssen runtergebrochen sein, damit bzgl Parameter keine 
-#   fragen mehr aufkommen
-
-
 # [auswertung]
+# BOW/TFIDF - RF XGBoost: variablenwichtigkeit in Wordcloud
+# BOW/TFIDF - XGBoost: Dalex für einzelne Beobachtungen
+# SOW Glove - überlegen
+# Glove - CNN - filter aus dem ersten Layer über Tupel aus Wort-Vektoren laufen lassen
+#        die 2 maximalen Einträge auflisten für zb 50 filter
+# Glove - LSTM: beobachtungen nehmen die von anderen Falsch klassifiziert worden sind
+#               aber von LSTM richtig. 
+#               Sätze shuffeln und schauen wie die performance runtergeht.
 # exploration function for word vectors (relate to wordclouds)
-# explaining bei bag-of- words checken
-# explaining bzgl cnn filtern checken
+
 
 
 # [liste für groll:]
-
-# Explaining auflisten und nachfragen, auflisten was noch fehlt
-# (tabelle der vorauswahl kann ausgefüllt, aber nicht beschrieben werden)
 # tiefe der erklärung im methodenteil abklären
-# validation/test bei xgboost und RF checken (muss gleich sein) (wird watchlist eigentlich gebraucht)
-#     im falle RF wird ja auf vollen 90% trainiert, auf 10% predicted
-#     im falle XG wird auf 80% von 90% trainiert, auf 10% predicted
-#     watchlist ist nur zum tunen.
-# framework update (RF und XGBoost watchlist/outofbag, aber gleiche trainingsmenge?) ist rechenbar
-# human experiment
-# fußnoten? richtlinien für die Arbeit, Alles was im anhang ist wird nicht gebraucht?
 
+# xxtuning auf den validierungsdaten erklären, was da gemacht wurde
+# xxvorauswahl tabelle fertig stellen, farblich markieren und vorauswahl stichpunktartig
+#           überlegen
+# xxExplaining auflisten und nachfragen ob das eine gute Idee ist.
+# xxAuflisten was im Methodenteil noch fehlt
+# xxgroll email schreiben wegen grundsätzlicher Tiefe, Vorauswahl okay, vorbeikommen
+# xx  seminarvortrag wann?, zweitprüfer
+#xx [vor finaler modellrechnung]
+#xx - framework bzgl splits muss 100%ig abgeklärt sein
+#xx - methoden müssen runtergebrochen sein, damit bzgl Parameter keine 
+#xx   fragen mehr aufkommen
 # xxerwähnen dass accuracy, f1_micro precision und f1_micro recall immer gleich sind.
 # xxbei wordembeddings namen für später erwähnen
 # xxwieso ist f1_mu = accuracy, wenn precision_mu = recall_mu = accuray, dann f1

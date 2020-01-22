@@ -6,6 +6,11 @@
 {biblatex}
 \addbibresource{literature.bib}
 
+\makeatletter
+\newcommand\notsotiny{\@setfontsize\notsotiny{8}{8}}
+\makeatother
+
+
 \usepackage[utf8]{inputenc}
 \usepackage{csquotes}
 \usepackage{array}
@@ -48,31 +53,40 @@ Dieses Unterkapitel erläutert das verwendete \textit{Framework} und beschreibt 
 
 Dieser Abschnitt erklärt, wie die $200847$ Beobachtungen des gesamten Datensatzes in Trainings-, Test- und Validierungsdaten unterteilen.\\
 Die Testdaten ist der Teil der Daten, auf den die finalen Modelle eine Vorhersage der Nachrichtenkategorie treffen und anschließend die Gütemaße aus Kapitel \ref{kap:guetemass} berechnet und evaluiert werden. Wichtig dabei ist, dass die Testdaten den Modellen nie als Input gedient haben. Der Grund dafür ist, dass die Testdaten als Kriterium dafür dienen, wie gut die gelernten Modelle auf ungesehenen Daten generalisieren können. Zur Ermittlung einer geeigneten Größe der Testdaten, wird das Kriterium genommen, dass im Mittel $100$ Beobachtungen in der am niedrigsten repräsentierten Nachrichtensparte enthalten sind. Dies resultiert in einer Stichprobe von $20005$ Beobachtungen, was etwa 10 Prozent der gesamten Daten entspricht. Mit dieser Größe ist eine aussagekräftige Evaluation möglich und gleichzeitig stehen den Algorithmen eine größtmögliche Anzahl von Beobachtungen zum Training zur Verfügung. Von den verbleibenden $90$ der Daten wurde wiederum eine Stichprobe von $10$ Prozent gezogen (insgesamt $9$ Prozent der gesamten Daten). Auf dieser Stichprobe der Größe $18084$ erfolgt die im nächsten Abschnitt beschriebene Vorauswahl der Algorithmen und Repräsentationen. Die Daten für die Vorauswahl (folglich Vorauswahldaten genannt) werden wiederum in $80$ Prozent Trainingsdaten ($14467$ Datenpunkte) und $20$ Prozent  Validierungsdaten ($3617$ Datenpunkte) geteilt. Auf den Vorauswahldaten werden die verschiedenen Repräsentationen der Wörter, sowohl für Training als auch Validierung erstellt. Dabei werden je nach Art des \textit{Embeddings} einige wenige Datenpunkte entfernt. Der Grund hierfür ist beispielsweise, dass  unter Nutzung von \textit{BOW} nach Entfernung der \textit{Stopwords} einige Beobachtungen keine Wörter mehr enthalten. Im Falle von \textit{Glove} werden im Zuge des \textit{paddings} alle Datenpunkte entfernt, die mehr als $W_{max}$ Wörter enthalten.
-Letztlich erhalten alle Algorithmen die selben Teilmengen der Vorauswahldaten zum Trainieren und Validieren. 
+Letztlich erhalten alle Algorithmen die selben Teilmengen der Vorauswahldaten zum Trainieren und Validieren. Die Struktur der verwendeten neuronalen Netze sowie die Hyperparameter der baumbasierten Verfahren wurde auf den Validierungsdaten für jedes Modell in mehreren Trainings-Durchläufen angepasst.
 
 \subsubsection{Vorauswahl der Modelle}\label{kap:preselection}
 
-Es gibt viele Kombinationen aus Repräsentationen der Wörter und Algorithmen, die auf diese \textit{Embeddings} angewandt werden. In der in diesem Unterabschnitt beschriebenen Vorauswahl wird die Menge auf $4$ (todo: sinnvoll?)  Kombinationen aus \textit{Word Embeddings} und Modellen reduziert. Dabei sollen mindestens ein neuronales Netze als auch ein baumbasiertes Verfahren in die Auswahl aufgenommen werden. Des Weiteren ist eine gute Performance im Sinne der Gütemaße aus Kapitel \ref{kap:guetemass} maßgebend. Für die Vorauswahl werden $4$ Gütemaße betrachtet, $accuracy$, $CE$, $fscore_\mu^{(1)}$ und $fscore_M^{(1)}$. Die auf den Validierungsdaten evaluierten Ergebnisse sind in Tabelle \ref{tab:preselection} dargestellt.
+Es gibt viele Kombinationen aus Repräsentationen der Wörter und Algorithmen, die auf diese \textit{Embeddings} angewandt werden. In der in diesem Unterabschnitt beschriebenen Vorauswahl wird die Menge auf $4$ (todo: sinnvoll?)  Kombinationen aus \textit{Word Embeddings} und Modellen reduziert. Dabei sollen mindestens ein neuronales Netze als auch ein baumbasiertes Verfahren in die Auswahl aufgenommen werden. Des Weiteren ist eine gute Performance im Sinne der Gütemaße aus Kapitel \ref{kap:guetemass} maßgebend. Für die Vorauswahl werden die Gütemaße $accuracy$, $CE$ und $fscore_M^{(1)}$ betrachtet. Die auf den Validierungsdaten evaluierten Ergebnisse sind in Tabelle \ref{tab:preselection} dargestellt.
 
 
 \begin{table}[ht]
 \begin{center}
-\begin{tabular}{|m{2cm}|m{1.4cm}m{1.4cm}m{1.4cm}m{1.4cm}m{1.4cm}m{1.4cm}m{1.4cm}|}
+\notsotiny
+\begin{tabular}{|m{2cm}||m{1.4cm}m{1.4cm}m{1.4cm}m{1.4cm}m{1.4cm}m{1.4cm}m{1.4cm}|}
 \hline
- & \multicolumn{7}{c|}{Modelle}  \\
+ & \multicolumn{7}{c|}{\textbf{Modelle} }  \\
  \hline
-  \textit{Word}\newline \textit{Embeddings} & \textit{XGBoost} & \textit{Random Forest} & \textit{MLP} & \textit{CNN \newline Sequenz} & \textit{CNN Glove} & \textit{Bi-LSTM \newline Sequenz} &  \textit{Bi-LSTM \newline Glove} \\
+  \textbf{\textit{Word}}\newline \textbf{\textit{Embeddings}} & \textit{XGBoost} & \textit{Random Forest} & \textit{MLP} & \textit{CNN \newline Sequenz} & \textit{CNN Glove} & \textit{Bi-LSTM \newline Sequenz} &  \textit{Bi-LSTM \newline Glove} \\
  \hline
  \hline
-\textit{BOW} & $0.04, 0.005$ \newline $0.00, 1.24$ & & & & & & \\
-\textit{TFIDF} & & & & & & & \\
-\textit{GloVe unsup. 50D} & & & & & & & \\
-\textit{GloVe 50D} & & & & & & & \\
-\textit{GloVe 300D} & & & & & & & \\
-\textit{SOW GloVe unsup. 50D} & & & & & & & \\
-\textit{SOW GloVe 50D} & & & & & & & \\
-\textit{SOW Glove 300D}  & & & & & & & \\
-\textit{Sequence} & & & & & & & \\
+\textit{BOW} & $0.509$ \newline $0.379$ \newline $1.934$& $0.480$ \newline $0.366$ \newline $5.282$ & $0.504$ \newline $0.301$ \newline $2.066$ & - & & & \\
+\hline
+\textit{TFIDF} & $0.496$ \newline $0.374$ \newline $1.998$ & $0.450$ \newline $0.311$ \newline $4.810$ & $0.510$ \newline $0.331$ \newline $2.070$& & & & \\
+ \hline
+\textit{GloVe unsup. 50D} & & & & & $0.382$ \newline $0.195$ \newline $2.379$ & & $0.350$ \newline $0.180$ \newline $2.420$ \\
+ \hline
+\textit{GloVe 50D} & & & & & $0.550$ \newline $0.397$ \newline $1.684$ & & $0.537$ \newline $0.408$ \newline $1.680$ \\
+ \hline
+\textit{GloVe 300D} & & & & & $0.570$ \newline $0.409$ \newline $1.637$ & & $0.587$ \newline $0.467$ \newline $1.497$ \\
+ \hline
+\textit{SOW GloVe unsup. 50D} & $0.273$ \newline $0.125$ \newline $2.714$ & $0.299$ \newline $0.132$ \newline $4.126$ & $0.287$ \newline $0.078$ \newline $2.643$ & & & & \\
+ \hline
+\textit{SOW GloVe 50D} & $0.436$ \newline $0.289$ \newline $2.091$ & $0.434$ \newline $0.257$ \newline $4.322$ & $0.418$ \newline $0.187$ \newline $2.100$ & & & & \\
+ \hline
+\textit{SOW Glove 300D}  & $0.497$ \newline $0.344$ \newline $1.942$ & $0.447$ \newline $0.249$ \newline $4.210$ & $0.499$ \newline $0.260$ \newline $1.882$ & & & & \\
+ \hline
+\textit{Sequence} & & & & $0.451$ \newline $0.235$ \newline $2.246$ & & $0.477$ \newline $0.263$ \newline $2.194$ & \\
    \hline
 \end{tabular}
 
@@ -82,6 +96,8 @@ Es gibt viele Kombinationen aus Repräsentationen der Wörter und Algorithmen, d
 \end{table}
 
 % \cellcolor[HTML]{AA0044}
+
+
 
 \begin{itemize}
 \item testdaten: 

@@ -1207,11 +1207,9 @@ predictLSTMArray <- function(dataPath, fileName,
   testLabel <- to_categorical(testLabelNumeric)
   
   model <- keras_model_sequential() %>%
-   
-    bidirectional(layer_lstm(units = 256)) %>%
-    # bidirectional(input_shape =  list(maxWords, channels),
-    #               layer_gru(units = 256),
-    #               layer_lstm(units = 256)) %>%
+    # bidirectional(layer_lstm(units = 256)) %>%
+    bidirectional(input_shape =  list(maxWords, channels),
+                  layer_lstm(units = 256)) %>%
     #layer_activation("relu") %>%
     layer_dropout(rate = 0.2) %>% 
     

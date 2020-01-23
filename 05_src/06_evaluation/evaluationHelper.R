@@ -1,4 +1,14 @@
-compareProbVsAcc <- function(data, cutN = 100) {
+compareProbVsAcc <- function(inPath, cutN = 50) {
+  assertString(inPath)
+  
+  browser()
+
+  allModels <- list.files(path = inPath)
+  # subset to only .rds files
+  allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
+  
+  data <- readRDS(paste0(inPath, allModels[3]))
+  # browser()
   
   ProbAccDT <- data[["ProbAccDT"]]
   ProbAccDT[, ProbCut := cut(x = Prob, breaks = cutN)]
@@ -9,8 +19,8 @@ compareProbVsAcc <- function(data, cutN = 100) {
   plotDT[, CutLvl := 1: .N]
   
   ggObj <- ggplot(plotDT, aes(x = CutLvl)) + 
-    geom_line(aes(y = CorrectMean), color = "green") +
-    geom_line(aes(y = ProbMean), color = "blue")
+    geom_line(aes(y = CorrectMean), color = "darkgreen") +
+    geom_line(aes(y = ProbMean), color = "blue"); ggObj
   
   return(ggObj)
 }
@@ -118,4 +128,64 @@ getModelMetrics <- function(fileName,
               f1_M = f1_M))
   
 }
+
+
+plotAccByClass <- function(inPath) {
+  inPath <- "03_computedData/05_modelData/finalselection/"
+  assertString(inPath)
+  
+  allModels <- list.files(path = inPath)
+  # subset to only .rds files
+  allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
+ 
+  res <- data.table()
+  for(fileName in allModels) {
+    model <- readRDS(paste0(inPath, fileName))
+    data <- model[["accByClass"]]
+    res[, Var := data]
+    tmpName <- paste0(strsplit(fileName, split = "_")[[1]][2:3], collapse = "_")
+    setnames(res, "Var", tmpName)
+  }
+  
+  res[, category := names(data)]
+  plotData <- melt(res, id.vars = "category")
+  plotData[, Order := max(value), by = .(category)]
+  
+  ggObj <- ggplot(plotData, aes(x = reorder(category, -Order),
+                                    y = value, fill = variable, 
+                                    label = category)) +
+    geom_bar(stat = "identity", position = "dodge") + 
+    labs(x = "Nachrichtenkategorie",
+         y = "Accuracy") +
+    theme(axis.text.x  = element_text(angle = 45,
+                                      vjust = 1, hjust = 1,
+                                      size = 14),
+          axis.text.y = element_text(size = 15),
+          axis.title = element_text(size = 28),
+          axis.ticks.x = element_line(),
+          legend.background = element_rect(fill = "lightgrey"),
+          legend.key = element_rect(fill = "lightblue", color = NA),
+          legend.position = "top",
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank());ggObj
+  
+  
+  theme(axis.text.x  = element_text(angle = 45,
+                                    vjust = 1, hjust = 1,
+                                    size = 14),
+        axis.title = element_text(size = 28),
+        legend.text = element_text(size = 13),
+        legend.title = element_text(size = 15),
+        axis.ticks.x = element_line(),
+        panel.background = element_blank(),
+        legend.background = element_rect(fill = "lightgrey"),
+        legend.key = element_rect(fill = "lightblue", color = NA),
+        legend.position = "top",
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
+  
+  return(ggObj)
+}
+
+
 

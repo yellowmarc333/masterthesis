@@ -94,6 +94,9 @@ evalReduced[, LatexOutput := paste0("$", accuracy, "$ ewline $",
                                     f1_M, "$ ewline $", mlogloss, "$ ")]
 
 
+compareProbVsAcc(inPath = "03_computedData/05_modelData/finalselection/")
+
+
 # binary
 resultBinary2 <- pipelineEmbBinary(inPath = "03_computedData/03_integratedData/",
                                   outPath = "03_computedData/04_preparedData/", 

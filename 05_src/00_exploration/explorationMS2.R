@@ -1,7 +1,5 @@
 # next steps/ to dos:
 
-# [vor runter schreiben von methoden]
-
 # [coding]
 # explaining schon für CNN anfangen
 # grafiken für Evaluation der Modelle anfertigen
@@ -28,7 +26,12 @@
 #- captions nicht alles in textit
 #- label under caption
 
-# [auswertung]
+# [evaluation der modelle]
+# Sicherheit vs Korrektheit Grafik (schauen ob interessant)
+# function zur identifizierung von Nachbarklassen schreiben (zweitgrößte klasse)
+# plot function barplot accuracy by class schreiben
+
+# [analyse der modelle]
 # BOW/TFIDF - RF XGBoost: variablenwichtigkeit in Wordcloud
 # BOW/TFIDF - XGBoost: Dalex für einzelne Beobachtungen
 # SOW Glove - überlegen

@@ -2,8 +2,8 @@
 
 # [coding]
 # explaining schon für CNN anfangen
-# grafiken für Evaluation der Modelle anfertigen
-# 
+# xx Grafik für accuracy By Class
+# benachbarte klassen identifizieren
 
 # [runterschreiben]
 # next steps:

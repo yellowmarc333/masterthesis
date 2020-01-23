@@ -2,33 +2,18 @@
 
 # exchange words and see what happens, if the prediction gets into nearest
 # input sequence of text (first first word, then 2nd word etc)
-# class
-# lime auschecken
-# check human classification
 # schaue benachbarte klassen an, in die am meisten falsch klassifiziert wird.
 
-evaluateData <- function(inPath = "03_computedData/05_modelData/", 
-                         outPath = "03_computedData/06_evaluatedData/",
-                         subfolder) {
+# global parameters
+fullWidth <- 15.49779
+fullHeight <- fullWidth * 9/16
+fullWidth2 <- 15.49779 * 3/4
+fullHeight2 <- fullWidth * 9/29
+outPath <- "03_computedData/06_evaluatedData/"
 
-  assertString(inPath)
-  assertString(outPath)
-  
-  if(!missing(subfolder)){
-    assertString(subfolder)
-    inPath = paste0(inPath, subfolder)
-  }
-  
-  allModels <- list.files(path = inPath)
-  # subset to only .rds files
-  allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
+compareProbVsAcc(inPath = "03_computedData/05_modelData/finalselection/")
 
-  resList <- lapply(allModels, function(x) {
-    getModelMetrics(fileName = x, path = inPath)
-  })
-  
-  res <- rbindlist(resList)
-  
-  write.fst(res, path = paste0(outPath, "evaluationResult.fst"))
-  return(res)
-}
+ggObj <- plotAccByClass(inPath = "03_computedData/05_modelData/finalselection/")
+ggsave(filename = paste0(outPath, "accByClass.pdf"),
+       plot = ggObj, width = fullWidth, height = fullHeight, 
+       device = "pdf")

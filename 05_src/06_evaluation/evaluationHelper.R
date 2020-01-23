@@ -1,3 +1,31 @@
+evaluateData <- function(inPath = "03_computedData/05_modelData/", 
+                         outPath = "03_computedData/06_evaluatedData/",
+                         subfolder) {
+  
+  assertString(inPath)
+  assertString(outPath)
+  
+  if(!missing(subfolder)){
+    assertString(subfolder)
+    inPath = paste0(inPath, subfolder)
+  }
+  
+  allModels <- list.files(path = inPath)
+  # subset to only .rds files
+  allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
+  
+  resList <- lapply(allModels, function(x) {
+    getModelMetrics(fileName = x, path = inPath)
+  })
+  
+  res <- rbindlist(resList)
+  
+  write.fst(res, path = paste0(outPath, "evaluationResult.fst"))
+  return(res)
+}
+
+
+
 compareProbVsAcc <- function(inPath, cutN = 50) {
   assertString(inPath)
   
@@ -156,7 +184,8 @@ plotAccByClass <- function(inPath) {
                                     label = category)) +
     geom_bar(stat = "identity", position = "dodge") + 
     labs(x = "Nachrichtenkategorie",
-         y = "Accuracy") +
+         y = "Accuracy",
+         fill = "Modell: ") +
     theme(axis.text.x  = element_text(angle = 45,
                                       vjust = 1, hjust = 1,
                                       size = 14),
@@ -166,26 +195,43 @@ plotAccByClass <- function(inPath) {
           legend.background = element_rect(fill = "lightgrey"),
           legend.key = element_rect(fill = "lightblue", color = NA),
           legend.position = "top",
+          legend.text = element_text(size = 15),
+          legend.title = element_text(size = 18),
           panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank());ggObj
-  
-  
-  theme(axis.text.x  = element_text(angle = 45,
-                                    vjust = 1, hjust = 1,
-                                    size = 14),
-        axis.title = element_text(size = 28),
-        legend.text = element_text(size = 13),
-        legend.title = element_text(size = 15),
-        axis.ticks.x = element_line(),
-        panel.background = element_blank(),
-        legend.background = element_rect(fill = "lightgrey"),
-        legend.key = element_rect(fill = "lightblue", color = NA),
-        legend.position = "top",
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())
+          panel.grid.minor = element_blank())
   
   return(ggObj)
 }
 
 
+identifyNeighborClasses <- function(inPath) {
+  
+  inPath <- "03_computedData/05_modelData/finalselection/"
+  assertString(inPath)
+  
+  allModels <- list.files(path = inPath)
+  # subset to only .rds files
+  allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
+  
+  res <- list()
+  
+  # todo: unlist, name der wahren kategorie dazu
+  # checken ob accuracy matrix richtig berechnet wurde!
+  for(j in 1:length((allModels))) {
+    model <- readRDS(paste0(inPath, allModels[j]))
+    data <- model[["confusionMatrix"]]
+    neighborCount <- list()
+    for(i in 1:nrow(data)) {
+      x <- data[i, ]
+      x[i] <- 0
+      y <- max(x)
+      neighborCount[[i]] <- list(value = y,
+                               name = names(which.max(x)))
+    }
+    res[[j]] <- neighborCount
+  }
+
+  
+  
+}
 

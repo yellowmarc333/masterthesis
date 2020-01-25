@@ -324,6 +324,20 @@ predictPreselection <- function() {
   
 }
 
+#----------------------- 10 pc to analyse---------------------####
+
+calc <- function() {
+  fileName <- "GloveArray-10pc-300-FALSE.rds"
+  modelRes <- predictCNNArray(dataPath, fileName = fileName, 
+                              epochs = 4)
+  modelName <- "mod_GloveArray300_CNNArray_10New"
+  
+  saveRDS(modelRes,
+          file = paste0("03_computedData/05_modelData/finalselection/", 
+                        modelName, "_", ".RDS"))
+}
+
+
 
 
 #----------------------- 100 percent models --------------------------------####

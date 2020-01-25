@@ -1,15 +1,31 @@
 # next steps/ to dos:
 
 # [coding]
-# explaining schon für CNN anfangen
-# xx Grafik für accuracy By Class
-# benachbarte klassen identifizieren
+
+
+
+# [evaluation der modelle]
+
+# [analyse der modelle]
+# BOW/TFIDF - RF XGBoost: variablenwichtigkeit in Wordcloud
+# BOW/TFIDF - XGBoost: Dalex für einzelne Beobachtungen
+# SOW Glove - überlegen
+# Glove - CNN - filter aus dem ersten Layer über Tupel aus Wort-Vektoren laufen lassen
+#        die 2 maximalen Einträge auflisten für zb 50 filter
+# Glove - LSTM: beobachtungen nehmen die von anderen Falsch klassifiziert worden sind
+#               aber von LSTM richtig. 
+#               Sätze shuffeln und schauen wie die performance runtergeht.
+#               exchange words and see what happens, if the prediction gets into nearest
+#               input sequence of text (first first word, then 2nd word etc)
+# exploration function for word vectors (relate to wordclouds)
+
 
 # [runterschreiben]
 # next steps:
 # vanishing gradient problem erklären
 # gradientenabstieg erklären anhand anderer Quelle? MIT S.170
 # matzes CNN teil korrigieren
+
 
 # wording: modelle statt algorithmen
 # matze diskutieren, macht bidirectional überhaupt sinn?
@@ -26,27 +42,12 @@
 #- captions nicht alles in textit
 #- label under caption
 
-# [evaluation der modelle]
-# Sicherheit vs Korrektheit Grafik (schauen ob interessant)
-# function zur identifizierung von Nachbarklassen schreiben (zweitgrößte klasse)
-# plot function barplot accuracy by class schreiben
-
-# [analyse der modelle]
-# BOW/TFIDF - RF XGBoost: variablenwichtigkeit in Wordcloud
-# BOW/TFIDF - XGBoost: Dalex für einzelne Beobachtungen
-# SOW Glove - überlegen
-# Glove - CNN - filter aus dem ersten Layer über Tupel aus Wort-Vektoren laufen lassen
-#        die 2 maximalen Einträge auflisten für zb 50 filter
-# Glove - LSTM: beobachtungen nehmen die von anderen Falsch klassifiziert worden sind
-#               aber von LSTM richtig. 
-#               Sätze shuffeln und schauen wie die performance runtergeht.
-# exploration function for word vectors (relate to wordclouds)
-
-
-
 # [liste für groll:]
-# tiefe der erklärung im methodenteil abklären
 
+# xxCNN function proggren
+# xxSicherheit vs Korrektheit Grafik (schauen ob interessant)
+# xxfunction zur identifizierung von Nachbarklassen schreiben (zweitgrößte klasse)
+# xxplot function barplot accuracy by class schreiben
 # xxtuning auf den validierungsdaten erklären, was da gemacht wurde
 # xxvorauswahl tabelle fertig stellen, farblich markieren und vorauswahl stichpunktartig
 #           überlegen

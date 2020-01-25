@@ -103,11 +103,16 @@ predictMLP <- function(dataPath, fileName,
                           Correct = correctBinary)
   
   levels(predictMax) <- levels(testLabelRaw)
+  
   confusionMatrix <- t(matrix(table(factor(predictMax, 
                                          levels =  levels(testLabelRaw)),
                                   factor(testLabelRaw, 
                                          levels =  levels(testLabelRaw))),
                             ncol = length(levels(testLabelRaw))))
+  # Marc: confusionMatrix is rightly calculated. The rows are the true label
+  # and in the cols are the predictions, tested with
+  # tested with data.table(table(testLabelRaw), rowSums(confusionMatrix))
+  
   
   confAcc <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
   
@@ -808,7 +813,7 @@ predictCNNArray <- function(dataPath, fileName,
   # config = get_config(object = model)
   # hierraus können die filter weights rausgezogen werden
   weights = keras::get_weights(model)
-   output = keras::get_output_at(model, node_index = 1)
+  #  output = keras::get_output_at(model, node_index = 1)
   
   
   evaluationResult <- model %>% 
@@ -863,7 +868,8 @@ predictCNNArray <- function(dataPath, fileName,
               predictions = predictProb,
               testLabelRaw = testLabelRaw,
               history = history,
-              model = model))
+              model = model,
+              weights = weights))
 }
 
 

@@ -28,15 +28,12 @@ evaluateData <- function(inPath = "03_computedData/05_modelData/",
 
 compareProbVsAcc <- function(inPath, cutN = 50) {
   assertString(inPath)
-  
-  browser()
 
   allModels <- list.files(path = inPath)
   # subset to only .rds files
   allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
   
   data <- readRDS(paste0(inPath, allModels[3]))
-  # browser()
   
   ProbAccDT <- data[["ProbAccDT"]]
   ProbAccDT[, ProbCut := cut(x = Prob, breaks = cutN)]
@@ -65,7 +62,10 @@ getModelMetrics <- function(fileName,
                      "predictions",
                      "testLabelRaw"),
                choices = names(model))
- 
+
+  # if the prediction is correct, how sure was the model
+  probAccDT <- model$ProbAccDT
+  probIfCorrect <- mean(probAccDT[Correct == TRUE, .(Prob)][[1]])
   
   confMat <- model$confusionMatrix
   namesConfMat <- colnames(confMat)
@@ -153,7 +153,8 @@ getModelMetrics <- function(fileName,
               precision_M = precision_M,
               recall_M = recall_M,
               f1_mu = f1_mu,
-              f1_M = f1_M))
+              f1_M = f1_M,
+              probIfCorrect = probIfCorrect))
   
 }
 
@@ -205,8 +206,6 @@ plotAccByClass <- function(inPath) {
 
 
 identifyNeighborClasses <- function(inPath) {
-  
-  inPath <- "03_computedData/05_modelData/finalselection/"
   assertString(inPath)
   
   allModels <- list.files(path = inPath)
@@ -215,23 +214,62 @@ identifyNeighborClasses <- function(inPath) {
   
   res <- list()
   
-  # todo: unlist, name der wahren kategorie dazu
-  # checken ob accuracy matrix richtig berechnet wurde!
   for(j in 1:length((allModels))) {
     model <- readRDS(paste0(inPath, allModels[j]))
     data <- model[["confusionMatrix"]]
+    trueClasses <- row.names(data)
     neighborCount <- list()
     for(i in 1:nrow(data)) {
       x <- data[i, ]
       x[i] <- 0
       y <- max(x)
-      neighborCount[[i]] <- list(value = y,
-                               name = names(which.max(x)))
+      neighborCount[[i]] <- list(neighborClass = names(which.max(x)),
+                                 trueClass = trueClasses[i],
+                                 value = y)
     }
     res[[j]] <- neighborCount
   }
+  # Marc: funktioniert nicht wenn es neighbor classes mit gleich vielen
+  # Beobachtungen gibt
+  resListed <- lapply(res, function(x) rbindlist(x))
+  
+  return(resListed)
+}
 
+
+analyseCNNFilters <- function(modelPath, WEPath, n_gram = 2) {
+  assertString(modelPath)
+  assertString(WEPath)
+  
+  data <- readRDS(modelPath)
+  WE <- t(read.fst(WEPath, as.data.table = TRUE))
+
+  weights <- data$weights
+  
+  filterLevel <- weights[[n_gram*2 -3]]
   
   
+  resFinal <- list()
+  combn <- combn(ncol(WE), n_gram, simplify = FALSE)
+  # n <- 1000000
+  # combnRed <- combn[1:n]
+  
+  for(i in 1:dim(filterLevel)[3]){
+    print(paste("calculation filter", i))
+    # selecting filter
+    filter <- filterLevel[, , i]
+    # lapply > vapply > sapply
+    res <- lapply(combn, function(x) {
+      tmpWE <- WE[x,]
+      res <- sum(filter * tmpWE)
+      resNames <- paste0(row.names(tmpWE), collapse = " , ")
+      return(list(res = res,
+                  resNames = resNames))
+    })
+    resDT <- rbindlist(res)
+    resFinal[[i]] <- resDT
+  }
+
+  return(resFinal)
 }
 

@@ -85,13 +85,6 @@ prepareDataBOW(inPath = "03_computedData/03_integratedData/",
 predictPreselection()
 
 #------------------evaluation----------####
-evalPreselection <- evaluateData(inPath = "03_computedData/05_modelData/preselection/",
-                                 outPath = "03_computedData/06_evaluatedData/")
-evalPreselection <- read.fst("03_computedData/06_evaluatedData/evaluationResult.fst",
-                             as.data.table = TRUE)
-evalReduced <- evalPreselection[, .(modelName, accuracy, f1_M, mlogloss)]
-evalReduced[, LatexOutput := paste0("$", accuracy, "$ ewline $", 
-                                    f1_M, "$ ewline $", mlogloss, "$ ")]
 
 
 # binary

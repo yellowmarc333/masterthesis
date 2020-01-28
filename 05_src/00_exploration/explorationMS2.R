@@ -22,6 +22,11 @@
 
 # [runterschreiben]
 # next steps:
+# grolls korrektur
+# matzes korrektur (zusammen mit grolls zweiter ladung)
+# word embeddings für 100% anschmeißen, vorher testen
+
+
 # vanishing gradient problem erklären
 # gradientenabstieg erklären anhand anderer Quelle? MIT S.170
 # matzes CNN teil korrigieren
@@ -44,6 +49,7 @@
 
 # [liste für groll:]
 
+# xxgeprüft: BOW enthält auch zahlen größer 1
 # xxCNN function proggren
 # xxSicherheit vs Korrektheit Grafik (schauen ob interessant)
 # xxfunction zur identifizierung von Nachbarklassen schreiben (zweitgrößte klasse)

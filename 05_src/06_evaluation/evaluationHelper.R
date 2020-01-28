@@ -82,10 +82,14 @@ getModelMetrics <- function(fileName,
   true_positives <- diag(confMat)
   false_positives <- colSums(confMat) - diag(confMat)
   false_negatives <- rowSums(confMat) - diag(confMat)
-  true_negatives <- rep(sum(confMat), C) - (colSums(confMat) +
-                                               rowSums(confMat) -
-                                               diag(confMat))
- 
+
+  # alternative schreibweise, checked!
+  # true_negatives <- rep(sum(confMat), C) - (colSums(confMat) +
+  #                                              rowSums(confMat) -
+  #                                              diag(confMat))
+  true_negatives <- rep(sum(confMat), C) - (false_positives +
+                                               false_negatives +
+                                              diag(confMat))
   # check of measures are calculated correctly
   assert(all(sum(confMat) == (true_positives + false_positives +
                              true_negatives + false_negatives)))

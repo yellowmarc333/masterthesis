@@ -183,7 +183,46 @@ ggsave(filename = paste0(outPath, "wordCloudEducation.pdf"),
        plot = wordCloud, width = fullWidth, height = fullHeight, 
        device = "pdf")
 
+# example for bow and tfidf in 
 
+# data <- fread("03_computedData/02_cleanedData/News.csv")
+# data <- data[category == "parents"]
+# 
+# text1 <- data[19, .(headline)][[1]]; text1
+# text2 <- data[20, .(headline)][[1]]; text2
+# text3 <- data[137, .(headline)][[1]]; text3
+# 
+# uniqueWords <- unique(strsplit(paste(text1, text2, text3, 
+#                                      collapse = " "),
+#                                split = " ")[[1]])
+# paste(uniqueWords, collapse = " & ")
 
+text1 <- "the cat likes to sit"
+text2 <- "the dog does not like his owner"
+text3 <- "the owner likes the dog"
 
+texts <- c(text1, text2, text3)
+
+# Create iterator over tokens
+tokens <- tokens(texts, what = "word", remove_numbers = FALSE, 
+                 remove_punct = FALSE, remove_symbols = FALSE, 
+                 remove_hyphens = FALSE)
+
+tokens <- as.list(tokens)
+
+# Create vocabulary. Terms will be unigrams (simple words).
+itoken <- text2vec::itoken(tokens, progressbar = FALSE)
+vocab <- text2vec::create_vocabulary(itoken)
+vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 1L)
+
+# Use our filtered vocabulary
+vectorizer <- text2vec::vocab_vectorizer(vocab)
+dtm = text2vec::create_dtm(itoken, vectorizer)
+dfm = as.dfm(dtm)
+
+tfidf = dfm_tfidf(x = dfm, scheme_tf = "augmented", 
+                  scheme_df = "inverse", smoothing = 1,
+                  k = 1)
+
+tokens.sparse <- round(tfidf, digits = 3)
 

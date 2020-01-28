@@ -70,16 +70,20 @@ prepareDataGlove(inPath = "03_computedData/03_integratedData/",
 
 #-----------------------------------------------------------------------------
 
-# 100 pc
-prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
-                 outPath = "03_computedData/04_preparedData/", 
-                 subsetSize = "100pc", saveSparse = TRUE)
+# # 100 pc
+# prepareDataTFIDF(inPath = "03_computedData/03_integratedData/",
+#                  outPath = "03_computedData/04_preparedData/", 
+#                  subsetSize = "100pc", saveSparse = TRUE)
 
-
-# full
 prepareDataBOW(inPath = "03_computedData/03_integratedData/",
                outPath = "03_computedData/04_preparedData/", 
                subsetSize = "Full", saveSparse =  TRUE,  mergeSD = FALSE)
+
+prepareDataGlove(inPath = "03_computedData/03_integratedData/",
+                 outPath = "03_computedData/04_preparedData/", 
+                 subsetSize = "Full", word2VecSize = 300, mergeSD = FALSE,
+                 gloveName = "glove.42B.300d.txt")
+
 
 #------------------modelling-----------####
 predictPreselection()

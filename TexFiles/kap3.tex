@@ -6,6 +6,13 @@
 {biblatex}
 \addbibresource{literature.bib}
 
+\makeatletter
+\newcommand\notsotiny{\@setfontsize\notsotiny{8}{8}}
+\makeatother
+
+\usepackage{numprint}
+\npthousandsep{\,}
+
 \usepackage[utf8]{inputenc}
 \usepackage{csquotes}
 \usepackage{array}
@@ -62,7 +69,7 @@ $N = \sum_{i=1}^C \sum_{j=1}^C h_{ij}$\\
 \end{center}
 \end{table}
 
-Die absoluten Häufigkeiten $h_{ij}$ stehen für die Anzahl der Beobachtungen aus der wahren Klasse $i$, für die die Klasse $j$ prognostiziert wurde. Summiert man alle Einträge der Matrix, so erhält man die Anzahl der Beobachtungen $N$. Aus der \textit{confusion matrix} können folgende Größen identifiziert werden: Die \textit{true-positives} der Klasse $i$, $tp_i = h_{ii}$ sind alle Beobachtungen, die Klasse $i$ zugehörig sind und auch in selbige Klassifiziert wurden. Die Beobachtungen, die in Klasse $i$ klassifiziert wurden, aber einer anderen wahren Klasse zugehörig sind, bezeichnet man als \textit{false-positives} $fp_i = \sum_{j = 1}^C h_{ji} - h{ii}$. Als \textit{false-negatives} $tn_i = \sum_{j = 1}^C h_{ij} - h{ii}$ werden die Beobachtungen bezeichnet, die der Klasse $i$ zugehörig sind, aber in eine andere Kategorie falsch klassifiziert werden. Letztlich sind \textit{true-negatives} $fn_i = N - (fp_i + tn_i + \sum_{j \neq i} tp_j)$ die Datenpunkte, die nicht Kategorie $i$ angehören und für die auch nicht Klasse $i$ prognostiziert wird (vgl. \cite{sokolova}, S. 3). Unter Kenntnis der $4$ Häufigkeiten können nun verschiedene Gütemaße berechnet werden. 
+Die absoluten Häufigkeiten $h_{ij}$ stehen für die Anzahl der Beobachtungen aus der wahren Klasse $i$, für die die Klasse $j$ prognostiziert wurde. Summiert man alle Einträge der Matrix, so erhält man die Anzahl der Beobachtungen $N$. Aus der \textit{confusion matrix} können folgende Größen identifiziert werden: Die \textit{true-positives} der Klasse $i$, $tp_i = h_{ii}$ sind alle Beobachtungen, die Klasse $i$ zugehörig sind und auch in selbige klassifiziert wurden. Die Beobachtungen, die in Klasse $i$ klassifiziert wurden, aber einer anderen wahren Klasse zugehörig sind, bezeichnet man als \textit{false-positives} $fp_i = \sum_{j = 1}^C h_{ji} - h_{ii}$. Als \textit{false-negatives} $tn_i = \sum_{j = 1}^C h_{ij} - h_{ii}$ werden die Beobachtungen bezeichnet, die der Klasse $i$ zugehörig sind, aber in eine andere Kategorie falsch klassifiziert werden. Letztlich sind \textit{true-negatives} $tn_i = N - (fp_i + tn_i + tp_i)$ die Datenpunkte, die nicht Kategorie $i$ angehören und für die auch nicht Klasse $i$ prognostiziert wird (vgl. \cite{sokolova}, S. 3). Unter Kenntnis der $4$ Häufigkeiten können nun verschiedene Gütemaße berechnet werden. 
 
 
 Die \textit{accuracy} berechnet sich analog zur binären Klassifikation aus 
@@ -72,7 +79,7 @@ In der \textit{multiclass}-Klassifikation kann ein Gütemaß für das komplette 
 \[ precision_{\mu} = \frac{\sum_{i = 1}^C tp_i}{\sum_{i = 1}^C (tp_i + fp_i)}, \hspace{1cm} recall_{\mu} = \frac{\sum_{i = 1}^C tp_i}{\sum_{i = 1}^C (tp_i + fn_i)},\]
 \[ precision_M = \frac{\sum_{i = 1}^C \frac{tp_i}{tp_i + fp_i} }{C}, \hspace{1cm} recall_M = \frac{\sum_{i = 1}^C \frac{tp_i}{tp_i + fn_i} }{C}\]
 die Gütemaße für das gesamte Modell. Ein Maß, dass \textit{precision} und \textit{recall} kombiniert ist der \textit{fscore}. Mit der unterschiedlichen Durchschnittsbildung ergeben sich
-\[ fscore_{\mu}^{(\beta)} = \frac{(\beta^2+1) precision_{\mu} recall_{\mu}}{\beta^2 precision_{\mu}+ recall_{\mu}}, \hspace{1cm} fscore_{M}^{(\beta)} = \frac{(\beta^2+1) precision_{M} recall_{M}}{\beta^2 precision_{M}+ recall_{M}} . \]
+\[ fscore_{\mu}^{(\beta)} = \frac{(\beta^2+1) \cdot precision_{\mu} \cdot recall_{\mu}}{\beta^2 precision_{\mu}+ recall_{\mu}}, \hspace{1cm} fscore_{M}^{(\beta)} = \frac{(\beta^2+1) \cdot precision_{M} \cdot recall_{M}}{\beta^2 precision_{M}+ recall_{M}} . \]
 
 
 Hierbei ist anzumerken, dass $fscore_{\mu}^{(\beta)}$ Klassen mit vielen Beobachtungen in der Güte begünstigt während für $fscore_M^{(\beta)}$ alle Kategorien gleich wichtig sind  (vgl. \cite{sokolova}, S.3ff). Der Parameter $\beta$ gibt in den Formeln an, was für ein Gewicht \textit{recall} im Verhältnis zu \textit{precision} einnimmt.
@@ -80,14 +87,16 @@ Wie bei dem \textit{f1-score} Maß einer binären Klassifikation wird in dieser 
 Bei Betrachtung des Nenners in der Berechnung von $precision_{\mu}$ und $recall_{\mu}$ fällt auf, dass in beiden Fällen durch die gesamte Summe der \textit{Confusion Matrix} geteilt wird. Diese Summe entspricht dem Nenner $N$ bei der Berechnung der $accuracy$. Ist nun auch $\beta = 1$, so gilt 
 \[precision_{\mu} =  recall_{\mu} =  fscore_{\mu}^{(1)} = accuracy.\]
 
-Für eine beispielhafte Erklärung dieses Sachverhaltes sei auf \cite{towards1} verwiesen. Aus diesem Grund wird statt der mit \textit{micro-averaging} berechneten Gütemaße in der statistischen Auswertung in Kapitel \ref{Kap:statAus} die $accuracy$ verwendet.\\
+Für eine beispielhafte Erklärung dieses Sachverhaltes sei auf \cite{towards1}
+%todo: shmueli (2019) verwiesen
+verwiesen. Aus diesem Grund wird statt der mit \textit{micro-averaging} berechneten Gütemaße in der statistischen Auswertung in Kapitel \ref{Kap:statAus} die $accuracy$ verwendet.\\
 
-Ein weiteres Maß, um die Güte eines Multiklassifikationsproblems zu bewerten ist die gemittelte \textit{categorical cross entropy}. Diese berechnet sich aus
+Ein weiteres Maß, um die Güte eines Multiklassifikationsproblems zu bewerten, ist die gemittelte \textit{categorical cross entropy} (kurz \textit{CE}). Diese berechnet sich aus
 
-\[ CE = - \frac{1}{N}\sum_{i=1}^N \sum_{j = 1}^C y_{ij} log(p_i(c_j)) \]
+\[ CE = - \frac{1}{N}\sum_{i=1}^N \sum_{j = 1}^C y_{ij} log(p_i(c_j)) \hspace{2cm} y_{ij} \in \{0,1\} \hspace{0.2cm} \forall i, j = 1,...,N \hspace{0.2cm} ,\]
 
-(vgl. \cite{murphy}, S.571) wobei $y_{ij} \in \{0,1\}$ \hspace{0.2cm} $\forall i, j = 1,...,N$ indiziert, ob die Beobachtung $i$ der wahren Klasse $j$ zugehörig ist und $p_i(c_j)$ die vom Modell vorgegebene Wahrscheinlichkeit ist, dass Beobachtung $i$ zu Klasse $j$ gehört. Da $y_{ij}$ immer $0$ für alle falschen vorhergesagten Klassen ist, entspricht $CE$ dem negativen Mittelwert der logarithmierten Wahrscheinlichkeiten der wahren Klassen über alle Beobachtungen. So wird eine geschätzte Wahrscheinlichkeit nahe $0$ für die wahre Klasse stark bestraft und eine hohe Wahrscheinlichkeit trotz einer Fehlklassifikation weniger bestraft. Je sicherer sich das Modell für die wahren Kategorien ist, desto niedrigere Werte wird dieses Gütemaß annehmen (vgl. \cite{proMachine}, S. 72). 
-Dabei gilt es die \textit{cross entropy} zu minimieren. Sie nimmt ihr Minimum bei $0$ im Idealfall an, wenn für alle Beobachtungen eine Wahrscheinlichkeit von $1$ für die wahre Klasse prognostiziert wird. Die $CE$ wird oft als Verlustfunktion für die Modellanpassung auf den Trainingsdaten verwendet, wie zum Beispiel bei \textit{xgBoost} und den \textit{deep learning} Algorithmen aus Kapitel \ref{kap:neuralNets}.\\
+wobei $y_{ij}$ indiziert, ob die Beobachtung $i$ der wahren Klasse $j$ zugehörig ist. $p_i(c_j)$ gibt die vom Modell modellierte Wahrscheinlichkeit an, dass Beobachtung $i$ zu Klasse $j$ gehört (vgl. \cite{murphy}, S.571). Da $y_{ij}$ immer $0$ für alle falsch vorhergesagten Klassen ist, entspricht $CE$ dem negativen Mittelwert der logarithmierten Wahrscheinlichkeiten der wahren Klassen über alle Beobachtungen. So wird eine geschätzte Wahrscheinlichkeit nahe $0$ für die wahre Klasse stark bestraft und eine hohe Wahrscheinlichkeit trotz einer Fehlklassifikation weniger bestraft. Je sicherer sich das Modell für die wahren Kategorien ist, desto niedrigere Werte wird dieses Gütemaß annehmen (vgl. \cite{proMachine}, S. 72). 
+Dabei gilt es die \textit{cross entropy} zu minimieren. Sie nimmt ihr Minimum bei $0$ im Idealfall an, wenn für alle Beobachtungen eine Wahrscheinlichkeit von $1$ für die wahre Klasse prognostiziert wird. Die $CE$ wird oft als Verlustfunktion für die Modellanpassung auf den Trainingsdaten verwendet, wie zum Beispiel bei dem \textit{XGBoost}-Algorithmus und den \textit{deep learning} Verfahren aus Kapitel \ref{kap:neuralNets}.\\
 \\
 Die in diesem Abschnitt beschriebenen Maße können sowohl auf den Trainingsdaten als auch auf den  Validierungs- und Testdaten berechnet werden. Ein Vergleich der Modelle in der Vorauswahl in Abschnitt \ref{kap:preselection} erfolgt über die Evaluation auf den Validierungsdaten. Dabei werden die Maße $accuracy$, $CE$, und $fscore_M^{(1)}$ genutzt.
 Bei dem Vergleich der finalen Modelle in Kapitel \ref{kap:evalFinal} erfolgt die Auswertung der Performanzmaße auf den ungesehenen Testdaten. (todo: aufführen was noch alles verwendet wurde).
@@ -96,12 +105,47 @@ Bei dem Vergleich der finalen Modelle in Kapitel \ref{kap:evalFinal} erfolgt die
 \subsection{Methoden zur numerischen Repräsentation der Wörter} \label{kap:3.1Wordemb}
 
 Das Extrahieren von Informationen aus Texten ist keine triviale Aufgabe, für die es viele Methoden gibt. In diesem Abschnitt werden einige Methoden aufgezählt, die in dieser Thesis zum Einsatz kommen.
+Die beschriebenen Repräsentationen der Wörter werden folglich auch als \textit{Embeddings} oder \textit{Word-Embeddings} bezeichnet.
 
 
 \subsubsection{\textit{bag-of-words} und \textit{term frequency inverse document frequency}} \label{Kap:Tfidf}
 
-Bei diesen Methoden wird zuerst für den gesamten Textkorpus ein Vokabular gebildet, das für jedes vorkommende Wort die absolute Häufigkeit des Vorkommens sowie die Anzahl der Dokumente (ein Dokument ist ein Datenpunkt, also eine Schlagzeile) enthält, in der das Wort vorkommt. Aus diesem Vokabular wird anschließend die Matrix $dtm$ (\textit{document-term-matrix}) geformt, die für jede der $N$ Beobachtungen eine Zeile und für jede der $V$ Wörter im Vokabular eine Spalte enthält. Die Einträge der Matrix bestehen aus Werten, die das Aufkommen der Wörter beschreiben. Im simplen \textit{bag-of-words} (kurz: \textit{bow}) Ansatz ist $dtm_{ij} = f_{d_i t_j}$ die Anzahl von Wort $t_j$ in Dokument $d_i$ (vgl. \cite{deepEssentials} S. 117f). Es gibt einige Wörter wie \textit{the} oder \textit{and}, die häufig vorkommen aber eventuell nicht wichtig sind. Diese \textit{stopwords} können für die \textit{bow} Methode entfernt werden. Dies muss aber nicht erfolgen, da manche \textit{stopwords} in einen Kategorien häufiger vorkommen können als in anderen.
-Im \textit{bow} wird nur gezählt, wie oft ein Wort absolut vorkommt, dabei wird aber nicht berücksichtigt, dass manche Wörter in einigen Dokumenten eine höhere Bedeutung haben können als in anderen. \\
+Bei diesen Methoden wird zuerst für den gesamten Textkorpus ein Vokabular gebildet, das für jedes vorkommende Wort die absolute Häufigkeit des Vorkommens sowie die Anzahl der Dokumente (ein Dokument ist ein Datenpunkt, also eine Schlagzeile) enthält, in der das Wort vorkommt. Aus diesem Vokabular wird anschließend die \textit{document-term-matrix} (kurz \textit{dtm}) geformt, die für jede der $N$ Beobachtungen eine Zeile und für jede der $V$ Wörter im Vokabular eine Spalte enthält. Eine beispielhafte \textit{dtm} für ist in Tabelle dargestellt.
+
+\begin{table}[ht]
+\begin{center}
+    
+
+\begin{tabular}{|c||ccccccccccc|}
+\hline
+\multicolumn{12}{|c|}{\textit{BOW} \textit{dtm}} \\
+\hline 
+   Satz   & the & dog & cat & like & likes &  to & sit  & owner & his &  does & not \\
+      \hline
+Satz 1 & $1$ & $0$ & $1$ & $0$ & $1$ & $1$ & $1$ & $0$ & $0$ &  $0$ & $0$ \\
+Satz 2 & $1$ & $1$ & $0$ & $1$ & $0$ & $0$ & $0$ & $1$ & $1$ &  $1$ & $1$ \\
+Satz 3 & $2$ & $1$ & $0$ & $0$ & $1$ & $0$ & $0$ & $1$ & $0$ &  $0$ & $0$ \\
+
+\hline
+
+\multicolumn{12}{|c|}{\textit{TFIDF} \textit{dtm}} \\
+\hline 
+   Satz   & the & dog & cat & like & likes &  to & sit  & owner & his &  does & not \\
+      \hline
+Satz 1 & $0.243$ & $0$ & $0.398$ & $0$ & $0.301$ & $0.398$ & $0.398$ & $0$ & $0$ &  $0$ & $0$ \\
+Satz 2 & $0.243$ & $0.301$ & $0$ & $0.398$ & $0$ & $0$ & $0$ & $0.301$ & $0.398$ &  $0.398$ & $0.398$ \\
+Satz 3 & $0.243$ & $0.226$ & $0$ & $0$ & $0.226$ & $0$ & $0$ & $0.226$ & $0$ & $0$ & $0$ \\
+\hline
+\end{tabular}
+\end{center}{}
+\caption{Beispiel für eine \textit{document-term-matrix} für die $3$ Beispielsätze \textit{the cat likes to sit}, \textit{the dog does not like his owner}, \textit{the owner likes the dog} jeweils für das \textit{BOW Embedding} und das \textit{TFIDF Embedding} }  
+\label{tab:BOWExample}
+
+\end{table}
+
+Der Textkorpus im oben stehenden Beispiel besteht aus insgesamt $11$ Wörtern und jede der Spalten der Matrix repräsentiert eines davon.
+Die Einträge der \textit{dtm} bestehen aus Werten, die das Aufkommen der Wörter beschreiben. Im simplen \textit{bag-of-words} Ansatz (kurz: \textit{bow}) ist $dtm_{ij} = f_{d_i t_j}$ die Anzahl von Wort $t_j$ in Dokument $d_i$ (vgl. \cite{deepEssentials} S. 117f). Dies ist im oberen Teil von Tabelle \ref{tab:BOWExample} veranschaulicht. Es gibt einige Wörter wie \textit{the} oder \textit{and}, die häufig vorkommen aber eventuell nicht wichtig sind. Diese \textit{stopwords} können für die \textit{BOW} Methode entfernt werden. Dies muss aber nicht erfolgen, da manche \textit{stopwords} in einigen Kategorien häufiger vorkommen können als in anderen. Für das Beispiel in Tabelle \ref{tab:BOWExample} wurden die \textit{stopwords} nicht entfernt.
+Bei einem \textit{BOW Embedding} wird nur gezählt, wie oft ein Wort absolut vorkommt, dabei wird aber nicht berücksichtigt, dass manche Wörter in einigen Dokumenten eine höhere Bedeutung haben können als in anderen. \\
 
 Ein Ansatz, der diese Problematik berücksichtigt ist \textit{term frequency inverse document frequency} (kurz: \textit{tf-idf}). Hierbei werden die Einträge $dtm_{ij}$ bei häufig benutzten Ausdrücken verringert und erhöht für Wörter, die insgesamt selten benutzt werden (vlg. \cite{textMiningR} S.29). Die \textit{tf-idf} für das Dokument $d_i$ und das Wort $t_j$ berechnet sich aus 
 \[tfidf(d_i, t_j) = tf(d_i,t_j) \cdot idf(t_j) . \]
@@ -110,13 +154,15 @@ Die \textit{augmented-term-frequency}
 
 \[tf(d_i,t_j) = 0.5 +  0.5 \cdot \frac{f_{d_i t_j}}{max \{ f_{d_i t_j'}: t_j' \in d_i \}} \].
 
-berücksichtigt eine Verzerrung bei längeren Dokumenten, indem durch das Maximum der vorkommenden Wörter in dem Dokument dividiert wird. Der Summand $0.5$ und der Multiplikator $0.5$ dienen der Normalisierung. Für die \textit{inverse document frequency} ist der Quotient zwischen der Anzahl der Dokumente $N$ im Korpus und der Anzahl der Dokumente, die das Wort enthalten, ein geeignetes Maß (vgl. \cite{deepEssentials} S. 118):
+berücksichtigt eine Verzerrung bei längeren Dokumenten, indem durch das Maximum der Häufigkeiten der vorkommenden Wörter in dem Dokument dividiert wird. Der Summand $0.5$ und der Multiplikator $0.5$ dienen der Normalisierung. Für die \textit{inverse document frequency} ist der Quotient zwischen der Anzahl der Dokumente $N$ im Korpus und der Anzahl der Dokumente, die das Wort enthalten, ein geeignetes Maß (vgl. \cite{deepEssentials} S. 118):
 
-\[idf(t_j) = log(\frac{N}{\# \{d_i: t_j \in d_i \}}) .\]
+\[idf(t_j) = log \Bigl( \frac{N}{\# \{d_i: t_j \in d_i \}} \Bigr) .\]
 
-Die Umsetzung im Programmiercode erfolgte mit dem \texttt{R}- Paket \texttt{text2vec} (\cite{text2vec}) und die beiden \textit{Embeddings} werden ab hier mit \textit{BOW} und \textit{TFIDF} referenziert.\\
+In dem unteren Teil von Tabelle \ref{tab:BOWExample} ist die resultierende \textit{dtm} unter Nutzung des beschriebenen \textit{TFIDF Embeddings} dargestellt. Es ist zu sehen, dass nur einmal im Textkorpus vorkommende Wörter (\say{\textit{his}}), ein höheres Gewicht bekommen als Wörter, die oft vorkommen (\say{\textit{the}}). Zudem kann das gleiche Wort ein unterschiedliches Gewicht in verschiedenen Datenpunkten enthalten (\say{\textit{dog}}).
 
-Unter Nutzung von sowohl \textit{bow} als auch \textit{tfidf} für die Repräsentation von Wörtern vernachlässigt man die Reihenfolge in den Dokumenten (vgl. \cite{deepEssentials} S. 117). 
+Die Umsetzung im Programmiercode erfolgte mit dem \texttt{R}-Paket \texttt{text2vec} (\cite{text2vec}).
+
+Unter Nutzung von sowohl \textit{bow} als auch \textit{tfidf} für die Repräsentation von Wörtern wird die Reihenfolge in den Dokumenten vernachlässigt (vgl. \cite{deepEssentials} S. 117). 
 Die nachfolgend beschriebenen Methoden berücksichtigen hingegen die Reihenfolge der Wörter in einem Satz.
 
 
@@ -131,7 +177,7 @@ Die Matrix $R$ wird nun in das Produkt aus 2 Matrizen $P$ und $Q$ zerlegt, die m
 \underset{N \times N}{R} = \underset{N \times F}{P} \cdot \underset{F \times N}{Q} \approx  \underset{N \times N}{\Tilde{R}} 
 \end{equation*}
 
-Die Matrix $P$ mit Dimension $N \times F$ ergibt multipliziert mit $Q$ mit Dimensionen $F \times N$ wieder eine $N \times N$ Matrix. Nun werden sowohl $P$ als auch $Q$ mit zufälligen Werten initiiert und die Matrix $\Tilde{R}$ berechnet. Mithilfe des stochastischen Gradienten-Abstieg (mehr dazu in Kapitel \ref{kap:neuralNets}) wird nun der Inhalt von $P$ und $Q$ verändert, mit dem Ziel die Summe aller Einträge der Differenz von $\Tilde{R}$ und $R$ zu minimieren. Dies ist ein numerischer iterativer Prozess, der wiederholt wird, bis der Fehler eine vorgegebene untere Grenze erreicht. Die Matrix $P$ enthält nun die gewünschten \textit{word-embeddings} (vgl. \cite{keras}, S. 155f). Für eine detailierte Beschreibung der Methode sei auf \cite{glovePaper} verwiesen. Die Dimension $F$ der Wort-Vektoren muss vom Anwender festgelegt werden. Es ist möglich diese Vektoren auf dem vorliegenden Trainingsdatensatz zu trainieren, wenn der Textkorpus groß genug ist. In dem Fall des \textit{news category dataset} mit $200847$ ist dies durchaus plausibel. Das Trainieren der Vektoren erfolgte mit dem \texttt{R}-Paket \texttt{text2vec} (\cite{text2vec}) unter Verwendung der Parameter $skip\_grams\_window = 5$ für den symmetrischen Bereich des Kontextworts und die Dimension der Vektoren von $F = word\_vectors\_size = 50$. Dieses \textit{Embedding} wird mit dem Kürzel \textit{GloVe unsup. 50D} referenziert. \\
+Die Matrix $P$ mit Dimension $N \times F$ ergibt multipliziert mit $Q$ mit Dimensionen $F \times N$ wieder eine $N \times N$ Matrix. Nun werden sowohl $P$ als auch $Q$ mit zufälligen Werten initiiert und die Matrix $\Tilde{R}$ berechnet. Mithilfe des stochastischen Gradienten-Abstieg (mehr dazu in Kapitel \ref{kap:neuralNets}) wird nun der Inhalt von $P$ und $Q$ verändert, mit dem Ziel die Summe aller Einträge der Differenz von $\Tilde{R}$ und $R$ zu minimieren. Dies ist ein numerischer iterativer Prozess, der wiederholt wird, bis der Fehler eine vorgegebene untere Grenze erreicht. Die Matrix $P$ enthält nun die gewünschten \textit{word-embeddings} (vgl. \cite{keras}, S. 155f). Für eine detailierte Beschreibung der Methode sei auf \cite{glovePaper} verwiesen. Die Dimension $F$ der Wort-Vektoren muss vom Anwender festgelegt werden. Es ist möglich diese Vektoren auf dem vorliegenden Trainingsdatensatz zu trainieren, wenn der Textkorpus groß genug ist. In dem Fall des \textit{news category dataset} mit \numprint{200847} ist dies durchaus plausibel. Das Trainieren der Vektoren erfolgte mit dem \texttt{R}-Paket \texttt{text2vec} (\cite{text2vec}) unter Verwendung der Parameter $skip\_grams\_window = 5$ für den symmetrischen Bereich des Kontextworts und die Dimension der Vektoren von $F = word\_vectors\_size = 50$. Dieses \textit{Embedding} wird mit dem Kürzel \textit{GloVe unsup. 50D} referenziert. \\
 Eine Alternative zum Training der \textit{word-embeddings} auf dem vorliegenden Textkorpus ist der Griff zu einem der vortrainierten Datensätze, die von \cite{gloveOnline} zur Verfügung gestellt worden sind. Diese Vektoren wurden auf massiven Datenmengen trainiert. Für diese Arbeit wurden 2 Datensätze mit vor-trainierten Wortvektoren des \textit{GloVe} Projekts genutzt: Ein auf Wikipedia mit $6$ Milliarden Dokumenten trainierter Datensatz mit einer Länge der Vektoren von $F = 50$ (\cite{gloveWiki}) und ein auf $42$ Milliarden aus verschiedensten Quellen des Internets stammenden Textdokumenten mit $F = 300$ Dimensionen (\cite{gloveCommon}). Die beiden vortrainierten \textit{Embeddings} werden in Kapitel \ref{Kap:statAus} mit \textit{GloVe 50D} und \textit{GloVe 300D} referenziert.\\
 
 Ob nun vor-trainierte \textit{word embeddings} genutzt werden oder die Vektoren auf dem Trainingsdatensatz gelernt werden, es stellt sich die Frage, wie genau die Datenpunkte geformt werden, sodass ein \textit{machine learning} Modell immer Eingangswerte derselben Dimension erwarten kann. Nun ist unter der Annahme, dass eine Beobachtung immer aus einer Aneinanderreihung von Wörtern besteht, jeder durch Wort-Vektoren repräsentierter Datenpunkt $x_i$ bereits eine zweidimensionale Matrix mit Dimensionen $F \times  W_i$. $W_i$ steht für die Anzahl Wörter im Satz des Datenpunktes $x_i$ und $F$ ist die Anzahl der Wort-Vektoren. Damit die kodierten Datenpunkte nun jeweils die gleiche Dimension besitzen um zu einem dreidimensionalen Trainings-Array geformt werden zu können, soll $W_i$ immer gleich gewählt werden. Hier wird als Konstante $W_{max}$ die Anzahl Wörter gewählt, die $99.9$ Prozent der News Schlagzeilen im Trainingsset nicht überschreiten. Für jede Schlagzeile, die weniger Wörter als $W_{max}$ enthält, wird die Matrix für die fehlenden Wörter mit Nullen aufgefüllt (dies wird \textit{padding} genannt). Wäre $W_{max}$ die maximale Anzahl von Wörtern, die die größte Schlagzeile enthält, so würde durch das Auffüllen von vielen Nullen nur unnötig Speicherplatz verbraucht werden. \\
@@ -277,15 +323,14 @@ Im Prozess des Trainings werden dem Netz alle Beobachtungen nacheinander in \tex
 Es ist zu sehen, dass \textit{overfitting} ab dem Zeitpunkt eintritt, bei dem der Validierungsfehlers anfängt zu steigen. Der Trainingsfehler sinkt ab diesem Zeitpunkt zwar noch weiter, das Modell kann jedoch nicht mehr gut generalisieren. Beim Trainieren eines Netzes ist es wichtig die Anzahl von Epochen zu identifizieren, ab dem das Netz \textit{overfitting} betreibt.
 
 \begin{itemize}
-    \item todo:  vanishing gradient problem (bei relu eingehen?
-    \item todo: batch normalization/normalizierung
+    \item todo: vanishing gradient problem (bei relu eingehen?
     \item todo: gradientenabschnitt neu machen
 \end{itemize}{}
 
 \subsubsection{Convolutional Neural Net} \label{kap:CNN}
 
 Dieser Abschnitt basiert größtenteils auf \cite{deepEssentials}, S. 71-76 und S.93-95.
-\textit{convolutional neural networks} (kurz \textit{CNN}) wurden ursprünglich für das Feld des maschinellen Sehens entwickelt und stellen dort die erste Wahl für Aufgaben wie Klassifikation von Bildern dar. Aber auch für \textit{natural language processing} erwiesen sich \textit{CNN} als äußerst effektiv (\cite{cnnSentence}, S. 1746). Liegt ein Datenpunkt in einer Gitterform vor, wie beispielsweise ein Bild aus Pixeln oder eine Matrix aus Wort-Vektoren, so müsste in der Organisation eines traditionellen \textit{MLP} jeder Eintrag der Matrix mit jedem Neuron in der ersten Zwischenschicht verbunden werden. Bei einem Satz mit $20$ Wörtern und einer Dimension der Wort-Vektoren von $F = 300$ gäbe es bei $100$ Neuronen in der ersten Zwischenschicht bereits $20 \times 300 \times 100  = 600000$ Gewichte, die angepasst werden müssten. Um diese Gewichte angemessen zu trainieren, wäre eine massive Datenmenge und Rechenleistung nötig. Des Weiteren wäre \textit{overfitting} bei dieser großen Parameter-Menge unvermeidbar. \textit{CNN} stellen eine Lösung dieses Problems dar. Eine \textit{convolution}, oder auch Faltung ist die Messung der Auswirkung des Aufeinandertreffens zweier Signale. Das eine Signal ist der Datenpunkt, das andere der Faltungskern der \textit{convolution}. In Abbildung \ref{abb:convolution} ist die Faltungsoperation beispielhaft dargestellt.
+\textit{convolutional neural networks} (kurz \textit{CNN}) wurden ursprünglich für das Feld des maschinellen Sehens entwickelt und stellen dort die erste Wahl für Aufgaben wie Klassifikation von Bildern dar. Aber auch für \textit{natural language processing} erwiesen sich \textit{CNN} als äußerst effektiv (\cite{cnnSentence}, S. 1746). Liegt ein Datenpunkt in einer Gitterform vor, wie beispielsweise ein Bild aus Pixeln oder eine Matrix aus Wort-Vektoren, so müsste in der Organisation eines traditionellen \textit{MLP} jeder Eintrag der Matrix mit jedem Neuron in der ersten Zwischenschicht verbunden werden. Bei einem Satz mit $20$ Wörtern und einer Dimension der Wort-Vektoren von $F = 300$ gäbe es bei $100$ Neuronen in der ersten Zwischenschicht bereits $20 \times 300 \times 100  = \numprint{600000}$ Gewichte, die angepasst werden müssten. Um diese Gewichte angemessen zu trainieren, wäre eine massive Datenmenge und Rechenleistung nötig. Des Weiteren wäre \textit{overfitting} bei dieser großen Parameter-Menge unvermeidbar. \textit{CNN} stellen eine Lösung dieses Problems dar. Eine \textit{convolution}, oder auch Faltung ist die Messung der Auswirkung des Aufeinandertreffens zweier Signale. Das eine Signal ist der Datenpunkt, das andere der Faltungskern der \textit{convolution}. In Abbildung \ref{abb:convolution} ist die Faltungsoperation beispielhaft dargestellt.
 
 
 \begin{figure}[!ht]
@@ -319,7 +364,7 @@ Das Lernen der Gewichte sowie \textit{tuning} und Regularisierung erfolgt bei ei
 
 \begin{itemize}
     \item stride = 1 oder stride = 2 ( very deep conv networks )bei textdaten
-    \item mehr info in very deep conv networks
+    \item mehr info in very deep conv networks?
 \end{itemize}{}
 
 

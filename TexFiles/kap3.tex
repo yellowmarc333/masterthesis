@@ -124,7 +124,7 @@ Bei diesen Methoden wird zuerst für den gesamten Textkorpus ein Vokabular gebil
       \hline
 Satz 1 & $1$ & $0$ & $1$ & $0$ & $1$ & $1$ & $1$ & $0$ & $0$ &  $0$ & $0$ \\
 Satz 2 & $1$ & $1$ & $0$ & $1$ & $0$ & $0$ & $0$ & $1$ & $1$ &  $1$ & $1$ \\
-Satz 3 & $2$ & $1$ & $0$ & $0$ & $1$ & $0$ & $0$ & $1$ & $0$ &  $0$ & $0$ \\
+Satz 3 & $0$ & $1$ & $0$ & $0$ & $1$ & $0$ & $0$ & $1$ & $0$ &  $0$ & $0$ \\
 
 \hline
 
@@ -170,15 +170,49 @@ Die nachfolgend beschriebenen Methoden berücksichtigen hingegen die Reihenfolge
 
 Eine weitere Methode zur numerischen Repräsenation von Texten sind \textit{word embeddings}, bei denen Wörter zu Vektoren fester Länge mit numerischen Werten kodiert werden. Mittlerweile haben sich \textit{word embeddings} als präferierte Methode für alle Bereiche der Sprachverarbeitung im \textit{machine-learning} durchgesetzt. Die beiden bekanntesten Methoden um \textit{word embeddings} zu generieren sind \textit{word2vec} und \textit{GloVe} (vgl. \cite{keras}, S. 139). Obwohl \textit{word2vec} auf dem Lernen durch ein neuronales Netz basiert und \textit{GloVe} auf der Zählung des Vorkommens von Wörtern im Kontext aufbaut, sind die beiden Verfahren von der grundsätzlichen Herangehensweise und den Resultaten ähnlich. Beide Methoden konstruieren einen Vektorraum, in dem die Position eines Worts durch den Kontext bestimmt wird, in dem das Wort im Textkorpus auftritt.
 \textit{GloVe} liefert im Vergleich zu \textit{word2vec} generell etwas bessere Resultate und ist mit Paralellisierung schneller zu berechnen (vgl. \cite{keras}, S. 156). Aus diesen Gründen wird in dieser Thesis \textit{GloVe} verwendet und im Folgenden beschrieben. \\
-Die Methode nutzt ein unüberwachtes Lernen zur Konstruktion der Vektoren. Zuerst wird eine Matrix $R$ konstruiert, die so viele Zeilen enthält, wie das Vokabular Wörter besitzt. Die Spalten stehen ebenso für die Wörter des Vokabulars, allerdings als Kontext verstanden. In den Einträgen der Matrix stehen nun die Häufigkeit des Vorkommens der Wörter (Zeilen) im jeweiligen Kontext (Spalten). Ob ein Wort im Kontext vorkommt, ist so zu verstehen, dass es in einem vom Anwender wählbaren Fensterbereich um das Kontextwort enthalten ist. Zur Verdeutlichung sei folgender Satz gegeben: \textit{these quotes from kids are hilarious, adorable and oddly insightful}. So kommt für einen symmetrischen Bereich von $2$ dass Wort \textit{hilarious} im Kontext von \textit{kids} einmal vor, wobei \textit{insightful} nicht im Kontext von \textit{kids} vorkommt. 
-Die Matrix $R$ wird nun in das Produkt aus 2 Matrizen $P$ und $Q$ zerlegt, die multipliziert eine fast identische Matrix $\Tilde{R}$ ergeben:
+Die Methode nutzt ein unüberwachtes Lernen zur Konstruktion der Vektoren. Zuerst wird eine \textit{term-co-occurance} (kurz \textit{tcm}) Matrix $R$ konstruiert, die so viele Zeilen enthält, wie das Vokabular Wörter besitzt. Die Spalten stehen auch für die Wörter des Vokabulars, allerdings als Kontext verstanden. Tabelle \ref{tab:GloveExample} verdeutlicht dies anhand des Beispiels aus Tabelle \ref{tab:BOWExample}.
+
+\begin{table}[ht]
+\begin{center}
+  
+ \begin{tabular}{|l||ccccccccccc|}
+  \hline
+  & \multicolumn{11}{|c|}{Kontext} \\
+\hline 
+Wörter & the & dog & cat & like & likes & to & sit & owner & his & does & not \\ 
+  \hline
+the & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+  dog & 2  & 0  & 0  & 0  & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+  cat & 1 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 \\ 
+  like & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 1 \\ 
+  likes & 3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+  to & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+  sit & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 \\ 
+  owner & 2 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+  his & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 1 \\ 
+  does & 1 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\ 
+  not & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+   \hline
+\end{tabular}  
+ 
+\end{center}{}
+\caption{Beispiel für eine \textit{term-co-occurance} Matrix für die $3$ Beispielsätze \textit{the cat likes to sit} (Satz $1$), \textit{the dog does not like his owner} (Satz $2$), \textit{the owner likes the dog} (Satz $3$) für einen symmetrischen Fensterbereich von 2}  
+\label{tab:GloveExample}
+
+\end{table}
+
+In den Einträgen der \textit{tcm} Matrix stehen nun die Häufigkeit des Vorkommens der Wörter (Zeilen) im jeweiligen Kontext (Spalten). Ob ein Wort im Kontext vorkommt, ist so zu verstehen, dass es in einem vom Anwender wählbaren Fensterbereich um das Kontextwort enthalten ist. So kommt für einen symmetrischen Bereich von $2$ in Tabelle \ref{tab:GloveExample} das Wort \say{likes} dreimal im Kontext von \say{the} vor, einmal in Satz $1$ und zweimal in Satz $3$. Obwohl \say{dog} und \say{owner} in Satz $2$ und Satz $3$ zusammen vorkommen, steht in der \textit{tcm} an der betreffenden Stelle eine $0$. Zur Berechnung der \textit{GloVe Embeddings} wird nun die \textit{tcm} Matrix $\bm{R}$ in das Produkt aus $2$ Matrizen $\bm{P}$ und $\bm{Q}$ zerlegt, die multipliziert eine Matrix $\bm{\Tilde{R}}$ ergeben:
 
 \begin{equation*}
-\underset{N \times N}{R} = \underset{N \times F}{P} \cdot \underset{F \times N}{Q} \approx  \underset{N \times N}{\Tilde{R}} 
+\underset{N \times N}{\bm{R}} = \underset{N \times F}{\bm{P}} \cdot \underset{F \times N}{\bm{Q}} \approx  \underset{N \times N}{\Tilde{\bm{R}}} 
 \end{equation*}
 
-Die Matrix $P$ mit Dimension $N \times F$ ergibt multipliziert mit $Q$ mit Dimensionen $F \times N$ wieder eine $N \times N$ Matrix. Nun werden sowohl $P$ als auch $Q$ mit zufälligen Werten initiiert und die Matrix $\Tilde{R}$ berechnet. Mithilfe des stochastischen Gradienten-Abstieg (mehr dazu in Kapitel \ref{kap:neuralNets}) wird nun der Inhalt von $P$ und $Q$ verändert, mit dem Ziel die Summe aller Einträge der Differenz von $\Tilde{R}$ und $R$ zu minimieren. Dies ist ein numerischer iterativer Prozess, der wiederholt wird, bis der Fehler eine vorgegebene untere Grenze erreicht. Die Matrix $P$ enthält nun die gewünschten \textit{word-embeddings} (vgl. \cite{keras}, S. 155f). Für eine detailierte Beschreibung der Methode sei auf \cite{glovePaper} verwiesen. Die Dimension $F$ der Wort-Vektoren muss vom Anwender festgelegt werden. Es ist möglich diese Vektoren auf dem vorliegenden Trainingsdatensatz zu trainieren, wenn der Textkorpus groß genug ist. In dem Fall des \textit{news category dataset} mit \numprint{200847} ist dies durchaus plausibel. Das Trainieren der Vektoren erfolgte mit dem \texttt{R}-Paket \texttt{text2vec} (\cite{text2vec}) unter Verwendung der Parameter $skip\_grams\_window = 5$ für den symmetrischen Bereich des Kontextworts und die Dimension der Vektoren von $F = word\_vectors\_size = 50$. Dieses \textit{Embedding} wird mit dem Kürzel \textit{GloVe unsup. 50D} referenziert. \\
-Eine Alternative zum Training der \textit{word-embeddings} auf dem vorliegenden Textkorpus ist der Griff zu einem der vortrainierten Datensätze, die von \cite{gloveOnline} zur Verfügung gestellt worden sind. Diese Vektoren wurden auf massiven Datenmengen trainiert. Für diese Arbeit wurden 2 Datensätze mit vor-trainierten Wortvektoren des \textit{GloVe} Projekts genutzt: Ein auf Wikipedia mit $6$ Milliarden Dokumenten trainierter Datensatz mit einer Länge der Vektoren von $F = 50$ (\cite{gloveWiki}) und ein auf $42$ Milliarden aus verschiedensten Quellen des Internets stammenden Textdokumenten mit $F = 300$ Dimensionen (\cite{gloveCommon}). Die beiden vortrainierten \textit{Embeddings} werden in Kapitel \ref{Kap:statAus} mit \textit{GloVe 50D} und \textit{GloVe 300D} referenziert.\\
+Die Matrix $\bm{P}$ mit Dimension $N \times F$ ergibt multipliziert mit $\bm{Q}$ mit Dimensionen $F \times N$ wieder eine $N \times N$ Matrix. $F$ ist die Länge der resultierenden Wort-Vektoren und muss vom Anwender festgelegt werden. Diese Größe bestimmt den Raum $\mathbb{R^F}$, in dem die Wort-Vektoren die Wörter repräsentieren sollen. Nun werden zu Beginn sowohl $\bm{P}$ als auch $\bm{Q}$ mit zufälligen Werten initiiert und die Matrix $\bm{\Tilde{R}}$ berechnet. Mithilfe des stochastischen Gradienten-Abstiegs (mehr dazu in Kapitel \ref{kap:neuralNets}) wird nun der Inhalt von $\bm{P}$ und $\bm{Q}$ verändert, mit dem Ziel die Summe aller Einträge der Differenz von $\bm{\Tilde{R}}$ und $\bm{R}$ zu minimieren. Dies ist ein numerischer iterativer Prozess, der wiederholt wird, bis der Fehler eine vorgegebene untere Grenze erreicht und sich die Matrizen $\bm{\Tilde{R}}$ und $\bm{R}$ im Rahmen dieser Toleranz ähnlich sind. Die Matrix $\bm{P}$ enthält nun die gewünschten \textit{word-embeddings} (vgl. \cite{keras}, S. 155f). Für eine detailierte Beschreibung der Methode sei auf \cite{glovePaper} verwiesen. 
+%todo: et al
+Es ist möglich diese Vektoren auf dem vorliegenden Trainingsdatensatz zu trainieren, wenn der Textkorpus groß genug ist. In dem Fall des \textit{news category dataset} mit \numprint{200847} ist dies durchaus plausibel. Das Trainieren der Vektoren erfolgte mit dem \texttt{R}-Paket \texttt{text2vec} (\cite{text2vec}) unter Verwendung der Parameter $skip\_grams\_window = 5$ für den symmetrischen Bereich des Kontextworts und die Dimension der Vektoren von $F = 50$. Dieses \textit{Embedding} wird mit dem Kürzel \textit{GloVe unsup. 50D} referenziert. \\
+Eine Alternative zum Training der \textit{word-embeddings} auf dem vorliegenden Textkorpus ist der Griff zu einem der vortrainierten Datensätze, die von \cite{gloveOnline}
+%todo: o.D referenz?
+zur Verfügung gestellt worden sind. Diese Vektoren wurden auf massiven Datenmengen trainiert. Für diese Arbeit wurden 2 Datensätze mit vor-trainierten Wortvektoren des \textit{GloVe} Projekts genutzt: Ein auf Wikipedia mit $6$ Milliarden Dokumenten trainierter Datensatz mit einer Länge der Vektoren von $F = 50$ (\cite{gloveWiki}) und ein auf $42$ Milliarden aus verschiedensten Quellen des Internets stammenden Textdokumenten mit $F = 300$ Dimensionen (\cite{gloveCommon}). Die beiden vortrainierten \textit{Embeddings} werden in Kapitel \ref{Kap:statAus} mit \textit{GloVe 50D} und \textit{GloVe 300D} referenziert.\\
 
 Ob nun vor-trainierte \textit{word embeddings} genutzt werden oder die Vektoren auf dem Trainingsdatensatz gelernt werden, es stellt sich die Frage, wie genau die Datenpunkte geformt werden, sodass ein \textit{machine learning} Modell immer Eingangswerte derselben Dimension erwarten kann. Nun ist unter der Annahme, dass eine Beobachtung immer aus einer Aneinanderreihung von Wörtern besteht, jeder durch Wort-Vektoren repräsentierter Datenpunkt $x_i$ bereits eine zweidimensionale Matrix mit Dimensionen $F \times  W_i$. $W_i$ steht für die Anzahl Wörter im Satz des Datenpunktes $x_i$ und $F$ ist die Anzahl der Wort-Vektoren. Damit die kodierten Datenpunkte nun jeweils die gleiche Dimension besitzen um zu einem dreidimensionalen Trainings-Array geformt werden zu können, soll $W_i$ immer gleich gewählt werden. Hier wird als Konstante $W_{max}$ die Anzahl Wörter gewählt, die $99.9$ Prozent der News Schlagzeilen im Trainingsset nicht überschreiten. Für jede Schlagzeile, die weniger Wörter als $W_{max}$ enthält, wird die Matrix für die fehlenden Wörter mit Nullen aufgefüllt (dies wird \textit{padding} genannt). Wäre $W_{max}$ die maximale Anzahl von Wörtern, die die größte Schlagzeile enthält, so würde durch das Auffüllen von vielen Nullen nur unnötig Speicherplatz verbraucht werden. \\
 
@@ -443,7 +477,7 @@ erstellt, der potentielle Werte enthält, die zum \textit{input gate} Output add
 welches kontrolliert, welcher Anteil der Information im Gedächtnis des Netzes zum Zeitpunkt $t$ erhalten bleibt. $\bm{W}_f$ bezeichnet die Gewichtsmatrix und $\bm{b}_f$ den zugehörigen \textit{bias}. Neben dem \textit{hidden state} gibt es jetzt nun auch einen \textit{cell state} $\bm{c}_t$ . Inhaltlich repräsentiert dieser das interne Langzeitgedächnis der \textit{LSTM}-Zelle (vgl. \cite{keras}, S. 186). Dieser wird berechnet aus
 \[\bm{c}_t = \bm{f}_t \cdot \bm{c}_{t-1} + \bm{i}_t \cdot \bm{\acute{c}}_t ,\]
 
-also aus der Summe von $2$ Komponenten. Der eine Teil ist der \textit{cell state} zum Zeitpunkt $t-1$, gefiltert durch das \textit{forget gate}. Die andere Komponente ist der Kandidaten-Vektor, der durch das \textit{input gate} ebenfalls gefiltert wird.\\
+also aus der Summe von $0$ Komponenten. Der eine Teil ist der \textit{cell state} zum Zeitpunkt $t-1$, gefiltert durch das \textit{forget gate}. Die andere Komponente ist der Kandidaten-Vektor, der durch das \textit{input gate} ebenfalls gefiltert wird.\\
 Das letzte \textit{gate} ist das \textit{output gate} 
 \[  \bm{o}_t = \sigma(\bm{W}_o [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_o), .\]
 
@@ -451,7 +485,7 @@ $\bm{W}_o$ ist die Gewichtsmatrix und $\bm{b}_o$ der \textit{bias}. Der \textit{
 \[\bm{h}_t = \bm{o}_t \cdot tanh(\bm{c}_t) , \]
 also aus dem \textbf{cell state}, auf den die \textit{tanh} Aktivierungsfunktion angewandt wird und durch das \textit{output gate} gefiltert wird.  
 
-In der bisher beschriebenen Struktur ist der Output zum Zeitpunkt $t$ von allen vergangenen Zeitpunkten $1,...,t-1$ abhängig. Nun ist es möglich, dass der Output zum Zeitpunkt $t$ auch von den zukünftigen Zeitpunkten $t+1,..., \tau$ abhängt. Dies kann von einem regulären \textit{LSTM} nicht modelliert werden. Eine Erweiterung der Architektur ist das \textit{bidirectional LSTM}. Dort werden $2$ \textit{LSTM} Schichten genutzt, wobei die eine Schicht den Input regulär nutzt und die andere die Sequenz rückwärts ließt. So kann sowohl der Kontext aus der Vergangenheit als auch von der Zukunft modelliert werden (vgl. \cite{deepEssentials}, S.159).
+In der bisher beschriebenen Struktur ist der Output zum Zeitpunkt $t$ von allen vergangenen Zeitpunkten $1,...,t-1$ abhängig. Nun ist es möglich, dass der Output zum Zeitpunkt $t$ auch von den zukünftigen Zeitpunkten $t+1,..., \tau$ abhängt. Dies kann von einem regulären \textit{LSTM} nicht modelliert werden. Eine Erweiterung der Architektur ist das \textit{bidirectional LSTM}. Dort werden $0$ \textit{LSTM} Schichten genutzt, wobei die eine Schicht den Input regulär nutzt und die andere die Sequenz rückwärts ließt. So kann sowohl der Kontext aus der Vergangenheit als auch von der Zukunft modelliert werden (vgl. \cite{deepEssentials}, S.159).
 \textit{bidirectional LSTM} zeichnen sich generell durch eine gute Performance auf vielen \textit{NLP} Problemen aus (vgl. \cite{deepNLP}, S.142).
 
 

@@ -343,52 +343,76 @@ calc <- function() {
 #----------------------- 100 percent models --------------------------------####
 
 predictFullModels <- function() {
-  # BOW 100pc # 13-10
-  fileName <- "BOW-100pc-TRUE-FALSE.rds"
-  indexName <- "BOW-Indexes-100pc-TRUE-FALSE.rds"
-  labelName <- "BOW-Label-100pc-TRUE-FALSE.rds"
-  mod_BOW_RF_100 <- predictRF(dataPath, fileName, 
-                              sparse = TRUE) # 
-  mod_BOW_XG_100 <- predictXG(dataPath, fileName,
-                              sparse = TRUE) # 0.495
+  dataPath <- "03_computedData/04_preparedData/"
+  psPath <- "03_computedData/05_modelData/finalModels/"
   
-  # TFIDF 100pc # 13-10
-  fileName <- "TFIDF-100pc-TRUE-FALSE.rds"
-  mod_TFIDF_RF_100 <- predictRF(dataPath, fileName,
-                                sparse = TRUE, num.trees = 500) # 
-  mod_TFIDF_XG_100 <- predictXG(dataPath, fileName, 
-                                sparse = TRUE, nrounds = 250)  
-  # 0.590 (nrounds = 100 (mehr wählen))
+  dir.create("03_computedData/05_modelData/finalModels/", recursive = TRUE,
+             showWarnings = FALSE)
+  dateNow <- Sys.Date()
   
-  # LSTM 100pc #06-10
-  fileName <- "Seq-100pc-FALSE.rds"
-  indexName <- "Seq-Indexes-100pc-FALSE.rds"
-  mod_Seq_LSTMSeq_100 <- predictLSTMSeq(dataPath, fileName,
-                                        epochs = 20) # 0.600
   
-  # Seq 100pc # 06-10
-  fileName7 <- "Seq-100pc-FALSE.rds"
-  indexName7 <- "Seq-Indexes-100pc-FALSE.rds"
-  mod_Seq_CNNSeq_100 <- predictCNNSeq(dataPath, fileName7,
-                                      indexName7, epochs = 15) # 0.580
+  calc <- function() {
+    fileName <- "BOW-Full-TRUE-FALSE.rds"
+    modelRes <- predictXG(dataPath, fileName,
+                          sparse = TRUE, nrounds = 250)
+    modelName <- "mod_BOW_XG_Full"
+    
+    saveRDS(modelRes,
+            file = paste0(psPath, modelName, "_", dateNow, ".RDS"))
+  }
+  try(calc())
+  gc()
   
-  # Array Glove 100pc # 06-10
-  fileName <- "GloveArray-100pc-50-FALSE.rds"
-  indexName <- "Glove-Indexes-100pc-50-FALSE.rds"
-  mod_GloveArray_CNNArray_100 <- predictCNNArray(dataPath, fileName,
-                                                 indexName) #0.554, 06-10 0.5774
+  calc <- function() {
+    fileName <- "GloveSums-Full-300-FALSE.rds"
+    modelRes <- predictXG(dataPath, fileName,
+                          sparse = FALSE, nrounds = 250)
+    modelName <- "mod_GloveSums300_XG_Full"
+    
+    saveRDS(modelRes,
+            file = paste0(psPath, modelName, "_", dateNow, ".RDS"))
+  }
+  try(calc())
+  gc()
   
-  # Array LSTM 100PC 24-10
-  fileName <- "GloveArray-100pc-50-FALSE.rds"
-  indexName <- "Glove-Indexes-100pc-50-FALSE.rds"
-  mod_LSTMArray <- predictLSTMArray(dataPath, fileName = fileName, 
-                                    epochs = 20) # 0.5916
+  # relevant atm
+  calc <- function() {
+    fileName <- "GloveSums-Full-300-FALSE.rds"
+    modelRes <- predictMLP(dataPath, fileName,
+                          epochs = 30)
+    modelName <- "mod_GloveSums300_MLP_Full"
+    
+    saveRDS(modelRes,
+            file = paste0(psPath, modelName, "_", dateNow, ".RDS"))
+  }
+  try(calc())
+  gc()
   
-  # Array LSTM 100PC merge Shortdescription
-  fileName <- "GloveArray-100pc-50-TRUE.rds"
-  indexName <- "Glove-Indexes-100pc-50-TRUE.rds"
-  mod_LSTMGloveTRUE <- predictLSTMArray(dataPath, fileName = fileName, 
-                                        indexName = indexName) #0.635
+ 
+  calc <- function() {
+    fileName <- "GloveArray-Full-300-FALSE.rds"
+    modelRes <- predictCNNArray(dataPath, fileName,
+                                epochs = 30) 
+    modelName <- "mod_GloveArray300_CNNArray_Full"
+    
+    saveRDS(modelRes,
+            file = paste0(psPath, modelName, "_", dateNow, ".RDS"))
+  }
+  try(calc())
+  gc()
+  
+  calc <- function() {
+    fileName <- "GloveArray-Full-300-FALSE.rds"
+    modelRes <-  predictLSTMArray(dataPath, fileName = fileName, 
+                                  epochs = 30) 
+    modelName <- "mod_GloveArray300_LSTMArray_Full"
+    
+    saveRDS(modelRes,
+            file = paste0(psPath, modelName, "_", dateNow, ".RDS"))
+  }
+  try(calc())
+  gc()
+  
   
 }
 

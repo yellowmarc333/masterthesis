@@ -164,25 +164,41 @@ getModelMetrics <- function(fileName,
 
 
 plotAccByClass <- function(inPath) {
-  inPath <- "03_computedData/05_modelData/finalselection/"
   assertString(inPath)
   
   allModels <- list.files(path = inPath)
+  assert_character(allModels, min.len = 1)
   # subset to only .rds files
   allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
  
   res <- data.table()
+  res2 <- data.table()
   for(fileName in allModels) {
     model <- readRDS(paste0(inPath, fileName))
     data <- model[["accByClass"]]
+    
+    counts <- rowSums(model$confusionMatrix)
+  
     res[, Var := data]
+    res2[, Count := counts]
     tmpName <- paste0(strsplit(fileName, split = "_")[[1]][2:3], collapse = "_")
     setnames(res, "Var", tmpName)
+    setnames(res2, "Count", tmpName)
   }
   
+
   res[, category := names(data)]
-  plotData <- melt(res, id.vars = "category")
+  res2[, category := names(data)]
+  
+  
+  resMelted <- melt(res, id.vars = c("category"))
+  resMelted2 <- melt(res2, id.vars = c("category"),
+                      , value.name = "count")
+  plotData <- merge(resMelted, resMelted2, 
+                    by = c("category", "variable"))
   plotData[, Order := max(value), by = .(category)]
+  
+  
   
   ggObj <- ggplot(plotData, aes(x = reorder(category, -Order),
                                     y = value, fill = variable, 
@@ -191,6 +207,10 @@ plotAccByClass <- function(inPath) {
     labs(x = "Nachrichtenkategorie",
          y = "Accuracy",
          fill = "Modell: ") +
+    geom_text(aes(label = round(value, 2)), 
+              position = position_dodge(width = 0.9),
+               vjust = 0.2, hjust = 1.4,
+              angle = 90, size = 2) +
     theme(axis.text.x  = element_text(angle = 45,
                                       vjust = 1, hjust = 1,
                                       size = 14),
@@ -203,8 +223,8 @@ plotAccByClass <- function(inPath) {
           legend.text = element_text(size = 15),
           legend.title = element_text(size = 18),
           panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank())
-  
+          panel.grid.minor = element_blank()) 
+
   return(ggObj)
 }
 

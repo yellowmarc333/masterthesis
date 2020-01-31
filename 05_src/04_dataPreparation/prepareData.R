@@ -585,9 +585,8 @@ prepareDataGlove = function(inPath = "03_computedData/03_integratedData/",
   # Use our filtered vocabulary
   vectorizer <- text2vec::vocab_vectorizer(vocab)
   # use window of 5 for context words
-  tcm <- text2vec::create_tcm(itoken, vectorizer, skip_grams_window = 2L)
+   # insert glove here
   
-  # insert glove here
   glove <- fread(paste0("02_initialData/", gloveName), quote = "")
   
   # see how many words are in glove of the data words

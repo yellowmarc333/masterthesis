@@ -226,3 +226,32 @@ tfidf = dfm_tfidf(x = dfm, scheme_tf = "augmented",
 
 tokens.sparse <- round(tfidf, digits = 3)
 
+## Glove Example:  
+
+# Create iterator over tokens
+tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
+                           remove_punct = FALSE, remove_symbols = FALSE, 
+                           remove_hyphens = FALSE)
+
+tokens <- as.list(tokens)
+
+# Create vocabulary. Terms will be unigrams (simple words).
+itoken <- text2vec::itoken(tokens, progressbar = FALSE)
+vocab <- text2vec::create_vocabulary(itoken)
+vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 0L)
+
+# Use our filtered vocabulary
+vectorizer <- text2vec::vocab_vectorizer(vocab)
+# use window of 5 for context words
+tcm <- text2vec::create_tcm(itoken, vectorizer, skip_grams_window = 2L,
+                            skip_grams_window_context = c("symmetric"),
+                            weights = c(1,1))
+colOrder <- tcm@Dimnames[[1]]
+newOrder <- c(11, 8, 1, 5, 10, 6, 2, 9, 4, 3, 7)
+tcmDT <- as.data.table(as.matrix(tcm))
+tcmDTOrdered <- tcmDT[newOrder, ]
+setcolorder(tcmDTOrdered, newOrder)
+row.names(tcmDTOrdered) <- colOrder[newOrder]
+
+print(xtable(tcmDTOrdered, label = "tab:GloveExample"), 
+      include.rownames = TRUE)

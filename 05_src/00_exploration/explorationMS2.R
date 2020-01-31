@@ -1,8 +1,3 @@
-# next steps/ to dos:
-
-# [coding]
-
-
 
 # [evaluation der modelle]
 
@@ -20,15 +15,21 @@
 # exploration function for word vectors (relate to wordclouds)
 
 
-# [runterschreiben]
-# next steps:
-# grolls korrektur
+# [next steps: runterschreiben]
+# xxfinal modells rechnen
+# xxemail schreiben
+# xxendauswahl checken
+# neighbor classes in tabelle: 5x32 (true class, then neighborclass for each modell)
+# accvsProb grafik finalisieren
+# in accuracyByClass die anzahl der beobachtungen reinschreiben
+# gradientenabstieg erklären anhand anderer Quelle? MIT S.151ff, 294.
+# tabelle der vorauswahl erstellen
 # matzes korrektur (zusammen mit grolls zweiter ladung)
-# word embeddings für 100% anschmeißen, vorher testen
+
 
 
 # vanishing gradient problem erklären
-# gradientenabstieg erklären anhand anderer Quelle? MIT S.170
+
 # matzes CNN teil korrigieren
 
 
@@ -48,7 +49,8 @@
 #- label under caption
 
 # [liste für groll:]
-
+# xx grolls korrektur
+# xx word embeddings für 100% anschmeißen, vorher testen
 # xxgeprüft: BOW enthält auch zahlen größer 1
 # xxCNN function proggren
 # xxSicherheit vs Korrektheit Grafik (schauen ob interessant)

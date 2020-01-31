@@ -59,7 +59,8 @@ Letztlich erhalten alle Algorithmen die selben Teilmengen der Vorauswahldaten zu
 
 \subsubsection{Vorauswahl der Modelle}\label{kap:preselection}
 
-Es gibt viele Kombinationen aus Repräsentationen der Wörter und Algorithmen, die auf diese \textit{Embeddings} angewandt werden. In der in diesem Unterabschnitt beschriebenen Vorauswahl wird die Menge der Kombinationen aus \textit{Word Embeddings} und Modellen reduziert. Dabei sollen mindestens ein neuronales Netz als auch ein baumbasiertes Verfahren in die Auswahl aufgenommen werden. Des Weiteren ist eine gute Performance im Sinne der Gütemaße aus Kapitel \ref{kap:guetemass} maßgebend. Für die Vorauswahl werden die Gütemaße $accuracy$, $CE$ und $fscore_M^{(1)}$ betrachtet. Die auf den Validierungsdaten evaluierten Ergebnisse sind in Tabelle \ref{tab:preselection} dargestellt.
+Es gibt viele Kombinationen aus Repräsentationen der Wörter und Algorithmen, die auf diese \textit{Embeddings} angewandt werden. In der in diesem Unterabschnitt beschriebenen Vorauswahl wird die Menge der Kombinationen aus \textit{Word Embeddings} und Modellen auf eine Endauswahl reduziert. Die Modelle der Endauswahl werden dann auf den kompletten Trainingsdaten ($\approx 90$ Prozent der Gesamtdaten) trainiert und in Kapitel \ref{kap:evalFinal} auf den Testdaten ($\approx 10$ Prozent der Gesamtdaten) ausgewertet. In die Endauswahl sollen mindestens ein neuronales Netz als auch ein baumbasiertes Verfahren in die Auswahl aufgenommen werden. Des Weiteren ist eine gute Performance im Sinne der Gütemaße aus Kapitel \ref{kap:guetemass} maßgebend. Für die Vorauswahl werden die Gütemaße $accuracy$, $fscore_M^{(1)}$ und $CE$ betrachtet. Für $accuracy$ und $fscore_M^{(1)}$ sind hohe Werte wünschenswert, für $CE$ niedrige Werte.
+Die auf den Validierungsdaten evaluierten Ergebnisse sind in Tabelle \ref{tab:preselection} dargestellt.\\
 
 
 \begin{table}[ht]
@@ -69,7 +70,7 @@ Es gibt viele Kombinationen aus Repräsentationen der Wörter und Algorithmen, d
 \hline
  & \multicolumn{7}{c|}{\textbf{Modelle}}  \\
  \hline
-  \textbf{\textit{Word}} \newline \textbf{\textit{Embeddings}} & \textit{XGBoost} & \textit{Random Forest} & \textit{MLP} & \textit{CNN \newline Sequenz} & \textit{CNN Glove} & \textit{Bi-LSTM \newline Sequenz} &  \textit{Bi-LSTM \newline Glove} \\
+  \textbf{\textit{Word}} \newline \textbf{\textit{Embeddings}} & \textit{XGBoost} & \textit{Random Forest} & \textit{MLP} & \textit{CNN \newline Sequenz} & \textit{CNN GloVe} & \textit{Bi-LSTM \newline Sequenz} &  \textit{Bi-LSTM \newline GloVe} \\
  \hline
  \hline
 \textit{BOW} & $0.509$ \newline $0.379$ \newline $1.934$& $0.480$ \newline $0.366$ \newline \textcolor{red}{$5.282$} & $0.504$ \newline $0.301$ \newline $2.066$ & -- & -- & -- & -- \\
@@ -86,7 +87,7 @@ Es gibt viele Kombinationen aus Repräsentationen der Wörter und Algorithmen, d
  \hline
 \textit{SOW GloVe 50D} & $0.436$ \newline $0.289$ \newline $2.091$ & $0.434$ \newline $0.257$ \newline $4.322$ & $0.418$ \newline $0.187$ \newline $2.100$ & & -- & -- & -- \\
  \hline
-\textit{SOW Glove 300D}  & $0.497$ \newline $0.344$ \newline $1.942$ & $0.447$ \newline $0.249$ \newline $4.210$ & $0.499$ \newline $0.260$ \newline $1.882$ & & -- & -- & -- \\
+\textit{SOW GloVe 300D}  & $0.497$ \newline $0.344$ \newline $1.942$ & $0.447$ \newline $0.249$ \newline $4.210$ & $0.499$ \newline $0.260$ \newline $1.882$ & & -- & -- & -- \\
  \hline
 \textit{Sequence} & -- & -- & -- & $0.451$ \newline $0.235$ \newline $2.246$ & -- & $0.477$ \newline $0.263$ \newline $2.194$ & -- \\
    \hline
@@ -98,16 +99,14 @@ Es gibt viele Kombinationen aus Repräsentationen der Wörter und Algorithmen, d
 \end{table}
 
 % \cellcolor[HTML]{AA0044}
+Das beste Ergebnis bezüglich allen $3$ Gütemaßen erzielt das \textit{Bi-LSTM} neuronale Netz auf dem \textit{GloVe 300D Embedding} mit einer $accuracy$ von $0.587$, einem $fscore_M^{(1)}$ von $0.467$ und einer $CE$ von $1.497$. Dies bedeutet, dass auf dem Validierungsdatensatz $58.7$ Prozent aller Datenpunkte in der besten Kombination aus \textit{Word Embedding} und \textit{Modell} der richtigen Nachrichtensparte zugeordnet werden kann. Das zweitbeste Modell stellt das \textit{CNN} auf dem selbigen \textit{Embedding} mit einer $accuracy$ von $0.570$, einem $fscore_M^{(1)}$ von $0.409$ und einer $CE$ von $1.637$. Auf den auf Wikipedia basierenden $GloVe 50D$ Wort-Vektoren erzielen beide Modelle etwas schlechtere Ergebnisse, übertreffen aber die Kennzahlen der restlichen Tabelle. Die auf dem Datensatz gelernten \textit{GloVe unsuper. 50D} \textit{Embeddings} erzielen, von den Embeddings die aus Sequenzen von Wort-Vektoren basieren, die schlechtesten Gütemaße. Bei Betrachtung der Summen dieser Vektoren im \textit{SOW GloVe unsup.50D} Embedding fällt auf, dass \textit{XGBoost} bezüglich der $accuracy$ ($0.273$) den niedrigsten und bezüglich dem $fscore_M^{(1)}$ ($0.125$) den zweit niedrigsten Wert erzielt. Unter Nutzung dieser Repräsentation der Wörter nimmt das \textit{MLP} für $fscore_M^{(1)}$ ($0.078$) das schlechteste und für $accuracy$ ($0.287$) das zweit schlechteste Maß an. Im Vergleich der Summen der Sequenzen der Wort-Vektoren, bei denen die Reihenfolge der Wörter nicht mehr einfließt und der Sequenzen der Wort-Vektoren fällt auf, dass letztere Repräsentation, die die Reihenfolge berücksichtigt, in allen Gütemaßen besser abschneidet. Die Repräsentation als Summe erreicht jedoch zumindest bei \textit{SOW GloVe 300D} gute Ergebnisse. Hinsichtlich $accuracy$ ($0.499$) und $CE$ ($1.882$) schneidet \textit{MLP} am besten ab, in Bezug auf den $fscore_M^{(1)}$ ($0.344$) erzielt \textit{XGBoost} den besten Wert auf diesem \textit{Embedding}. Im Bereich des \textit{BOW}, erzielen sowohl \textit{XGBoost}, \textit{Random Forest} und \textit{MLP} solide Ergebnisse. Darunter schneidet XGBoost mit den Werten $0.509$, $0.378$ und $1.934$ am besten ab. Für das $TFIDF$ \textit{Embedding} sind die Ergebnisse bei \textit{XGBoost} und \textit{Random Forest} etwas schlechter und bei \textit{MLP} etwas besser. Die marginalen Unterschiede sind interessant, da in der Berechnung des \textit{TFIDF-Embedding} zusätzliche Aspekte berücksichtigt wurden, zum Beispiel dass selten vorkommende Wörter höher gewichtet und häufig vorkommende Wörter niedriger gewichtet werden. Die beiden mit Abstand höchsten Ausprägungen der \textit{CE} nimmt \textit{Random Forest} mit $5.282$ bei \textit{BOW} und $4.810$ bei \textit{TFIDF} an. Die hohen Werte auf allen \textit{Word Embeddings} sind dadurch zu erklären, dass \textit{Random Forest} kein Verfahren ist, dass die \textit{CE} als Optimierungskriterium nutzt. Die Repräsentation der Wörter, die eine Sequenz aus Wort-Indizes bilden (\textit{Sequence}) erzielen unter der Anwendung von \textit{CNN} ($accuracy = 0.451$) und \textit{Bi-LSTM} ($accuracy = 0.477$) akzeptable Ergebnisse. Auch hier schneidet das \textit{Bi-LSTM} besser als das \textit{CNN} ab. Hierbei werden die Wort-Vektoren mit überwachtem Lernen in einer \textit{Embedding}-Zwischenschicht im neuronalen Netz gelernt. Obwohl das \textit{Sequence} \textit{Embedding} die Reihenfolge der Wörter im Satz berücksichtigt, sind die Ergebnisse schlechter als bei anderen Repräsentationen wie \textit{SOW Glove 300D} oder \textit{BOW}, die die Reihenfolge nicht miteinbeziehen.\\
+
+Zusammenfassend ist in Tabelle \ref{tab:preselection} zu sehen, dass die neuronalen Netze \textit{CNN} und \textit{Bi-LSTM} auf dem \textit{SOW GloVe 300D} die besten Ergebnisse hinsichtlich aller $3$ Gütemaße erzielen. Diese beiden Kombinationen werden deshalb in die Auswahl der finalen Modelle aufgenommen. Auf den klassischen \textit{Embeddings} \textit{BOW} und \textit{TFIDF} erzielen \textit{XGBoost} und \textit{MLP} akzeptable Ergebnisse. Da sich die beiden Repräsentationen hinsichtlich ihrer Struktur wenig unterscheiden, wird ausschließlich ein Modell auf einem der beiden \textit{Embeddings} in die Endauswahl aufgenommen. Dies ist \textit{XGBoost} unter Verwendung von \textit{BOW}, welches für $fscore_M^{(1)}$ und $CE$ das beste und für $accuracy$ das zweitbeste Resultat erzielt. Ein weiteres Modell der Endselektion ist \textit{MLP} auf \textit{SOW GloVe 300D}, welches von allen Repräsentationen, die auf Summen von Wort-Vektoren basieren, die beste \textit{accuracy} und \textit{CE} erzielt. \\
+
+Die vier Kombinationen der Endauswahl umfassen nun $4$ Modelle und $3$ Arten der Repräsentationen der Wörter und werden in den nächsten Abschnitten näher vorgestellt.
 
 
 
-\paragraph{Auswahl}
-\begin{itemize}
-\item Bi-LSTM Glove, da beste Performance bei allen 3 Gütemaßen
-\item CNN Glove, da zweitbeste Performance bei allen 3 Gütemaßen
-\item XGBoost auf BOW, da beste Performance in BOW und zweitbeste im TFIDF Embedding Accuracy. Bzgl f1scoreM und CE beste in TFIDF.
-\item als viertes Modell XGBoost auf SOW Glove 300D?
-\end{itemize}{}
 
 \begin{itemize}
     \item tuning wurde klein gehalten, die Modelle werden auf 90 \% der Daten nicht nochmal verändert. (ausser nrounds, epochen, numtrees etc)
@@ -117,6 +116,7 @@ Es gibt viele Kombinationen aus Repräsentationen der Wörter und Algorithmen, d
 \subsubsection{Performanzmaße}
 
 \begin{itemize}
+\item vorstellung: struktur, hyperparameter, word embedding sizes und dimensions
     \item metriken wie in vorauswahl nur ausführlicher
     \item accuracy by class comparison
     \item confidence vs accuracy plots
@@ -131,6 +131,7 @@ Es gibt viele Kombinationen aus Repräsentationen der Wörter und Algorithmen, d
     \item variablenwichtigkeit bei xgboost als wordcloud plotten, dalex und sonstiges
     \item random forest direkt variablenwichtigkeit
     \item nachbarklassen identifizieren durch confusionmatrix
+    \item confusionmatrix zeigen
     \item convolutional filters holen und ähnlichkeiten zu combinationen aus word vectors erhalten über tupel/tripel von wortvectoren laufen lassen und schauen wo die ähnlichkeit am größten ist
 \end{itemize}{}
 

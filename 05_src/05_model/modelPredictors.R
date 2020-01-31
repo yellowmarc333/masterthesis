@@ -80,7 +80,7 @@ predictMLP <- function(dataPath, fileName,
     view_metrics = FALSE,
     verbose = 2,
     callbacks = list(
-      callback_early_stopping(min_delta = 0.002)))
+      callback_early_stopping(min_delta = 0.00002)))
 
   evaluationResult <- model %>% 
     evaluate(as.matrix(testData), testLabel, batch_size = 32)
@@ -370,6 +370,7 @@ predictXG <- function(dataPath, fileName,
   assertFactor(testLabelRaw)
   
   rm(data)  
+  gc()
 
   assert(length(unique(trainLabelRaw)) == length(unique(testLabelRaw)))
   
@@ -731,6 +732,7 @@ predictCNNArray <- function(dataPath, fileName,
   maxWords <- data$maxWords
   channels <- data$channels
   rm(data)  
+  gc()
   
   assert(length(unique(trainLabelRaw)) == length(unique(testLabelRaw)))
   
@@ -806,7 +808,7 @@ predictCNNArray <- function(dataPath, fileName,
     view_metrics = FALSE,
     verbose = 2,
     callbacks = list(
-      callback_early_stopping(min_delta = 0.002)))
+      callback_early_stopping(min_delta = 0.00002)))
   
   
    # 
@@ -973,7 +975,7 @@ predictCNNSeq <- function(dataPath, fileName,
     view_metrics = FALSE,
     verbose = 2,
     callbacks = list(
-      callback_early_stopping(min_delta = 0.002)))
+      callback_early_stopping(min_delta = 0.00002)))
   
   evaluationResult <- model %>% 
     evaluate(as.matrix(testData), testLabel, batch_size = 32)
@@ -1113,7 +1115,7 @@ predictLSTMSeq <- function(dataPath, fileName,
     view_metrics = FALSE,
     verbose = 2,
     callbacks = list(
-      callback_early_stopping(min_delta = 0.002)))
+      callback_early_stopping(min_delta = 0.00002)))
   
   evaluationResult <- model %>% 
     evaluate(as.matrix(testData), testLabel, batch_size = 32)
@@ -1200,6 +1202,7 @@ predictLSTMArray <- function(dataPath, fileName,
   maxWords <- data$maxWords
   channels <- data$channels
   rm(data)  
+  gc()
   
   assert(length(unique(trainLabelRaw)) == length(unique(testLabelRaw)))
   
@@ -1249,7 +1252,7 @@ predictLSTMArray <- function(dataPath, fileName,
     view_metrics = FALSE,
     verbose = 2,
     callbacks = list(
-      callback_early_stopping(min_delta = 0.002)))
+      callback_early_stopping(min_delta = 0.00002)))
   
   evaluationResult <- model %>% 
     evaluate(testData, testLabel, batch_size = 32)

@@ -32,20 +32,64 @@ compareProbVsAcc <- function(inPath, cutN = 50) {
   allModels <- list.files(path = inPath)
   # subset to only .rds files
   allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
+
+  sequence <- seq(0, 1, length.out = cutN)
+  beginn <- sequence[1: (cutN - 1)]
+  end <- sequence[2: cutN]
   
-  data <- readRDS(paste0(inPath, allModels[3]))
+  res <- data.table(cutLvl = 1:(cutN-1))
   
-  ProbAccDT <- data[["ProbAccDT"]]
-  ProbAccDT[, ProbCut := cut(x = Prob, breaks = cutN)]
+  for(fileName in allModels) {
+    model <- readRDS(paste0(inPath, fileName))
+    ProbAccDT <- model[["ProbAccDT"]]
+    
+    cutLvl <- sapply(ProbAccDT$Prob, function(w) {
+      which(mapply(function(x, y, z) {
+        between(z, x, y)
+      }, beginn, end, w))
+    }) 
+    ProbAccDT[, cutLvl := cutLvl]
+    
+    probCutDT <- ProbAccDT[, .(CorrectMean = mean(Correct)), by = cutLvl]
+    tmpName <- paste0(strsplit(fileName, split = "_")[[1]][2:3], collapse = ", ")
+    setnames(probCutDT, "CorrectMean", tmpName)
+    
+    res <- merge(res, probCutDT, by = "cutLvl", all = TRUE)
+  }
+
+  setnames(res, c("cutLvl", "BOW, XGBoost","GloVe 300D, CNN" ,
+            "GloVe 300D, Bi-LSTM", "SOW GloVe 300D, MLP"))
+  plotData <- melt(res, id.vars = "cutLvl")
+  plotData[, cutLvl := (cutLvl/cutN) - (1/cutN)/2]
   
-  plotDT <- ProbAccDT[, .(ProbMean = mean(Prob),
-                          CorrectMean = mean(Correct)), by = ProbCut]
-  setorderv(plotDT, "ProbCut", "1")
-  plotDT[, CutLvl := 1: .N]
-  
-  ggObj <- ggplot(plotDT, aes(x = CutLvl)) + 
-    geom_line(aes(y = CorrectMean), color = "darkgreen") +
-    geom_line(aes(y = ProbMean), color = "blue"); ggObj
+  ggObj <- ggplot(plotData, aes(x = cutLvl, y = value,
+                                color = variable, shape = variable)) + 
+    geom_point(aes(shape = variable)) +
+    geom_line(aes(color = variable)) +
+    geom_abline(intercept = 0, slope = 1, colour = "black",
+                linetype = "dashed", size = 0.5) +
+    labs(x = "Mitte des Intervals der Modellwahrscheinlichkeit",
+         y = "Anteil korrekt klassifizierter Beobachtungen") +
+    scale_color_discrete(name = "Embedding, Modell", 
+                         labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
+                                    "GloVe 300D, Bi-LSTM", 
+                                    "SOW GloVe 300D, MLP")) +
+    scale_shape_discrete(name = "Embedding, Modell", 
+                         labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
+                                    "GloVe 300D, Bi-LSTM", 
+                                    "SOW GloVe 300D, MLP")) +
+    theme(axis.text.x  = element_text(size = 14),
+          axis.text.y = element_text(size = 15),
+          axis.title = element_text(size = 28),
+          axis.ticks.x = element_line(linetype = "solid"),
+          legend.background = element_rect(fill = "lightgrey", size = 6),
+          legend.key = element_rect(fill = "white",
+                                    color = NA, size = 8),
+          legend.position = "top",
+          legend.text = element_text(size = 17),
+          legend.title = element_text(size = 19),
+          panel.grid.major = element_line(), 
+          panel.grid.minor = element_line()) ; ggObj
   
   return(ggObj)
 }
@@ -65,7 +109,7 @@ getModelMetrics <- function(fileName,
 
   # if the prediction is correct, how sure was the model
   probAccDT <- model$ProbAccDT
-  probIfCorrect <- mean(probAccDT[Correct == TRUE, .(Prob)][[1]])
+  probIfCorrect <- round(mean(probAccDT[Correct == TRUE, .(Prob)][[1]]),3)
   
   confMat <- model$confusionMatrix
   namesConfMat <- colnames(confMat)
@@ -197,8 +241,14 @@ plotAccByClass <- function(inPath) {
   plotData <- merge(resMelted, resMelted2, 
                     by = c("category", "variable"))
   plotData[, Order := max(value), by = .(category)]
-  
-  
+  # renaming for plotting (hardcode)
+  plotData[variable == "BOW_XG", variable := "BOW, XGBoost"]
+  plotData[variable == "GloveArray300_CNNArray", 
+           variable := "GloVe 300D, CNN"]
+  plotData[variable == "GloveArray300_LSTMArray", 
+           variable := "GloVe 300D, Bi-LSTM"]
+  plotData[variable == "GloveSums300_MLP", 
+           variable := "SOW GloVe 300D, MLP"]
   
   ggObj <- ggplot(plotData, aes(x = reorder(category, -Order),
                                     y = value, fill = variable, 
@@ -206,17 +256,17 @@ plotAccByClass <- function(inPath) {
     geom_bar(stat = "identity", position = "dodge") + 
     labs(x = "Nachrichtenkategorie",
          y = "Accuracy",
-         fill = "Modell: ") +
+         fill = "Embedding, Modell: ") +
     geom_text(aes(label = round(value, 2)), 
               position = position_dodge(width = 0.9),
-               vjust = 0.2, hjust = 1.4,
-              angle = 90, size = 2) +
+               vjust = 0.5, hjust = 1.4,
+              angle = 90, size = 2.4) +
     theme(axis.text.x  = element_text(angle = 45,
                                       vjust = 1, hjust = 1,
                                       size = 14),
           axis.text.y = element_text(size = 15),
           axis.title = element_text(size = 28),
-          axis.ticks.x = element_line(),
+          axis.ticks.x = element_line(size  = 1),
           legend.background = element_rect(fill = "lightgrey"),
           legend.key = element_rect(fill = "lightblue", color = NA),
           legend.position = "top",
@@ -245,19 +295,35 @@ identifyNeighborClasses <- function(inPath) {
     neighborCount <- list()
     for(i in 1:nrow(data)) {
       x <- data[i, ]
-      x[i] <- 0
-      y <- max(x)
-      neighborCount[[i]] <- list(neighborClass = names(which.max(x)),
-                                 trueClass = trueClasses[i],
-                                 value = y)
+      x[i] <- 0 # setting the diagonal = 0
+      sorted <- sort(x, decreasing = TRUE)
+      highest1 <- sorted[1]
+      highest2 <- sorted[2]
+      NC1 <- paste0("textit{", names(which(x == highest1)[1])
+                    , "}, ($", highest1, "$)")
+      NC2 <- paste0("textit{", names(which(x == highest2)[1])
+                    , "}, ($", highest2, "$)")
+      
+      neighborCount[[i]] <- list(trueClass = trueClasses[i],
+                                 NC1 = NC1,
+                                 NC2 = NC2)
     }
-    res[[j]] <- neighborCount
+    res[[allModels[j]]] <- neighborCount
   }
+
   # Marc: funktioniert nicht wenn es neighbor classes mit gleich vielen
   # Beobachtungen gibt
   resListed <- lapply(res, function(x) rbindlist(x))
+
   
-  return(resListed)
+  resDT <- data.table(trueClass = resListed[[1]]$trueClass)
+  for(i in seq_along(resListed)) {
+    tmpName <- names(resListed)[i]
+    setnames(resListed[[i]], "NC1", paste0(tmpName, "_NC1"))
+    setnames(resListed[[i]], "NC2", paste0(tmpName, "_NC2"))
+    resDT <- merge(resDT, resListed[[i]], by = "trueClass")
+  }
+  return(resDT)
 }
 
 

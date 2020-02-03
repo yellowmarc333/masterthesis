@@ -1,5 +1,4 @@
 
-# [evaluation der modelle]
 
 # [analyse der modelle]
 # BOW/TFIDF - RF XGBoost: variablenwichtigkeit in Wordcloud
@@ -16,14 +15,8 @@
 
 
 # [next steps: runterschreiben]
-# xxfinal modells rechnen
-# xxemail schreiben
-# xxendauswahl checken
-# neighbor classes in tabelle: 5x32 (true class, then neighborclass for each modell)
-# accvsProb grafik finalisieren
-# in accuracyByClass die anzahl der beobachtungen reinschreiben
+# mean_accuracy erklären, probIfCorrect
 # gradientenabstieg erklären anhand anderer Quelle? MIT S.151ff, 294.
-# tabelle der vorauswahl erstellen
 # matzes korrektur (zusammen mit grolls zweiter ladung)
 
 
@@ -48,7 +41,14 @@
 #- captions nicht alles in textit
 #- label under caption
 
-# [liste für groll:]
+
+# xxtabelle der vorauswahl erstellen
+# xxneighbor classes in tabelle: zweite neighborclass dazunehmen?
+# xxaccvsProb grafik finalisieren
+# xxfinal modells rechnen
+# xxemail schreiben
+# xxendauswahl checken
+# xxin accuracyByClass die anzahl der beobachtungen reinschreiben
 # xx grolls korrektur
 # xx word embeddings für 100% anschmeißen, vorher testen
 # xxgeprüft: BOW enthält auch zahlen größer 1
@@ -187,22 +187,5 @@
 # markus und wdl datensätze im auge behalten
 # fasttext auschecken
 
-install_keras(method = c("auto", "virtualenv", "conda"),
-              conda = "auto", version = "default", tensorflow = "default",
-              extra_packages = c("tensorflow-hub"), ...)
 
-library(reticulate)
-use_python("//usr/local/bin/python3", required = TRUE)
-py_available()
-py_config()
-py_numpy_available()
-library(keras)
 
-# balancing
-data <- read.fst("03_computedData/04_preparedData/Emb-10pc-FALSE.fst", 
-                 as.data.table = TRUE)
-test <- generalizedSampling(data = data, method = "down", 
-                    label = "labelRaw")
-table(test$labelRaw)
-
-notFound <- fread("03_computedData/02_cleanedData/notFound.csv")

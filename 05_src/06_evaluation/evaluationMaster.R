@@ -17,25 +17,34 @@ evalReduced[, LatexOutput := paste0("$", accuracy, "$ ewline $",
 # evalFinalModels ####
 evalFinalModels <- evaluateData(inPath = "03_computedData/05_modelData/finalModels/",
                                 outPath = outPath)
+evalFinalModelsReduced <- evalFinalModels[, .(modelName, accuracy,
+                                               accuracy_mean, f1_M, mlogloss,
+                                               probIfCorrect)]
 
-print(xtable(evalFinalModels, label = "tab:finalEvaluation"), 
+print(xtable(evalFinalModelsReduced, label = "tab:finalSelection", digits = 3), 
       include.rownames = FALSE)
 
 
 # prob vs acc ####
 ggObj <- compareProbVsAcc(inPath = "03_computedData/05_modelData/finalModels/")
-ggObj
+ggsave(filename = paste0(outPath, "FinalSelectionCompareProbVsAcc.pdf"),
+       plot = ggObj, width = fullWidth, height = fullHeight, 
+       device = "pdf")
+
+
 
 # accuracy by class ####
 ggObj <- plotAccByClass(inPath = "03_computedData/05_modelData/finalModels/")
-ggsave(filename = paste0(outPath, "accByClass.pdf"),
+
+ggsave(filename = paste0(outPath, "FinalSelectionAccByClass.pdf"),
        plot = ggObj, width = fullWidth, height = fullHeight, 
        device = "pdf")
 
 # neighborClasses ####
+# testweise gecheckt dass neighborclasses und counts stimmen
 res <- identifyNeighborClasses("03_computedData/05_modelData/finalModels/")
-
-
+print(xtable(res, label = "tab:neighborClasses", digits = 0), 
+      include.rownames = FALSE)
 
 
 

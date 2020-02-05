@@ -113,11 +113,76 @@ Die vier Kombinationen der Endauswahl umfassen nun $4$ Modelle und $3$ Arten der
 \end{itemize}{}
 
 \subsection{Evaluation und Vergleich der Modelle} \label{kap:evalFinal}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|l||ccccc|}
+  \hline
+\textit{Embedding}, Modell & $accuracy$ & $\bar{accuracy}$ & $fscore_M^{(1)}$ & $CE$ & probIfCorrect \\ 
+  \hline
+\textit{BOW, XGBoost} & 0.624 & 0.487 & 0.541 & 1.447 & 0.653 \\ 
+  \textit{GloVe 300D, CNN} & 0.668 & 0.521 & 0.562 & 1.247 & 0.646 \\ 
+  \textit{GloVe 300D, Bi-LSTM} & 0.689 & 0.552 & 0.587 & 1.124 & 0.825 \\ 
+  \textit{SOW GloVe 300D, MLP} & 0.625 & 0.455 & 0.499 & 1.358 & 0.705 \\ 
+   \hline
+\end{tabular}
+\label{tab:finalSelection}
+\end{table}
+
+
+\begin{table}[ht]
+\notsotiny
+\centering
+\begin{tabular}{|l||rrrr|}
+  \hline
+Wahre Kategorie & \textit{BOW}, \textit{XGBoost} & \textit{GloVe 300D}, \textit{CNN} & \textit{GloVe 300D}, \textit{Bi-LSTM} & \textit{SOW GloVe 300D}, \textit{MLP} \\ 
+  \hline
+\textit{arts \& culture} & \textit{wellness \& \dots}, ($62$) & \textit{entertainment}, ($57$) & \textit{entertainment}, ($43$) & \textit{entertainment}, ($64$) \\ 
+  \textit{black voices} & \textit{entertainment}, ($67$) & \textit{entertainment}, ($88$) & \textit{entertainment}, ($62$) & \textit{entertainment}, ($88$) \\ 
+  \textit{business} & \textit{wellness \& \dots}, ($141$) & \textit{wellness \& \dots}, ($89$) & \textit{wellness \& \dots}, ($85$) & \textit{politics}, ($109$) \\ 
+  \textit{college} & \textit{wellness \& \dots}, ($19$) & \textit{wellness \& \dots}, ($13$) & \textit{politics}, ($11$) & \textit{politics}, ($18$) \\ 
+  \textit{comedy} & \textit{wellness \& \dots}, ($78$) & \textit{entertainment}, ($83$) & \textit{entertainment}, ($79$) & \textit{politics}, ($101$) \\ 
+  \textit{crime} & \textit{politics}, ($41$) & \textit{politics}, ($50$) & \textit{politics}, ($37$) & \textit{politics}, ($44$) \\ 
+  \textit{divorce} & \textit{wellness \& \dots}, ($41$) & \textit{weddings}, ($34$) & \textit{wellness \& \dots}, ($31$) & \textit{parents}, ($38$) \\ 
+  \textit{education} & \textit{wellness \& \dots}, ($24$) & \textit{politics}, ($18$) & \textit{politics}, ($23$) & \textit{politics}, ($27$) \\ 
+  \textit{entertainment} & \textit{wellness \& \dots}, ($135$) & \textit{politics}, ($44$) & \textit{politics}, ($41$) & \textit{politics}, ($90$) \\ 
+  \textit{fifty} & \textit{wellness \& \dots}, ($63$) & \textit{wellness \& \dots}, ($62$) & \textit{wellness \& \dots}, ($49$) & \textit{wellness \& \dots}, ($74$) \\ 
+  \textit{food, drink \dots} & \textit{wellness \& \dots}, ($125$) & \textit{wellness \& \dots}, ($44$) & \textit{wellness \& \dots}, ($64$) & \textit{wellness \& \dots}, ($63$) \\ 
+  \textit{good news} & \textit{wellness \& \dots}, ($20$) & \textit{parents}, ($21$) & \textit{green \& \dots}, ($20$) & \textit{parents}, ($19$) \\ 
+  \textit{green} \& \dots & \textit{wellness \& \dots}, ($74$) & \textit{politics}, ($42$) & \textit{politics}, ($42$) & \textit{politics}, ($52$) \\ 
+  \textit{home} \& living & \textit{wellness \& \dots}, ($61$) & \textit{style \& beauty}, ($29$) & \textit{food, drink \dots}, ($18$) & \textit{food, \textit{drink} \dots}, ($21$) \\ 
+  \textit{impact} & \textit{wellness \& \dots}, ($122$) & \textit{wellness \& \dots}, ($89$) & \textit{wellness \& \dots}, ($73$) & \textit{wellness \& \dots}, ($91$) \\ 
+  \textit{latino voices} & \textit{politics}, ($29$) & \textit{politics}, ($22$) & \textit{entertainment}, ($17$) & \textit{politics}, ($41$) \\ 
+  \textit{media} & \textit{politics}, ($78$) & \textit{politics}, ($91$) & \textit{politics}, ($61$) & \textit{politics}, ($114$) \\ 
+  \textit{money} & \textit{wellness \& \dots}, ($34$) & \textit{business}, ($47$) & \textit{business}, ($32$) & \textit{business}, ($55$) \\ 
+  \textit{parents} & \textit{wellness \& \dots}, ($221$) & \textit{wellness \& \dots}, ($117$) & \textit{wellness \& \dots}, ($130$) & \textit{wellness \& \dots}, ($137$) \\ 
+  \textit{politics} & \textit{wellness \& \dots}, ($182$) & \textit{world news}, ($112$) & \textit{world news}, ($85$) & \textit{world news}, ($78$) \\ 
+  \textit{queer voices} & \textit{politics}, ($47$) & \textit{entertainment}, ($42$) & \textit{politics}, ($55$) & \textit{politics}, ($68$) \\ 
+  \textit{religion} & \textit{wellness \& \dots}, ($48$) & \textit{wellness \& \dots}, ($29$) & \textit{wellness \& \dots}, ($29$) & \textit{politics}, ($36$) \\ 
+  \textit{science} & \textit{wellness \& \dots}, ($63$) & \textit{wellness \& \dots}, ($46$) & \textit{wellness \& \dots}, ($46$) & \textit{wellness \& \dots}, ($45$) \\ 
+  \textit{sports} & \textit{wellness \& \dots}, ($66$) & \textit{entertainment}, ($27$) & \textit{entertainment}, ($23$) & \textit{entertainment}, ($27$) \\ 
+  \textit{style \& beauty} & \textit{wellness \& \dots}, ($125$) & \textit{entertainment}, ($61$) & \textit{entertainment}, ($57$) & \textit{entertainment}, ($90$) \\ 
+  \textit{tech} & \textit{wellness \& \dots}, ($29$) & \textit{business}, ($29$) & \textit{business}, ($23$) & \textit{business}, ($28$) \\ 
+  \textit{travel} & \textit{wellness \& \dots}, ($141$) & \textit{food, drink \dots}, ($51$) & \textit{wellness \& \dots}, ($37$) & \textit{food, \textit{drink} \dots}, ($44$) \\ 
+  \textit{weddings} & \textit{wellness \& \dots}, ($39$) & \textit{wellness \& \dots}, ($22$) & \textit{wellness \& \dots}, ($28$) & \textit{divorce}, ($27$) \\ 
+  \textit{weird news} & \textit{wellness \& \dots}, ($33$) & \textit{travel}, ($18$) & \textit{green \& \dots}, ($18$) & \textit{crime}, ($27$) \\ 
+  \textit{wellness} \& \dots & \textit{parents}, ($73$) & \textit{parents}, ($120$) & \textit{parents}, ($81$) & \textit{parents}, ($112$) \\ 
+  \textit{women} & \textit{wellness \& \dots}, ($86$) & \textit{wellness \& \dots}, ($73$) & \textit{wellness \& \dots}, ($65$) & \textit{wellness \& \dots}, ($76$) \\ 
+  \textit{world news} & \textit{politics}, ($92$) & \textit{politics}, ($62$) & \textit{politics}, ($81$) & \textit{politics}, ($114$) \\ 
+   \hline
+\end{tabular}
+\label{tab:neighborClasses}
+\end{table}
+
+
+
 \subsubsection{Performanzmaße}
 
 \begin{itemize}
 \item vorstellung: struktur, hyperparameter, word embedding sizes und dimensions
     \item metriken wie in vorauswahl nur ausführlicher
+    \item neighbor classes (mit 2 größten neighbor classes?)
+    \item eingehen auf fehlklassifikationskosten
     \item accuracy by class comparison
     \item confidence vs accuracy plots
     \item maß wie sicher ist sich das Verfahren, wenn es die richtige klasse ist? compareProbVsAcc/CE

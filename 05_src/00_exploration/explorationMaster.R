@@ -255,3 +255,15 @@ row.names(tcmDTOrdered) <- colOrder[newOrder]
 
 print(xtable(tcmDTOrdered, label = "tab:GloveExample"), 
       include.rownames = TRUE)
+
+
+# OSV ####
+dataRaw <- fread("03_computedData/01_importedData/News.csv")
+set.seed(123)
+sampleDT <- dataRaw[sample.int(.N, 5)]
+
+
+print(xtable(sampleDT),  include.rownames = FALSE )
+
+
+

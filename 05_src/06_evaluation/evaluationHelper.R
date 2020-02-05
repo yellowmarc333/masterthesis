@@ -301,18 +301,19 @@ identifyNeighborClasses <- function(inPath) {
       highest2 <- sorted[2]
       NC1 <- paste0("textit{", names(which(x == highest1)[1])
                     , "}, ($", highest1, "$)")
-      NC2 <- paste0("textit{", names(which(x == highest2)[1])
-                    , "}, ($", highest2, "$)")
+      # Marc: outcomment, maybe for Anhang
+      # NC2 <- paste0("textit{", names(which(x == highest2)[1])
+      #               , "}, ($", highest2, "$)")
       
       neighborCount[[i]] <- list(trueClass = trueClasses[i],
-                                 NC1 = NC1,
-                                 NC2 = NC2)
+                                 NC1 = NC1
+                                 #,
+                                 #NC2 = NC2
+                                 )
     }
     res[[allModels[j]]] <- neighborCount
   }
 
-  # Marc: funktioniert nicht wenn es neighbor classes mit gleich vielen
-  # Beobachtungen gibt
   resListed <- lapply(res, function(x) rbindlist(x))
 
   
@@ -320,7 +321,7 @@ identifyNeighborClasses <- function(inPath) {
   for(i in seq_along(resListed)) {
     tmpName <- names(resListed)[i]
     setnames(resListed[[i]], "NC1", paste0(tmpName, "_NC1"))
-    setnames(resListed[[i]], "NC2", paste0(tmpName, "_NC2"))
+    #setnames(resListed[[i]], "NC2", paste0(tmpName, "_NC2"))
     resDT <- merge(resDT, resListed[[i]], by = "trueClass")
   }
   return(resDT)

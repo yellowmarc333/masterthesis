@@ -100,6 +100,9 @@ getModelMetrics <- function(fileName,
   assertString(fileName, pattern = ".RDS")
   assertString(path)
   
+  
+  
+  
   model <- readRDS(paste0(path, fileName))
   assertList(model)
   assertSubset(x = c("confusionMatrix",
@@ -140,6 +143,7 @@ getModelMetrics <- function(fileName,
   
   accuracy <- round(sum(diag(confMat)) / sum(confMat),
                     digits = 3)
+
   accuracy_mean <- round(mean(diag(confMat) / rowSums(confMat)), 3)
   
   # compute zähler seperate in case that no observations get classified in
@@ -210,6 +214,13 @@ getModelMetrics <- function(fileName,
 plotAccByClass <- function(inPath) {
   assertString(inPath)
   
+  # # calculate counts in testLabel for later ordering
+  # emb <- readRDS("03_computedData/04_preparedData/BOW-Full-TRUE-FALSE.rds")
+  # labelTest <- emb$labelTest
+  # countDT <- data.table(table(labelTest))
+  # setnames(countDT, c("category", "count"))
+  
+  
   allModels <- list.files(path = inPath)
   assert_character(allModels, min.len = 1)
   # subset to only .rds files
@@ -219,9 +230,10 @@ plotAccByClass <- function(inPath) {
   res2 <- data.table()
   for(fileName in allModels) {
     model <- readRDS(paste0(inPath, fileName))
-    data <- model[["accByClass"]]
-    
-    counts <- rowSums(model$confusionMatrix)
+    confMatrix <- model[["confusionMatrix"]]
+    data <- diag(confMatrix)/rowSums(confMatrix)
+
+    counts <- rowSums(confMatrix)
   
     res[, Var := data]
     res2[, Count := counts]
@@ -233,14 +245,14 @@ plotAccByClass <- function(inPath) {
 
   res[, category := names(data)]
   res2[, category := names(data)]
-  
+
   
   resMelted <- melt(res, id.vars = c("category"))
   resMelted2 <- melt(res2, id.vars = c("category"),
-                      , value.name = "count")
+                       value.name = "count")
   plotData <- merge(resMelted, resMelted2, 
                     by = c("category", "variable"))
-  plotData[, Order := max(value), by = .(category)]
+  #plotData[, Order := max(value), by = .(category)]
   # renaming for plotting (hardcode)
   plotData[variable == "BOW_XG", variable := "BOW, XGBoost"]
   plotData[variable == "GloveArray300_CNNArray", 
@@ -250,7 +262,7 @@ plotAccByClass <- function(inPath) {
   plotData[variable == "GloveSums300_MLP", 
            variable := "SOW GloVe 300D, MLP"]
   
-  ggObj <- ggplot(plotData, aes(x = reorder(category, -Order),
+  ggObj <- ggplot(plotData, aes(x = reorder(category, -count),
                                     y = value, fill = variable, 
                                     label = category)) +
     geom_bar(stat = "identity", position = "dodge") + 

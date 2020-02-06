@@ -4,10 +4,25 @@
 
 \usepackage{beamerthemesplit}
 \renewcommand{\baselinestretch}{1.5}\normalsize % Zeilenabstand 1.5
+
+% make own frame on Beginn of each section
+\AtBeginSection[]{
+  \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+}
+
+
+
 \usepackage{caption}
 \makeatletter
 \newcommand\notsotiny{\@setfontsize\notsotiny{7}{7}}
-
+\newcommand\micro{\@setfontsize\notsotiny{4.5}{4.5}}
 \newcommand\middletiny{\@setfontsize\notsotiny{6}{6}}
 \makeatother
 \usepackage{numprint}
@@ -76,7 +91,7 @@
 \setbeamertemplate{footline}[frame number]
 %%%%%%%%%%%%%%%Foliennummerierung%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{\textit{Multiclass}-Klassifizierung \\
+\title{Masterthesis: \textit{Multiclass}-Klassifizierung \\
  von Nachrichten Schlagzeilen}        % Titel (Kommando muss aufgerufen werden)
 \author{Marc Schmieder}     % Autor(en) 
 \date{06.02.2020}
@@ -97,12 +112,43 @@
 \tableofcontents
 
 \section{Motivation und Zielstellung}
-\begin{frame}
+
+
+
+\begin{frame}{Motivation}
 
    \begin{itemize}
-   \item 
+   \item Natural Language Processing (NLP) ist aktuelles Thema mit vielen Anwendungsfällen, zB. überwachte Klassifikation von Kurztexten.
+   \item Größtenteils Artikel und Tutorials über binäre Klassifikation (zB. IMDB Sentiment Classification, Spam Vs NonSpam etc.)
+   \item In der Realität oft viel mehr Klassen, zB:
+   \item Themen-Kategorisierung von Kundenbeschwerden
+   \item Tagging von Forenbeiträgen (Stackoverflow)
+   \item Produktkategorien von Artikeln anhand Artikelbeschreibung
+   \item Kategorisierung von Nachrichtenkategorien
    \end{itemize}
 \end{frame}  
+
+\begin{frame}{Zielstellung}
+
+\begin{block}{Methodik}
+\begin{itemize}
+    \item \textbf{Verschiedene Repräsentation der Wörter}: (Word Embeddings): BOW, TFIDF, GloVe, SOW GloVe 
+    \item \textbf{Verschiedene Machine Learning Modelle}: Baumbasierte Verfahren (XGBoost, Random Forest) VS. neuronale Netze (MLP, CNN, LSTM)
+\end{itemize}{}
+\end{block}{}
+
+\begin{block}{Untersuchungsfragen}
+\begin{itemize}
+    \item Welche Embeddings funktionieren gut mit welchen Modellen?
+    \item Wie groß sind die Unterschiede bei den vorliegenden Daten?
+    \item Welchen Unterschied macht die Berücksichtigung der Reihenfolge?
+    \item Was lernen die Modelle bzw. ist der Output interpretierbar?
+\end{itemize}{}
+\end{block}{}
+
+
+\end{frame}
+
 
 
 \section{Datensatz und Exploration}
@@ -156,13 +202,11 @@ Daten\-punkt & Link & Kurzbeschreibung & Datum \\
 
 
 
- \subsection{Veränderung am Datensatz}
-
 \begin{frame}{Cleaning}
 \begin{itemize}
    \item Konvertierung der Großbuchstaben zu Kleinbuchstaben (\textit{Teacher}, \textit{teacher})
-   \item Ursprung aus verschiedenen Ländern: Entfernung von Sonderzeichen (\say{©} oder \say{™}), da Konvertierungsfehler
-   \item  \say{n't} $\xrightarrow{}$ \say{ not}, \say{'ll} $\xrightarrow{}$ \say{ will},  \say{here's} $\xrightarrow{}$ \say{here is} 
+   \item Ursprung aus verschiedenen Ländern: Entfernung von Sonderzeichen (\say{©} oder \say{™}), da Konvertierungsfehler bei gemischten Encodings
+   \item  \say{aren't} $\xrightarrow{}$ \say{are not}, \say{he'll} $\xrightarrow{}$ \say{he will},  \say{here's} $\xrightarrow{}$ \say{here is} 
    \item \say{trump's} $\xrightarrow{}$ \say{trump his}, dann \say{john's son} $\xrightarrow{}$ \say{john its son}
    \item Entfernung von leeren Texten (6 Beobachtungen). Insgesamt \numprint{200847} Beobachtungen verbleibend.
    \end{itemize}
@@ -173,7 +217,7 @@ Daten\-punkt & Link & Kurzbeschreibung & Datum \\
 \begin{frame}{Zusammenlegung der Kategorien I}
 
    \begin{itemize}
-   \item Namentliche und inhaltliche Ähnlichkeit der Kategorien (\textit{arts \& culture} und \textit{culture & arts})
+   \item Namentliche und inhaltliche Ähnlichkeit der Kategorien (\textit{arts \& culture} und \textit{culture \& arts})
    \item Schwierig mit menschlicher Intuition auseinander zu halten.
    \item Reduktion auf $32$ Kategorien (ab $0.50$, zuzüglich \textit{arts \& culture} \textit{arts})
    \end{itemize}
@@ -236,20 +280,6 @@ Kategorie 1 & Kategorie 2  & relative Schnittmenge & neue Kategorie\\
 
 
 
-
-
-\begin{frame}{\insertsection}
-
-   \begin{itemize}
-   \item 
-   \end{itemize}
- 
-   
-\end{frame}   
-
-
-
-
 \begin{frame}
 
 \begin{figure}[ht]
@@ -262,16 +292,7 @@ Kategorie 1 & Kategorie 2  & relative Schnittmenge & neue Kategorie\\
 \end{frame}
 
 
-\begin{frame}
 
-\begin{figure}[ht]
-    \centering
-\includegraphics[width = \textwidth,  keepaspectratio]{Images/barplotSymbols.pdf} 
-\caption{Relativer Anteil Datenpunkte für ausgewählte Sonderzeichen pro Kategorie. Der komplementäre Anteil ist der Anteil Datenpunkte, in dem keine der aufgeführten Sonderzeichen enthalten sind.}
-\label{abb:barplotSymbols}
-\end{figure}
-
-\end{frame}
 
 
 \begin{frame}
@@ -290,6 +311,10 @@ Kategorie 1 & Kategorie 2  & relative Schnittmenge & neue Kategorie\\
 
 \begin{frame}{Bag-Of-Words}
 
+\begin{block}{Vorauswahl}
+In einer Vorauswahl wurden viele Repräsentation der Wörter getestet, hier werden die Word-Embeddings der Endauswahl vorgestellt
+\end{block}{}
+
 \begin{table}[ht]
 \begin{center}
 
@@ -307,7 +332,7 @@ Satz 3 & $0$ & $1$ & $0$ & $0$ & $1$ & $0$ & $0$ & $1$ & $0$ &  $0$ & $0$ \\
 
 \end{tabular}
 \end{center}{}
-\caption{Beispiel für eine \textit{document-term-matrix} für die $3$ Beispielsätze \textit{the cat likes to sit}, \textit{the dog does not like his owner}, \textit{the owner likes the dog} jeweils für das \textit{BOW Embedding} und das \textit{TFIDF Embedding} }  
+\caption{Beispiel für eine \textit{document-term-matrix} für die $3$ Beispielsätze \textit{the cat likes to sit}, \textit{the dog does not like his owner}, \textit{the owner likes the dog} jeweils für das \textit{BOW Embedding}}  
 \label{tab:BOWExample}
 
 \end{table}
@@ -317,55 +342,65 @@ Satz 3 & $0$ & $1$ & $0$ & $0$ & $1$ & $0$ & $0$ & $1$ & $0$ &  $0$ & $0$ \\
 
 
 \begin{itemize}
-    \item Methode zur Repräsentation von Wörtern im $F$- dimensionalen Raum
-    \item Training auf eigenem Textkorpus
-    \item Vortrainierte Datensätze auf Wikipedia oder Common Crawl
+    \item Methode zur Repräsentation von Wörtern im $F$- dimensionalen Raum.
     \item Datenpunkt ist Sequenz aus Wort Vektoren und hat Matrix-Form mit Dimension $F \times maxWords$
+    \item Unüberwachtes Lernen der Vektoren
+    \item \textbf{Möglichkeit 1:} Training auf eigenem Textkorpus
+    \item \textbf{Möglichkeit 2:} Vortrainierte Datensätze auf Wikipedia (GloVe 50D) oder genereller Internet Crawl (Glove 300D)
+\begin{block}{Weiteres Embedding:}
+Bilde normierte Summen aus Wortvektoren und bilde so die Repräsentation des Satzes durch einen Vektor der Dimension $F$
+\end{block}{}
+\begin{block}{Ähnliches Embedding:}
+Überwachtes Lernen der Wortvektoren durch eine \textit{embedding}-Zwischenschicht mit $F$ Neuronen im Neuronalen Netz
+\end{block}{}
+
 \end{itemize}{}
+
+\end{frame}{}
+
+\begin{frame}{GloVe Beispiel}
+\begin{table}[ht]
+\micro
+\centering
+\begin{tabular}{|m{0.6cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}|}
+  \hline
+ & reese & wither\-spoon & had & the & ' & snl & ' & cast & apolo\-gize & to & their & moms & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\ 
+  \hline
+Dim 0 & -0.42 & -0.49 & 0.60 & 0.42 & -0.04 & -0.31 & -0.04 & 0.02 & -0.02 & 0.68 & 0.42 & 0.05 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  Dim 1 & -0.00 & 0.35 & -0.52 & 0.25 & 1.20 & -0.20 & 1.20 & 0.42 & -0.55 & -0.04 & 0.13 & 0.40 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  Dim 2 & -0.37 & -0.50 & 0.41 & -0.41 & 0.35 & -0.09 & 0.35 & 0.41 & -0.25 & 0.30 & -0.06 & 0.16 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  Dim 3 & 0.10 & 0.07 & -0.37 & 0.12 & -0.56 & 0.74 & -0.56 & -0.13 & -0.26 & -0.18 & -0.57 & -0.95 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  Dim 4 & 0.54 & 0.35 & 0.37 & 0.35 & -0.52 & 0.26 & -0.52 & 0.58 & -0.04 & 0.43 & 0.50 & 0.37 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  Dim 5 & 0.08 & 0.42 & 0.61 & -0.04 & -0.67 & -0.21 & -0.67 & 1.18 & 0.18 & 0.03 & 0.21 & 0.51 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+  Dim 45 & -0.11 & -0.68 & -0.25 & -0.44 & 0.44 & 0.02 & 0.44 & -0.62 & 0.56 & -0.20 & 0.24 & 0.56 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  Dim 46 & 0.46 & 0.25 & -0.48 & 0.19 & -0.06 & -1.25 & -0.06 & 0.16 & 0.11 & 0.08 & -0.19 & 0.16 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  Dim 47 & 0.27 & 0.42 & -1.04 & 0.00 & -0.43 & 0.68 & -0.43 & -0.57 & -1.25 & -0.09 & -0.22 & 0.12 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  Dim 48 & -0.51 & -1.05 & -0.15 & -0.18 & -0.08 & 0.71 & -0.08 & -0.64 & 0.93 & -0.07 & -0.12 & 0.08 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  Dim 49 & -1.02 & -0.74 & -0.22 & -0.12 & 0.49 & -0.42 & 0.49 & -0.25 & 0.00 & -0.06 & -0.34 & 0.02 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+  Dim 50 & 0.69 & 0.61 & -0.60 & -0.79 & 0.09 & 1.69 & 0.09 & 0.10 & 0.51 & -0.26 & -0.87 & 0.66 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\ 
+   \hline
+\end{tabular}
+\caption{GloVe Embedding eines Beispieldatenpunkts: Der Satz \textit{reese witherspoon had the 'snl' cast apologize to their moms}}
+
+\end{table}
+
     
 \end{frame}{}
 
 
-\begin{frame}{GloVe: Global Word Vektors}
-    \begin{table}[ht]
-    \notsotiny
-    \begin{center}
- \begin{tabular}{|l||ccccccccccc|}
-  \hline
-  & \multicolumn{11}{|c|}{Kontext} \\
-\hline 
-Wörter & the & dog & cat & like & likes & to & sit & owner & his & does & not \\ 
-  \hline
-the & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
-  dog & 2  & 0  & 0  & 0  & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
-  cat & 1 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 \\ 
-  like & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 1 \\ 
-  likes & 3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
-  to & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
-  sit & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 \\ 
-  owner & 2 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
-  his & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 1 \\ 
-  does & 1 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\ 
-  not & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
-   \hline
-\end{tabular}  
- 
-\end{center}{}
-\caption{Beispiel für eine \textit{term-co-occurance} Matrix für die $3$ Beispielsätze \textit{the cat likes to sit} (Satz $1$), \textit{the dog does not like his owner} (Satz $2$), \textit{the owner likes the dog} (Satz $3$) für einen symmetrischen Fensterbereich von 2}  
-\label{tab:GloveExample}
-
-\end{table}
-\end{frame}{}
 
 
-
-
-\section{Verfahren}
+\section{Machine Learning Modelle}
 
 \begin{frame}{Verfahren}
+\begin{block}{Vorauswahl}
+In einer Vorauswahl wurden viele Modelle getestet, hier werden die Modelle der Endauswahl kurz vorgestellt:
+\end{block}{}
+
 \begin{itemize}
 
-    \item XGBoost: Baum-Boosting Verfahren
+    \item XGBoost: Baumbasiertes-Boosting Verfahren
     \item MLP: Multi-Layer Perceptron: Reguläres Feed-forward neuronales Netz
     \item CNN: Convolutional Neural Network
     \item Bi-LSTM: Bidirectional Long-Short-Term-Memory Neural Network
@@ -375,19 +410,56 @@ the & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
 
 
 \begin{frame}{XGBoost}
-    
+    \begin{itemize}
+    \item Populär durch Kaggle-Wettbewerbs-Siege
+        \item Wald aus Klassifikationsbäumen
+        \item Boosting Verfahren: Schwierige zu klassifizierende Beobachtungen werden höher gewichtet in den sukzessiven Trainingsschritten
+        \item Extrem schnelle Rechenzeit (Sparse Matrizen, BOW)
+        \item Viele Libraries zum Explaining (zB. XGBoostExplainer)
+    \end{itemize}{}
 \end{frame}{}
+
+
+
 
 
 \begin{frame}{Multi Layer Perceptron}
-    
+\begin{columns}[T] % align columns
+\begin{column}{.48\textwidth}
+
+\begin{itemize}
+    \item Reguläres \textit{feed-forward} fully connected neuronales Netz
+    \item $32$ Neuronen in der Ausgangsschicht + Softmax Aktivierungsfunktion (gilt auch für alle folgende Netze
+    \item Implementation mit \texttt{keras} und Nutzung von \textit{early stopping} (gilt für alle Netze)
+\end{itemize}{}
+
+\end{column}%
+\hfill%
+\begin{column}{.48\textwidth}
+
+\centering
+\includegraphics[width = 6cm,  keepaspectratio]{Images/MLPScreen_DeepLearningEssentials2.PNG}
+\caption{\textit{fully-connected feed-forward} Netz mit 2 Zwischenschichten}
+
+\end{column}%
+\end{columns}
+
 \end{frame}{}
 
+
+
+
+
 \begin{frame}{Convolutional Neural Net}
-    
+\begin{itemize}
+    \item Ursprünglich zur Bilderkennung entwickelt
+    \item Auch für \textit{NLP} verwendbar
+    \item Gitterförmige Filter lernen Gewichte, die bei Wort-Tupeln oder Wort-Tripeln eine hohe Convolution erzeugen
+\end{itemize}{}  
+
 \begin{figure}[!ht]
 \begin{center}
-\includegraphics[width = \textwidth,  keepaspectratio]{Images/CNN_NLP.PNG}
+\includegraphics[width = 0.8\textwidth,  keepaspectratio]{Images/CNN_NLP.PNG}
 \caption{Architektur eines \textit{CNN} für einen NLP Anwendungsfall}
 \label{abb:CNN_NLP}
 \end{center}
@@ -395,9 +467,16 @@ the & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
 \end{frame}{}
 
 \begin{frame}{Long-Short-Term-Memory Neural Net}
+\begin{itemize}
+  \item Sehr populär für \textit{NLP} Anwendung
+  \item Weiterentwicklung des Recurrent Neural Net
+  \item Dateninput werden sequenziell ins Netz eingegeben
+  \item Internes \say{Langes} Kurzzeitgedächnis
+\end{itemize}{}  
+
     \begin{figure}[!ht]
 \begin{center}
-\includegraphics[width = \textwidth,  keepaspectratio]{Images/RNN_Example_DeepNLPpage128.PNG}
+\includegraphics[width = 0.8\textwidth,  keepaspectratio]{Images/RNN_Example_DeepNLPpage128.PNG}
 \caption{\textit{RNN} Model bei Input des Satzes: Sachin is a great }
 \label{abb:RNNExample}
 \end{center}
@@ -454,46 +533,24 @@ the & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
 \begin{figure}[ht]
     \centering
 \includegraphics[width = \textwidth,  keepaspectratio]{Images/FinalSelectionAccByClass.pdf} 
-\caption{\textit{accuracy} je Kategorie für die $4$ Modelle der Endauswahl}
+\caption{\textit{accuracy} je Kategorie für die $4$ Modelle der Endauswahl. Geordnet absteigend von links nach rechts nach Größe der Kategorie im Testdatensatz}
 \label{abb:AccByClass}
 \end{figure}
 \end{frame}
 
-\begin{frame}{Fehlklassifikation: Nachbarklassen}
-\begin{table}[ht]
-\middletiny
-\centering
-\begin{tabular}{|l||rrrr|}
-  \hline
-
-  & \multicolumn{4}{c|}{\textbf{Nachbarkategorie, (Beobachtungen)}} \\
-  \hline
-Kategorie & \textit{BOW}, \textit{XGBoost} & \textit{GloVe}, \textit{CNN} & \textit{GloVe}, \textit{Bi-LSTM} & \textit{SOW GloVe}, \textit{MLP} \\ 
-  \hline
-\textit{arts \& culture} & \textit{wellness \dots}, ($62$) & \textit{entert.}, ($57$) & \textit{entert.}, ($43$) & \textit{entert.}, ($64$) \\ 
-  \textit{black voices} & \textit{entert.}, ($67$) & \textit{entert.}, ($88$) & \textit{entert.}, ($62$) & \textit{entert.}, ($88$) \\ 
-  \textit{business} & \textit{wellness \dots}, ($141$) & \textit{wellness \dots}, ($89$) & \textit{wellness \dots}, ($85$) & \textit{politics}, ($109$) \\
-   \textit{college} & \textit{wellness \dots}, ($19$) & \textit{wellness \dots}, ($13$) & \textit{politics}, ($11$) & \textit{politics}, ($18$) \\ 
-  \textit{comedy} & \textit{wellness \dots}, ($78$) & \textit{entert.}, ($83$) & \textit{entert.}, ($79$) & \textit{politics}, ($101$) \\ 
-    \textit{crime} & \textit{politics}, ($41$) & \textit{politics}, ($50$) & \textit{politics}, ($37$) & \textit{politics}, ($44$) \\ 
-  \textit{divorce} & \textit{wellness \dots}, ($41$) & \textit{weddings}, ($34$) & \textit{wellness \dots}, ($31$) & \textit{parents}, ($38$) \\ 
-  \textit{education} & \textit{wellness \dots}, ($24$) & \textit{politics}, ($18$) & \textit{politics}, ($23$) & \textit{politics}, ($27$) \\ 
-   \textit{entert.} & \textit{wellness \dots}, ($135$) & \textit{politics}, ($44$) & \textit{politics}, ($41$) & \textit{politics}, ($90$) \\ 
-
-  
-  \vdots & \vdots & \vdots & \vdots & \vdots \\
-  
-  \textit{wellness} \& \dots & \textit{parents}, ($73$) & \textit{parents}, ($120$) & \textit{parents}, ($81$) & \textit{parents}, ($112$) \\ 
-  \textit{women} & \textit{wellness \dots}, ($86$) & \textit{wellness \dots}, ($73$) & \textit{wellness \dots}, ($65$) & \textit{wellness \dots}, ($76$) \\ 
-  \textit{world news} & \textit{politics}, ($92$) & \textit{politics}, ($62$) & \textit{politics}, ($81$) & \textit{politics}, ($114$) \\ 
-   \hline
-\end{tabular}
-\label{tab:neighborClasses}
-\caption{Kategorien, in die die meisten Beobachtungen klassifiziert wurden im Falle einer Fehlklassifikation für die Modelle der Endauswahl. In Klammern die zugehörige Anzahl der Beobachtungen.}
-\end{table}
+\begin{frame}
+\begin{itemize}
+    \item \textit{XGBoost} schneidet in $14$ Kategorien am schlechtesten ab und in keiner am besten.
+     \item \textit{CNN} dominiert $8$ Kategorien, insbesondere die beiden kleinsten \textit{college} und \textit{education}.
+    \item \textit{Bi-LSTM} dominiert $19$ von $32$ Kategorien und ist in keiner am schlechtesten.
+    \item \textit{MLP} performt am besten in \textit{sports}, belegt aber in $16$ der $32$ Sparten den letzten Platz. Schneidet besonders bei den $5$ kleinsten Kategorien schlecht ab. In  \textit{fifty} $0$ Prozent $accuracy$.
+    \item Die $2$ größten Kategorien \textit{politics} und \textit{wellness \& healthy living} sowie \textit{divorce} und \textit{tech} werden von  allen Modellen etwa gleich gut vorhergesagt.
+    \item kleine Kategorien schneiden tendenziell schlechter ab, die $7$ größten Kategorien haben in den besten Modellen eine $accuracy$ von $0.76- 0.86$ Prozent.
+\end{itemize}{}
+\end{frame}{}
 
 
-\end{frame}
+
 
 
 
@@ -508,10 +565,39 @@ Kategorie & \textit{BOW}, \textit{XGBoost} & \textit{GloVe}, \textit{CNN} & \tex
 \end{frame}
 
 
+\begin{frame}
+\begin{itemize}
+    \item \textit{Bi-LSTM}: Sicherheit zu groß
+    \item \textit{CNN}, \textit{XGBoost} häufig größerer Anteil korrekt klassifizierter Beobachtungen bei geringerer Sicherheit
+    \item \textit{MLP} Tendenziell genau so sicher, wie auch korrekt
+\end{itemize}{}
+\end{frame}{}
 
 
-\section{Fazit und Ausblick}
+\section{Fazit und weitere Schritte}
 
+\begin{frame}
+\begin{block}{Zusammenfassung}
+\begin{itemize}
+    \item Bi-LSTM dominiert mit $68.9$ Prozent $accuracy$
+    \item traditionelle Embeddings performen solide
+\end{itemize}{}
+\end{block}
 
+\begin{block}{Weitere Analysen}
+\begin{itemize}
+\item Visualisierung der Filtern des CNN
+\item Erklärung von einzelnen Beobachtungen von BOW, XGBoost mit Waterfall-Grafik (XGBoostExplainer)
+\item BOW, XGBoost Variablenwichtigkeiten in Wordclouds
+\item Ideen für Bi-LSTM und Sums-of-Words Embedding?
+\end{itemize}{}
+\end{block}{}
+
+\end{frame}{}
+
+\begin{frame}
+\centering
+    \Large{Vielen Dank für die Aufmerksamkeit!}
+\end{frame}{}
 
 \end{document}

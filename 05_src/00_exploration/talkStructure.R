@@ -23,9 +23,12 @@
 
 
 # to dos:
+# motivationsfolie erstellen und stichpunkte in MA
 # XGBoost verstehen und folie konstruieren
-# Word embedding teil fertig machen
-# endauswahl Tabelle beschreiben, dann in vortrag (farblich markieren)
+
+# xxWord embedding teil fertig machen
+# xxneighbor classes fertig, in vortrag (karteikarte noch) (rausgenommen)
+# xxaccuracy by class beschreiben, dann in MA
+# xxendauswahl Tabelle beschreiben, dann in vortrag (farblich markieren)
 # xxalgorithmen grafiken einfügen
-# probvsAcc beschreiben, dann in vortrag
-# neighbor classes fertig, in vortrag (karteikarte noch)
+# xxprobvsAcc beschreiben, dann in vortrag

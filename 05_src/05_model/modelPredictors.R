@@ -233,7 +233,7 @@ predictLogReg <- function(dataPath, fileName,
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
   # accuracy by class: colSums are the amount of true labels
-  accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
+  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
   
   names(accByClass) <-  levels(testLabelRaw)
   
@@ -326,7 +326,7 @@ predictNB <- function(dataPath, fileName,
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
   # accuracy by class: colSums are the amount of true labels
-  accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
+  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
   
   
   names(accByClass) <-  levels(testLabelRaw)
@@ -474,7 +474,7 @@ predictXG <- function(dataPath, fileName,
   print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
   
   # accuracy by class: colSums are the amount of true labels
-  accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
+  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
   
   
   names(accByClass) <-  levels(testLabelRaw)
@@ -583,7 +583,7 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
     print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
     
     # accuracy by class: colSums are the amount of true labels
-    accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
+    accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
     
     names(accByClass) <-  levels(testLabelRaw)
     
@@ -687,7 +687,7 @@ predictRF <- function(dataPath, fileName,  labelName = NULL,
     print(paste("sum of confusionMatrix is ", sum(confusionMatrix)))
     
     # accuracy by class: colSums are the amount of true labels
-    accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
+    accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
     
     names(accByClass) <-  levels(testLabelRaw)
     
@@ -745,7 +745,7 @@ predictCNNArray <- function(dataPath, fileName,
   testLabelNumeric <- as.numeric(testLabelRaw) - 1
   names(testLabelNumeric) <- testLabelRaw
   testLabel <- to_categorical(testLabelNumeric)
-  
+ 
 
   #building model with layers
   model <- keras_model_sequential()
@@ -856,7 +856,7 @@ predictCNNArray <- function(dataPath, fileName,
   correctBinary <- testLabelRaw == as.vector(predictMax)
   ProbAccDT <- data.table(Prob = predictionsMaxProb,
                           Correct = correctBinary)
-  
+  # Marc: stimmt, ist gecheckt
   accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
   
   names(accByClass) <-  levels(trainLabelRaw)
@@ -1159,7 +1159,7 @@ predictLSTMSeq <- function(dataPath, fileName,
   
   
   # accuracy by class: colSums are the amount of true labels
-  accByClass <- diag(confusionMatrix) / colSums(confusionMatrix)
+  accByClass <- diag(as.matrix(confusionMatrix)) / colSums(testLabel)
   
   names(accByClass) <-  levels(testLabelRaw)
   

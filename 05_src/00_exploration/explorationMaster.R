@@ -263,7 +263,26 @@ set.seed(123)
 sampleDT <- dataRaw[sample.int(.N, 5)]
 
 
-print(xtable(sampleDT),  include.rownames = FALSE )
+print(xtable(sampleDT),  include.rownames = FALSE)
+
+## Glove Bsp
+dataRaw <- readRDS("03_computedData/04_preparedData/GloveArray-10pc-50-FALSE.rds")
+gloveBsp <- t(dataRaw$resultTrain[1, , ])
+origObs <- read.fst("03_computedData/03_integratedData/trainSubset10pc.fst",
+                    as.data.table = TRUE)
+text <- origObs[1, .(headline)][[1]]
+
+tokens <- quanteda::tokens(text, what = "word", remove_numbers = FALSE, 
+                           remove_punct = FALSE, remove_symbols = FALSE, 
+                           remove_hyphens = FALSE)
+
+tokens <- as.character(tokens)
+
+colnames(gloveBsp) <- c(tokens, rep("--", ncol(gloveBsp) - length(tokens)))
+
+final <- rbind(head(gloveBsp), tail(gloveBsp))
+print(xtable(final, digits = 2, include.rownames = TRUE))
+
 
 
 

@@ -137,13 +137,14 @@ itoken <- text2vec::itoken(tokens, progressbar = FALSE)
 vocab <- text2vec::create_vocabulary(itoken)
 vocab <- as.data.table(text2vec::prune_vocabulary(vocab, term_count_min = 1L))
 
-# exploration of all tokens
-tokensLength <- sapply(tokens, length)
+# exploration of all tokens ####
+tokensLength <- sort(sapply(tokens, length), decreasing = TRUE)
 print(round(mean(tokensLength),3)) # wieviele wörter durchschnittlich/schlagzeile
 print(min(tokensLength)) # kleinste schlagzeile
 print(data[which.min(tokensLength), .(category, headline)]) # wie heißt kleinste schlagzeile
 
 print(max(tokensLength)) # länge maximale schlagzeile
+print(tokensLength[1:5])
 print(head(order(tokensLength, decreasing = TRUE)))
 tokens[which.max(tokensLength)] # wie heißt längste schlagzeile
 
@@ -283,6 +284,7 @@ colnames(gloveBsp) <- c(tokens, rep("--", ncol(gloveBsp) - length(tokens)))
 final <- rbind(head(gloveBsp), tail(gloveBsp))
 print(xtable(final, digits = 2, include.rownames = TRUE))
 
+## bsp for Glove SOW 50d
 
 
 

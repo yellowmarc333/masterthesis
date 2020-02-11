@@ -23,9 +23,11 @@
 
 
 # to dos:
-# motivationsfolie erstellen und stichpunkte in MA
+# Folien nochmal checken und Vortrag durchspielen
+# xxletzte Slide verbessern
 # XGBoost verstehen und folie konstruieren
 
+# xxmotivationsfolie erstellen und stichpunkte in MA
 # xxWord embedding teil fertig machen
 # xxneighbor classes fertig, in vortrag (karteikarte noch) (rausgenommen)
 # xxaccuracy by class beschreiben, dann in MA

@@ -8,6 +8,8 @@
 
 \makeatletter
 \newcommand\notsotiny{\@setfontsize\notsotiny{8}{8}}
+\newcommand\micro{\@setfontsize\notsotiny{4.5}{4.5}}
+\newcommand\middletiny{\@setfontsize\notsotiny{6}{6}}
 \makeatother
 
 \usepackage{numprint}
@@ -54,8 +56,9 @@ Dieses Unterkapitel erläutert das verwendete \textit{Framework} und beschreibt 
 
 
 Dieser Abschnitt erklärt, wie die \numprint{200847} Beobachtungen des gesamten Datensatzes in Trainings-, Test- und Validierungsdaten unterteilen.\\
-Die Testdaten ist der Teil der Daten, auf den die finalen Modelle eine Vorhersage der Nachrichtenkategorie treffen und anschließend die Gütemaße aus Kapitel \ref{kap:guetemass} berechnet und evaluiert werden. Wichtig dabei ist, dass die Testdaten den Modellen nie als Input gedient haben. Der Grund dafür ist, dass die Testdaten als Kriterium dafür dienen, wie gut die gelernten Modelle auf ungesehenen Daten generalisieren können. Zur Ermittlung einer geeigneten Größe der Testdaten, wird das Kriterium genommen, dass im Mittel $100$ Beobachtungen in der am niedrigsten repräsentierten Nachrichtensparte enthalten sind. Dies resultiert in einer Stichprobe von $\numprint{20005}$ Beobachtungen, was etwa 10 Prozent der gesamten Daten entspricht. Mit dieser Größe ist eine aussagekräftige Evaluation möglich und gleichzeitig stehen den Algorithmen eine größtmögliche Anzahl von Beobachtungen zum Training zur Verfügung. Von den verbleibenden $90$ der Daten wurde wiederum eine Stichprobe von $10$ Prozent gezogen (insgesamt $9$ Prozent der gesamten Daten). Auf dieser Stichprobe der Größe $\numprint{18084}$ erfolgt die im nächsten Abschnitt beschriebene Vorauswahl der Algorithmen und Repräsentationen. Die Daten für die Vorauswahl (folglich Vorauswahldaten genannt) werden wiederum in $80$ Prozent Trainingsdaten ($\numprint{14467}$ Datenpunkte) und $20$ Prozent  Validierungsdaten ($\numprint{3617}$ Datenpunkte) geteilt. Auf den Vorauswahldaten werden die verschiedenen Repräsentationen der Wörter, sowohl für Training als auch Validierung erstellt. Dabei werden je nach Art des \textit{Embeddings} einige wenige Datenpunkte entfernt. Der Grund hierfür ist beispielsweise, dass  unter Nutzung von \textit{BOW} nach Entfernung der \textit{Stopwords} einige Beobachtungen keine Wörter mehr enthalten. Im Falle von \textit{Glove} werden im Zuge des \textit{paddings} alle Datenpunkte entfernt, die mehr als $W_{max}$ Wörter enthalten.
-Letztlich erhalten alle Algorithmen die selben Teilmengen der Vorauswahldaten zum Trainieren und Validieren. Die Struktur der verwendeten neuronalen Netze sowie die Hyperparameter der baumbasierten Verfahren wurde auf den Validierungsdaten für jedes Modell in mehreren Trainings-Durchläufen angepasst.
+Die Testdaten ist der Teil der Daten, auf den die finalen Modelle eine Vorhersage der Nachrichtenkategorie treffen und anschließend die Gütemaße aus Kapitel \ref{kap:guetemass} berechnet und evaluiert werden. Wichtig dabei ist, dass die Testdaten den Modellen nie als Input gedient haben. Der Grund dafür ist, dass die Testdaten als Kriterium dafür dienen, wie gut die gelernten Modelle auf ungesehenen Daten generalisieren können. Zur Ermittlung einer geeigneten Größe der Testdaten, wird das Kriterium genommen, dass im Mittel $100$ Beobachtungen in der am niedrigsten repräsentierten Nachrichtensparte enthalten sind. Dies resultiert in einer Stichprobe von $\numprint{20005}$ Beobachtungen, was etwa 10 Prozent der gesamten Daten entspricht. 
+Mit dieser Größe ist eine aussagekräftige Evaluation möglich und gleichzeitig stehen den Algorithmen eine größtmögliche Anzahl von Beobachtungen zum Training zur Verfügung. Von den verbleibenden $90$ ($180842$ Datenpunkte) der Daten wurde wiederum eine Stichprobe von $10$ Prozent gezogen (insgesamt $9$ Prozent der gesamten Daten). Auf dieser Stichprobe der Größe $\numprint{18084}$ erfolgt die im nächsten Abschnitt beschriebene Vorauswahl der Algorithmen und Repräsentationen. Die Daten für die Vorauswahl (folglich Vorauswahldaten genannt) werden wiederum in $80$ Prozent Trainingsdaten ($\numprint{14467}$ Datenpunkte) und $20$ Prozent  Validierungsdaten ($\numprint{3617}$ Datenpunkte) geteilt. Auf den Vorauswahldaten werden die verschiedenen Repräsentationen der Wörter, sowohl für Training als auch Validierung erstellt. Dabei werden je nach Art des \textit{Embeddings} einige wenige Datenpunkte entfernt. Der Grund hierfür ist beispielsweise, dass  unter Nutzung von \textit{BOW} nach Entfernung der \textit{Stopwords} einige Beobachtungen keine Wörter mehr enthalten. Im Falle von \textit{Glove} werden im Zuge des \textit{paddings} alle Datenpunkte entfernt, die mehr als $W_{max}$ Wörter enthalten.
+Letztlich erhalten alle Algorithmen die selben Teilmengen der Vorauswahldaten zum Trainieren und Validieren. Die Struktur der verwendeten neuronalen Netze sowie die Hyperparameter der Verfahren wurde auf den Validierungsdaten für jedes Modell in mehreren Trainings-Durchläufen angepasst.
 
 \subsubsection{Vorauswahl der Modelle}\label{kap:preselection}
 
@@ -114,26 +117,59 @@ Die vier Kombinationen der Endauswahl umfassen nun $4$ Modelle und $3$ Arten der
 
 \subsection{Evaluation und Vergleich der Modelle} \label{kap:evalFinal}
 
+In diesem Abschnitt werden nun die finalen Modelle auf den etwa $90$ Prozent der Gesamtdaten ($180842$ Datenpunkte) trainiert und auf den etwa $10$ Prozent Testdaten ($20005$ Datenpunkte) anhand der resultierenden Modellwahrscheinlichkeiten und den \textit{Confusion Matrizes} evaluiert. Die Ergebnisse sind in Tabelle \ref{tab:finalSelection} zusammengetragen. 
+
+
 \begin{table}[ht]
 \centering
 \begin{tabular}{|l||ccccc|}
   \hline
-\textit{Embedding}, Modell & $accuracy$ & $\bar{accuracy}$ & $fscore_M^{(1)}$ & $CE$ & probIfCorrect \\ 
+\textit{Embedding}, Modell, (Nummer) & $accuracy$ & $\overline{accuracy}$ & $fscore_M^{(1)}$ & $CE$ & $\bar{p}_{IfCorrect}$ \\ 
   \hline
-\textit{BOW, XGBoost} & 0.624 & 0.487 & 0.541 & 1.447 & 0.653 \\ 
-  \textit{GloVe 300D, CNN} & 0.668 & 0.521 & 0.562 & 1.247 & 0.646 \\ 
-  \textit{GloVe 300D, Bi-LSTM} & 0.689 & 0.552 & 0.587 & 1.124 & 0.825 \\ 
-  \textit{SOW GloVe 300D, MLP} & 0.625 & 0.455 & 0.499 & 1.358 & 0.705 \\ 
+\textit{BOW, XGBoost}, (1) & \textcolor{red}{0.624} & 0.487 & 0.541 & \textcolor{red}{1.447} & 0.653 \\ 
+  \textit{GloVe 300D, CNN}, (2) & 0.668 & 0.521 & 0.562 & 1.247 & \textcolor{red}{0.646} \\ 
+  \textit{GloVe 300D, Bi-LSTM}, (3) & \textcolor{ForestGreen}{0.689} & \textcolor{ForestGreen}{0.552} & \textcolor{ForestGreen}{0.587} & \textcolor{ForestGreen}{1.124} & \textcolor{ForestGreen}{0.825} \\ 
+  \textit{SOW GloVe 300D, MLP}, (4) & 0.625 & \textcolor{red}{0.455} & \textcolor{red}{0.499} & 1.358 & 0.705 \\ 
    \hline
 \end{tabular}
 \label{tab:finalSelection}
+\caption{Evaluation der Modelle der finalen Auswahl bezüglich der Gütemaße $accuracy$, $\overline{accuracy}$, $fscore_M^{(1)}$, $CE$ und  $\bar{p}_{IfCorrect}$. In dunkelgrün ist das beste Ergebnis pro Gütemaß markiert, in rot das schlechteste}
 \end{table}
+
+Es ist zu sehen, dass das \textit{Bi-LSTM} bezüglich allen betrachteten Gütemaßen am besten abschneidet. Mit einer \textit{accuracy} von $0.689$ sagt es für die Beobachtungen des Testdatensatzes in $68.9$ Prozent der Fälle die richtige der $32$ Klassen vorher. Werden alle Klassen als gleich wichtig angesehen, so erkennt das \textit{Bi-LSTM} im Mittel $55.2$ Beobachtungen pro Sparte. Bezüglich der $CE$, die auch als Verlustfunktion im Trainingsprozess minimiert wird, wird ein Wert von $1.124$ erreicht. Wenn 
+
+
+Das zweitbeste Modell 
+
+
+
+
+
+\begin{figure}[ht]
+    \centering
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/FinalSelectionAccByClass.pdf} 
+\caption{\textit{accuracy} je Kategorie für die $4$ Modelle der Endauswahl. Geordnet absteigend von links nach rechts nach Größe der Kategorie im Testdatensatz}
+\label{abb:AccByClass}
+\end{figure}
+
+\paragraph{accbyclass}
+\begin{itemize}
+    \item \textit{XGBoost} schneidet in $14$ Kategorien am schlechtesten ab und in keiner am besten.
+     \item \textit{CNN} dominiert $8$ Kategorien, insbesondere die beiden kleinsten \textit{college} und \textit{education}.
+    \item \textit{Bi-LSTM} dominiert $19$ von $32$ Kategorien und ist in keiner am schlechtesten.
+    \item \textit{MLP} performt am besten in \textit{sports}, belegt aber in $16$ der $32$ Sparten den letzten Platz. Schneidet besonders bei den $5$ kleinsten Kategorien schlecht ab. In  \textit{fifty} $0$ Prozent $accuracy$.
+    \item Die $2$ größten Kategorien \textit{politics} und \textit{wellness \& healthy living} sowie \textit{divorce} und \textit{tech} werden von  allen Modellen etwa gleich gut vorhergesagt.
+    \item kleine Kategorien schneiden tendenziell schlechter ab, die $7$ größten Kategorien haben in den besten Modellen eine $accuracy$ von $0.76- 0.86$ Prozent.
+\end{itemize}{}
+
 
 
 \begin{table}[ht]
 \notsotiny
 \centering
 \begin{tabular}{|l||rrrr|}
+  \hline
+  & \multicolumn{4}{c|}{\textbf{Nachbarkategorie, (Beobachtungen)}} \\
   \hline
 Wahre Kategorie & \textit{BOW}, \textit{XGBoost} & \textit{GloVe 300D}, \textit{CNN} & \textit{GloVe 300D}, \textit{Bi-LSTM} & \textit{SOW GloVe 300D}, \textit{MLP} \\ 
   \hline
@@ -171,10 +207,30 @@ Wahre Kategorie & \textit{BOW}, \textit{XGBoost} & \textit{GloVe 300D}, \textit{
   \textit{world news} & \textit{politics}, ($92$) & \textit{politics}, ($62$) & \textit{politics}, ($81$) & \textit{politics}, ($114$) \\ 
    \hline
 \end{tabular}
+\caption{Kategorien, in die die meisten Beobachtungen klassifiziert wurden im Falle einer Fehlklassifikation für die Modelle der Endauswahl. In Klammern die zugehörige Anzahl der Beobachtungen.}
 \label{tab:neighborClasses}
 \end{table}
 
 
+
+
+
+
+
+\begin{figure}[ht]
+    \centering
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/FinalSelectionCompareProbVsAcc.pdf} 
+\caption{Anteil korrekt klassifizierter Beobachtungen für Intervalle der Modellwahrscheinlichkeiten der $4$ Modelle der Endauswahl}
+\label{abb:CompareProbVsAcc}
+\end{figure}
+
+
+\paragraph{probVsAcc}
+\begin{itemize}
+    \item \textit{Bi-LSTM}: Sicherheit zu groß
+    \item \textit{CNN}, \textit{XGBoost} häufig größerer Anteil korrekt Klassifizierter Beobachtungen bei geringerer Sicherheit
+    \item \textit{MLP} Tendenziell genau so sicher, wie auch korrekt
+\end{itemize}{}
 
 \subsubsection{Performanzmaße}
 

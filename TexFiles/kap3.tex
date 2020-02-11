@@ -8,6 +8,8 @@
 
 \makeatletter
 \newcommand\notsotiny{\@setfontsize\notsotiny{8}{8}}
+\newcommand\micro{\@setfontsize\notsotiny{4}{4}}
+\newcommand\middletiny{\@setfontsize\notsotiny{6}{6}}
 \makeatother
 
 \usepackage{numprint}
@@ -80,6 +82,9 @@ In der \textit{multiclass}-Klassifikation kann ein Gütemaß für das komplette 
 \[ precision_M = \frac{\sum_{i = 1}^C \frac{tp_i}{tp_i + fp_i} }{C}, \hspace{1cm} recall_M = \frac{\sum_{i = 1}^C \frac{tp_i}{tp_i + fn_i} }{C}\]
 die Gütemaße für das gesamte Modell. Ein Maß, dass \textit{precision} und \textit{recall} kombiniert ist der \textit{fscore}. Mit der unterschiedlichen Durchschnittsbildung ergeben sich
 \[ fscore_{\mu}^{(\beta)} = \frac{(\beta^2+1) \cdot precision_{\mu} \cdot recall_{\mu}}{\beta^2 precision_{\mu}+ recall_{\mu}}, \hspace{1cm} fscore_{M}^{(\beta)} = \frac{(\beta^2+1) \cdot precision_{M} \cdot recall_{M}}{\beta^2 precision_{M}+ recall_{M}} . \]
+
+todo: $\overline{accuracy} = \frac{1}{C} \sum_{i = 1}^C accuracy_{C_i}$\\
+$\bar{p}_{IfCorrect} = \frac{1}{N}\sum_{i=1}^N  I_{\{\hat{y}(x_i) = y_i\}} p(x_i = y_i)$\\
 
 
 Hierbei ist anzumerken, dass $fscore_{\mu}^{(\beta)}$ Klassen mit vielen Beobachtungen in der Güte begünstigt während für $fscore_M^{(\beta)}$ alle Kategorien gleich wichtig sind  (vgl. \cite{sokolova}, S.3ff). Der Parameter $\beta$ gibt in den Formeln an, was für ein Gewicht \textit{recall} im Verhältnis zu \textit{precision} einnimmt.
@@ -207,24 +212,63 @@ In den Einträgen der \textit{tcm} Matrix stehen nun die Häufigkeit des Vorkomm
 \underset{N \times N}{\bm{R}} = \underset{N \times F}{\bm{P}} \cdot \underset{F \times N}{\bm{Q}} \approx  \underset{N \times N}{\Tilde{\bm{R}}} 
 \end{equation*}
 
-Die Matrix $\bm{P}$ mit Dimension $N \times F$ ergibt multipliziert mit $\bm{Q}$ mit Dimensionen $F \times N$ wieder eine $N \times N$ Matrix. $F$ ist die Länge der resultierenden Wort-Vektoren und muss vom Anwender festgelegt werden. Diese Größe bestimmt den Raum $\mathbb{R^F}$, in dem die Wort-Vektoren die Wörter repräsentieren sollen. Nun werden zu Beginn sowohl $\bm{P}$ als auch $\bm{Q}$ mit zufälligen Werten initiiert und die Matrix $\bm{\Tilde{R}}$ berechnet. Mithilfe des stochastischen Gradienten-Abstiegs (mehr dazu in Kapitel \ref{kap:neuralNets}) wird nun der Inhalt von $\bm{P}$ und $\bm{Q}$ verändert, mit dem Ziel die Summe aller Einträge der Differenz von $\bm{\Tilde{R}}$ und $\bm{R}$ zu minimieren. Dies ist ein numerischer iterativer Prozess, der wiederholt wird, bis der Fehler eine vorgegebene untere Grenze erreicht und sich die Matrizen $\bm{\Tilde{R}}$ und $\bm{R}$ im Rahmen dieser Toleranz ähnlich sind. Die Matrix $\bm{P}$ enthält nun die gewünschten \textit{word-embeddings} (vgl. \cite{keras}, S. 155f). Für eine detailierte Beschreibung der Methode sei auf \cite{glovePaper} verwiesen. 
+Die Matrix $\bm{P}$ mit Dimension $N \times F$ ergibt multipliziert mit $\bm{Q}$ mit Dimensionen $F \times N$ wieder eine $N \times N$ Matrix. $F$ ist die Länge der resultierenden Wort-Vektoren und muss vom Anwender festgelegt werden. Diese Größe bestimmt den Raum $\mathbb{R^F}$, in dem die Wort-Vektoren die Wörter repräsentieren sollen. Nun werden zu Beginn sowohl $\bm{P}$ als auch $\bm{Q}$ mit zufälligen Werten initiiert und die Matrix $\bm{\Tilde{R}}$ berechnet. Mithilfe des stochastischen Gradienten-Abstiegs (mehr dazu in Kapitel \ref{kap:neuralNets}) wird nun der Inhalt von $\bm{P}$ und $\bm{Q}$ verändert, mit dem Ziel die Summe aller Einträge der Differenz von $\bm{\Tilde{R}}$ und $\bm{R}$ zu minimieren. Dies ist ein numerischer iterativer Prozess, der wiederholt wird, bis der Fehler eine vorgegebene untere Grenze erreicht und sich die Matrizen $\bm{\Tilde{R}}$ und $\bm{R}$ im Rahmen dieser Toleranz ähnlich sind. Die Matrix $\bm{P}$ enthält zeilenweise nun die gewünschten Wort-Vektoren für jedes der $N$ Wörter des Vokabulars (vgl. \cite{keras}, S. 155f). Für eine detailierte Beschreibung der Methode sei auf \cite{glovePaper} verwiesen. 
 %todo: et al
 Es ist möglich diese Vektoren auf dem vorliegenden Trainingsdatensatz zu trainieren, wenn der Textkorpus groß genug ist. In dem Fall des \textit{news category dataset} mit \numprint{200847} ist dies durchaus plausibel. Das Trainieren der Vektoren erfolgte mit dem \texttt{R}-Paket \texttt{text2vec} (\cite{text2vec}) unter Verwendung der Parameter $skip\_grams\_window = 5$ für den symmetrischen Bereich des Kontextworts und die Dimension der Vektoren von $F = 50$. Dieses \textit{Embedding} wird mit dem Kürzel \textit{GloVe unsup. 50D} referenziert. \\
 Eine Alternative zum Training der \textit{word-embeddings} auf dem vorliegenden Textkorpus ist der Griff zu einem der vortrainierten Datensätze, die von \cite{gloveOnline}
 %todo: o.D referenz?
 zur Verfügung gestellt worden sind. Diese Vektoren wurden auf massiven Datenmengen trainiert. Für diese Arbeit wurden 2 Datensätze mit vor-trainierten Wortvektoren des \textit{GloVe} Projekts genutzt: Ein auf Wikipedia mit $6$ Milliarden Dokumenten trainierter Datensatz mit einer Länge der Vektoren von $F = 50$ (\cite{gloveWiki}) und ein auf $42$ Milliarden aus verschiedensten Quellen des Internets stammenden Textdokumenten mit $F = 300$ Dimensionen (\cite{gloveCommon}). Die beiden vortrainierten \textit{Embeddings} werden in Kapitel \ref{Kap:statAus} mit \textit{GloVe 50D} und \textit{GloVe 300D} referenziert.\\
 
-Ob nun vor-trainierte \textit{word embeddings} genutzt werden oder die Vektoren auf dem Trainingsdatensatz gelernt werden, es stellt sich die Frage, wie genau die Datenpunkte geformt werden, sodass ein \textit{machine learning} Modell immer Eingangswerte derselben Dimension erwarten kann. Nun ist unter der Annahme, dass eine Beobachtung immer aus einer Aneinanderreihung von Wörtern besteht, jeder durch Wort-Vektoren repräsentierter Datenpunkt $x_i$ bereits eine zweidimensionale Matrix mit Dimensionen $F \times  W_i$. $W_i$ steht für die Anzahl Wörter im Satz des Datenpunktes $x_i$ und $F$ ist die Anzahl der Wort-Vektoren. Damit die kodierten Datenpunkte nun jeweils die gleiche Dimension besitzen um zu einem dreidimensionalen Trainings-Array geformt werden zu können, soll $W_i$ immer gleich gewählt werden. Hier wird als Konstante $W_{max}$ die Anzahl Wörter gewählt, die $99.9$ Prozent der News Schlagzeilen im Trainingsset nicht überschreiten. Für jede Schlagzeile, die weniger Wörter als $W_{max}$ enthält, wird die Matrix für die fehlenden Wörter mit Nullen aufgefüllt (dies wird \textit{padding} genannt). Wäre $W_{max}$ die maximale Anzahl von Wörtern, die die größte Schlagzeile enthält, so würde durch das Auffüllen von vielen Nullen nur unnötig Speicherplatz verbraucht werden. \\
+Ob nun vor-trainierte \textit{word embeddings} genutzt werden oder die Vektoren auf dem Trainingsdatensatz gelernt werden, es stellt sich die Frage, wie genau die Datenpunkte geformt werden, sodass ein \textit{machine learning} Modell immer Eingangswerte derselben Dimension erwarten kann. Nun ist unter der Annahme, dass eine Beobachtung immer aus einer Aneinanderreihung von Wörtern besteht, jeder durch Wort-Vektoren repräsentierter Datenpunkt $x_i$ bereits eine zweidimensionale Matrix mit Dimensionen $F \times  W_i$. $W_i$ steht für die Anzahl Wörter im Satz des Datenpunktes $x_i$ und $F$ ist die Anzahl der Wort-Vektoren. Die Trainingsdaten formen dann ein dreidimensionales Array $N \times F \times  W_i$, wobei $N$ die Anzahl der Datenpunkte im Trainingsset ist. In \texttt{R} müssen nun aber alle $N$ Matrizen die gleiche Anzahl Spalten und Zeilen besitzen, um zu einem Array geformt werden zu können.
+Dementsprechend soll die Anzahl der Spalten $W_i$ immer gleich gewählt werden. Hier wird als Konstante $W_{max}$ die Anzahl Wörter gewählt, die $99.9$ Prozent der News Schlagzeilen im Trainingsset nicht überschreiten. Diese Konstante wird heuristisch vom Nutzer gewählt. Die verbleibenden längsten $0.1$ Prozent der Schlagzeilen werden entfernt.
+Für jede Schlagzeile, die weniger Wörter als $W_{max}$ enthält, wird die Matrix für die fehlenden Wörter mit Nullen aufgefüllt. Dieser Prozess wird \textit{padding} genannt. Wäre beispielsweise $W_{max} = 82$ die größte Anzahl von Wörtern, die eine Schlagzeile enthält, so hätte jeder Datenpunkt $82$ Spalten, von denen die meisten mit Nullen gefüllt sind. Durch das Entfernen der $10$ längsten Schlagzeilen wäre die Anzahl der Spalten pro Datenpunkt schon auf $36$ Spalten reduziert. Es wird also durch den Verzicht auf einige wenige Datenpunkte viel Speicherplatz gespart.\\
+Zur Veranschaulichung der \textit{Glove} Vektoren ist in Tabelle \ref{tab:GloVeMatrixBsp} das \textit{Embedding} eines Datenpunkts dargestellt.
 
-Allgemein haben die resultierenden Vektoren einige nützliche Eigenschaften. Als Ähnlichkeits\-maß zwischen 2 Vektoren kann das Kreuzprodukt genutzt werden. Wörter, die einander ähnlich sind, sind auch im $F$-dimensionalen Vektorraum nahe beieinander angeordnet. Falls die \textit{word-embeddings} auf großen Datenmengen trainiert worden sind, können die Vektoren sogar semantische Beziehungen repräsentieren. So kann beispielsweise \textit{walking} zu \textit{walked} dieselbe Beziehung haben wie \textit{swimming} zu \textit{swam}. Addiert oder subtrahiert man Wort-Vektoren, so können sogar Gleichungen der Form $king - man + women \approx queen$, oder $berlin - germany + france \approx paris$ zustande kommen (vlg. \cite{deepEssentials}, S. 122).
+\begin{table}[ht]
+\micro
+\centering
+\begin{tabular}{|m{0.5cm}|m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.4cm}m{0.01cm}m{0.01cm}m{0.01cm}m{0.01cm}m{0.01cm}m{0.01cm}m{0.01cm}m{0.01cm}m{0.01cm}|}
+\hline
+ & \multicolumn{21}{|c|}{Wörter} \\
+  \hline
+Dim\-ension & ree\-se & wither\-spoon & had & the & ' & snl & ' & cast & apolo\-gize & to & their & mo\-ms & - & - & - & - & $\hdots$ & - & - & - & -  \\ 
+  \hline
+Dim 1 & -0.42 & -0.49 & 0.60 & 0.42 & -0.04 & -0.31 & -0.04 & 0.02 & -0.02 & 0.68 & 0.42 & 0.05 & 0 & 0 & 0 & 0 & $\hdots$ & 0 & 0 & 0 & 0 \\ 
+  Dim 2 & -0 & 0.35 & -0.52 & 0.25 & 1.20 & -0.20 & 1.20 & 0.42 & -0.55 & -0.04 & 0.13 & 0.40 & 0 & 0 & 0 & 0 & $\hdots$ & 0 & 0 & 0 & 0  \\ 
+  Dim 3 & -0.37 & -0.50 & 0.41 & -0.41 & 0.35 & -0.09 & 0.35 & 0.41 & -0.25 & 0.30 & -0.06 & 0.16 & 0 & 0 & 0 & 0 & $\hdots$ & 0 & 0 & 0 & 0 \\ 
+  Dim 4 & 0.10 & 0.07 & -0.37 & 0.12 & -0.56 & 0.74 & -0.56 & -0.13 & -0.26 & -0.18 & -0.57 & -0.95 & 0 & 0 & 0 & 0 & $\hdots$ & 0 & 0 & 0 & 0 \\ 
+  Dim 5 & 0.54 & 0.35 & 0.37 & 0.35 & -0.52 & 0.26 & -0.52 & 0.58 & -0.04 & 0.43 & 0.50 & 0.37 & 0 & 0 & 0 & 0 &  $\hdots$ & 0 & 0 & 0 & 0 \\ 
+  \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+  Dim 45 & -0.11 & -0.68 & -0.25 & -0.44 & 0.44 & 0.02 & 0.44 & -0.62 & 0.56 & -0.20 & 0.24 & 0.56 & 0 & 0 & 0 & 0 & $\hdots$ & 0 & 0 & 0 & 0 \\ 
+  Dim 46 & 0.46 & 0.25 & -0.48 & 0.19 & -0.06 & -1.25 & -0.06 & 0.16 & 0.11 & 0.08 & -0.19 & 0.16 & 0 & 0 & 0 & 0 &  $\hdots$ & 0 & 0 & 0 & 0 \\ 
+  Dim 47 & 0.27 & 0.42 & -1.04 & 0 & -0.43 & 0.68 & -0.43 & -0.57 & -1.25 & -0.09 & -0.22 & 0.12 & 0 & 0 & 0 & 0 &  $\hdots$ & 0 & 0 & 0 & 0 \\ 
+  Dim 48 & -0.51 & -1.05 & -0.15 & -0.18 & -0.08 & 0.71 & -0.08 & -0.64 & 0.93 & -0.07 & -0.12 & 0.08 & 0 & 0 & 0 & 0 &  $\hdots$ & 0 & 0 & 0 & 0 \\ 
+  Dim 49 & -1.02 & -0.74 & -0.22 & -0.12 & 0.49 & -0.42 & 0.49 & -0.25 & 0 & -0.06 & -0.34 & 0.02 & 0 & 0 & 0 & 0 &  $\hdots$ & 0 & 0 & 0 & 0  \\ 
+  Dim 50 & 0.69 & 0.61 & -0.60 & -0.79 & 0.09 & 1.69 & 0.09 & 0.10 & 0.51 & -0.26 & -0.87 & 0.66 & 0 & 0 & 0 & 0 &  $\hdots$ & 0 & 0 & 0 & 0 \\ 
+   \hline
+\end{tabular}
+\caption{Beipielhaftes GloVe $50D$ Embedding der Schlagzeile: \textit{reese witherspoon had the 'snl' cast apologize to their moms}}
+\label{tab:GloVeMatrixBsp}
+
+\end{table}
+
+Die Dimension $F$ beträgt in dem Beispiel $50$, jedes Wort wird also durch einen Vektor der Länge $50$ repräsentiert. Die Länge der Sequenz ist $maxW = 26$. Da der Satz nur $12$ Wörter enthält, sind die restlichen $26-12 = 14$ Spalten mit Nullen aufgefüllt (\textit{padding}). In dem Beispiel ist auch zu sehen, dass das zweifach vorkommende Anführungszeichen \say{'} ebenfalls einen eigenen Wort-Vektor erhält.\\
+\\
+Allgemein haben die resultierenden Vektoren einige nützliche Eigenschaften. Als Ähnlichkeits\-maß zwischen 2 Vektoren kann das Kreuzprodukt genutzt werden. Wörter, die einander ähnlich sind, sind auch in ihrer Repräsentation im $F$-dimensionalen Vektorraum nahe beieinander angeordnet. Falls die \textit{word-embeddings} auf großen Datenmengen trainiert worden sind, können die Vektoren sogar semantische Beziehungen repräsentieren. So kann beispielsweise \textit{walking} zu \textit{walked} dieselbe Beziehung haben wie \textit{swimming} zu \textit{swam}. Addiert oder subtrahiert man Wort-Vektoren, so können sogar Gleichungen der Form $king - man + women \approx queen$, oder $berlin - germany + france \approx paris$ zustande kommen (vlg. \cite{deepEssentials}, S. 122).
 
 \subsubsection{Summe von Wort-Vektoren}
 
-Die im vorherigen Abschnitt \ref{Kap:Glove} beschriebenen \textit{word-embeddings} bilden bei Sätzen immer eine zweidimensionale Matrix pro Datenpunkt. Es ist aber auch eine Dimensionsreduktion möglich indem die Vektoren unter bestimmten Regularisierungen summiert werden oder Differenzen gebildet werden. \cite{sumsWords}, S. 13 zeigen, dass die Summe der Word-Vektoren mit $L1$ Regularisierung eine gute Repräsentation der Sätze ist und gute Resultate liefert. Dies ist definiert als
+Die im vorherigen Abschnitt \ref{Kap:Glove} beschriebenen \textit{word-embeddings} bilden bei Sätzen immer eine zweidimensionale Matrix pro Datenpunkt. Es ist aber auch eine Dimensionsreduktion möglich, indem die Summe oder Differenz der Wort-Vektoren gebildet wird und anschließend mit einer Norm normalisiert wird. \cite{sumsWords}, S. 13 zeigen,
+% todo: Dilawar et al (2018, S.13)
+dass die Summe der Word-Vektoren unter Verwendung der $L1$ Normalisierung eine gute Repräsentation der Sätze ist und gute Resultate liefert. Diese Repräsentation ist definiert als
 
-\[SOW_{L1} = \frac{\sum_{i=1}^{W_{max}} \Vec{w_i}}{\| \sum_{i=1}^{W_{max}}  \vec{w_i} \|} \]
-(\cite{sumsWords}, S. 5). Die $L1$ Norm skaliert die Einträge der $\Vec{w_i}$ so, dass die Summe aller Einträge $1$ entspricht. Es wird bis $W_{max}$ summiert, da das in Kapitel \ref{Kap:Glove} erläuterte \textit{padding} dafür sorgt, dass jede Schlagzeile mit genau $W_{max}$ Vektoren der Länge $F$ repräsentiert werden. Aufgrund der Auffüllung mit Nullen für fehlende Wörter beeinflusst dies den Summand nicht.
-Jeder Datenpunkt wird zusammenfassend als Vektor mit $F$ Einträgen dargestellt, die die Bedeutung des dahinterstehenden Satzes im $F$ dimensionalen Raum repräsentieren. Die entsprechenden Summen der \textit{Embeddings} aus \ref{Kap:Glove} werden in der Vorauswahl in Kapitel \ref{kap:preselection} als \textit{SOW GloVe unsup. 50D}, \textit{SOW GloVe 50D} und \textit{SOW Glove 300D} bezeichnet.
+\[SOW_{L1} = \frac{\sum_{i=1}^{W_{max}} \Vec{w_i}}{\| \sum_{i=1}^{W_{max}}  \vec{w_i} \|} \vspace{0.2cm}\]
+
+(\cite{sumsWords}, S. 5). Die $L1$ Norm skaliert die Einträge der $\Vec{w_i}$ so, dass die Summe aller Einträge $1$ entspricht. Es wird bis $W_{max}$ summiert, da das in Kapitel \ref{Kap:Glove} erläuterte \textit{padding} dafür sorgt, dass jede Schlagzeile mit genau $W_{max}$ Vektoren der Länge $F$ repräsentiert wird. Die Spalten, die mit Nullen aufgefüllt wurden beeinflussen den Summanden nicht.
+Jeder Datenpunkt wird zusammenfassend als Vektor mit $F$ Einträgen dargestellt, der die Bedeutung des dahinterstehenden Satzes im $F$ dimensionalen Raum repräsentiert. Die entsprechenden Summen der \textit{Word Embeddings} aus Abschnitt \ref{Kap:Glove} werden in der Vorauswahl in Kapitel \ref{kap:preselection} als \textit{SOW GloVe unsup. 50D}, \textit{SOW GloVe 50D} und \textit{SOW Glove 300D} bezeichnet.
+Für das Beispiel aus Tabelle \ref{tab:GloVeMatrixBsp} hätte das \textit{SOW GloVe 50D} Embedding des Satzes
+\say{\textit{reese witherspoon had the 'snl' cast apologize to their moms}} die Form \\
+$\textbf{(}0.006, 0.017,  0.002, -0.017,  0.017, \dots , -0.004, -0.016, -0.008, -0.014, 0.012 \textbf{)}$. Dieser Vektor mit $50$ Einträgen repräsentiert also die Schlagzeile im $\mathbb{R}^{50}$.
 
 
 \subsubsection{Sequentielle Darstellung} \label{Kap:Seq}

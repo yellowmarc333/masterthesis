@@ -12,9 +12,16 @@
 #               exchange words and see what happens, if the prediction gets into nearest
 #               input sequence of text (first first word, then 2nd word etc)
 # exploration function for word vectors (relate to wordclouds)
-
+# achors, lime checken
+# permutation der wichtigen wörter, bzw festhalten
+# gerharz@tu-dortmund.de
+# bi-lstm weights holen und verstehen
+# sequentiell wort sequenzen reinfüttern. am beispiel von 3 Sätzen Explaining
+# 
 
 # [next steps: runterschreiben]
+# Zusammenfassung von netzteil schreiben
+# Zusammenfassung von wordembeddings schreiben
 # mean_accuracy erklären, probIfCorrect
 # gradientenabstieg erklären anhand anderer Quelle? MIT S.151ff, 294.
 # matzes korrektur (zusammen mit grolls zweiter ladung)
@@ -22,10 +29,7 @@
 
 
 # vanishing gradient problem erklären
-
 # matzes CNN teil korrigieren
-
-
 # wording: modelle statt algorithmen
 # matze diskutieren, macht bidirectional überhaupt sinn?
 # convolution mathematisch überhaupt nötig zu definieren?

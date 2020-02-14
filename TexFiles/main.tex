@@ -8,8 +8,22 @@
 
 \makeatletter
 \newcommand\notsotiny{\@setfontsize\notsotiny{8}{8}}
+\newcommand\micro{\@setfontsize\notsotiny{4.5}{4.5}}
+\newcommand\middletiny{\@setfontsize\notsotiny{6}{6}}
 \makeatother
 
+%\renewcommand{\symheadingname}{Symbolverzeichnis}
+
+%\usepackage[colorlinks=true,
+%breaklinks = true,
+%citecolor=black,
+%linkcolor=blue,
+%menucolor=black,
+%urlcolor=blue]{hyperrref}
+\usepackage[]{acronym}
+
+
+\usepackage[draft]{listofsymbols}
 \usepackage[utf8]{inputenc}
 \usepackage{csquotes}
 \usepackage{array}
@@ -34,7 +48,11 @@
 \usepackage[left=3cm,right=2.5cm,top=2cm,bottom=2cm]{geometry}
 \renewcommand{\baselinestretch}{1.5}\normalsize % Zeilenabstand 1.5
 
-
+%% symbolverzeichnis
+%\opensymdef
+%\newsym[Elementweises Produkt]{}{\circ}
+%\closesymdef
+%%
 
 \begin{document}
 
@@ -89,6 +107,17 @@ Verfasser: Marc Schmieder\\
 \thispagestyle{empty}
 \tableofcontents
 \newpage
+
+\addsec{\large{Abkürzungsverzeichnis}}
+\label{sec:abkuerz}
+
+\begin{acronym}[TF-IDF]
+\acro{lstm}{longshort}
+\acro{TF-IDF}{longshort}
+\end{acronym}
+
+\newpage
+
 \end{titlepage}
 
 

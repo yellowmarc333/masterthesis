@@ -41,13 +41,14 @@ ggsave(filename = paste0(outPath, "FinalSelectionAccByClass.pdf"),
        device = "pdf")
 
 # neighborClasses ####
-# testweise gecheckt dass neighborclasses und counts stimmen
-res <- identifyNeighborClasses("03_computedData/05_modelData/finalModels/")
+res <- identifyNeighborClassesIfTRUE("03_computedData/05_modelData/finalModels/")
 print(xtable(res, label = "tab:neighborClasses", digits = 0), 
       include.rownames = FALSE)
 
-
-
+# missclassification counts for all kategories
+res <- identifyMisclassSums("03_computedData/05_modelData/finalModels/")
+print(xtable(res, label = "tab:missclassClasses", digits = 0), 
+      include.rownames = TRUE)
 
 
 

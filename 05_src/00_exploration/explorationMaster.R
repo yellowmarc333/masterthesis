@@ -285,6 +285,19 @@ final <- rbind(head(gloveBsp), tail(gloveBsp))
 print(xtable(final, digits = 2, include.rownames = TRUE))
 
 ## bsp for Glove SOW 50d
+res <- rowSums(gloveBsp)
+resNorm <- round(res/sum(abs(res)), 3) # L1 norm
 
+## Kapitel 3.2.4 RNN Grafik ####
+inPath = "03_computedData/02_cleanedData/News.fst"
+data <- read.fst(inPath, as.data.table = TRUE)
 
+label <- data$category
+texts <- as.character(data$headline)
 
+tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE, 
+                           remove_punct = FALSE, remove_symbols = FALSE, 
+                           remove_hyphens = FALSE)
+tokens <- as.list(tokens)
+
+print(tokens[58])

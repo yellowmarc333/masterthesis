@@ -269,9 +269,9 @@ plotAccByClass <- function(inPath) {
     labs(x = "Nachrichtenkategorie",
          y = "Accuracy",
          fill = "Embedding, Modell: ") +
-    geom_text(aes(label = round(value, 2)), 
+    geom_text(aes(label = round(value, 3)), 
               position = position_dodge(width = 0.9),
-               vjust = 0.5, hjust = 1.4,
+               vjust = 0.5, hjust = 1.2,
               angle = 90, size = 2.4) +
     theme(axis.text.x  = element_text(angle = 45,
                                       vjust = 1, hjust = 1,
@@ -290,8 +290,63 @@ plotAccByClass <- function(inPath) {
   return(ggObj)
 }
 
+# identifyNeighborClasses <- function(inPath) {
+#   assertString(inPath)
+#   
+#   allModels <- list.files(path = inPath)
+#   # subset to only .rds files
+#   allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
+#   
+#   res <- list()
+#   
+#   for(j in 1:length((allModels))) {
+#     model <- readRDS(paste0(inPath, allModels[j]))
+#     data <- model[["confusionMatrix"]]
+#     
+#     
+#     
+#     browser()
+#     
+#     trueClasses <- row.names(data)
+#     neighborCount <- list()
+#     for(i in 1:nrow(data)) {
+#       x <- data[i, ]
+#       x[i] <- 0 # setting the diagonal = 0
+#       sorted <- sort(x, decreasing = TRUE)
+#       highest1 <- sorted[1]
+#       highest2 <- sorted[2]
+#       NC1 <- paste0("textit{", names(which(x == highest1)[1])
+#                     , "}, ($", highest1, "$)")
+#       # Marc: outcomment, maybe for Anhang
+#       # NC2 <- paste0("textit{", names(which(x == highest2)[1])
+#       #               , "}, ($", highest2, "$)")
+#       
+#       neighborCount[[i]] <- list(trueClass = trueClasses[i],
+#                                  NC1 = NC1
+#                                  #,
+#                                  #NC2 = NC2
+#       )
+#     }
+#     res[[allModels[j]]] <- neighborCount
+#   }
+#   
+#   resListed <- lapply(res, function(x) rbindlist(x))
+#   
+#   
+#   resDT <- data.table(trueClass = resListed[[1]]$trueClass)
+#   for(i in seq_along(resListed)) {
+#     tmpName <- names(resListed)[i]
+#     setnames(resListed[[i]], "NC1", paste0(tmpName, "_NC1"))
+#     #setnames(resListed[[i]], "NC2", paste0(tmpName, "_NC2"))
+#     resDT <- merge(resDT, resListed[[i]], by = "trueClass")
+#   }
+#   return(resDT)
+# }
+# 
 
-identifyNeighborClasses <- function(inPath) {
+
+
+identifyNeighborClassesIfTRUE <- function(inPath) {
   assertString(inPath)
   
   allModels <- list.files(path = inPath)
@@ -302,41 +357,62 @@ identifyNeighborClasses <- function(inPath) {
   
   for(j in 1:length((allModels))) {
     model <- readRDS(paste0(inPath, allModels[j]))
-    data <- model[["confusionMatrix"]]
-    trueClasses <- row.names(data)
-    neighborCount <- list()
-    for(i in 1:nrow(data)) {
-      x <- data[i, ]
-      x[i] <- 0 # setting the diagonal = 0
-      sorted <- sort(x, decreasing = TRUE)
-      highest1 <- sorted[1]
-      highest2 <- sorted[2]
-      NC1 <- paste0("textit{", names(which(x == highest1)[1])
-                    , "}, ($", highest1, "$)")
-      # Marc: outcomment, maybe for Anhang
-      # NC2 <- paste0("textit{", names(which(x == highest2)[1])
-      #               , "}, ($", highest2, "$)")
-      
-      neighborCount[[i]] <- list(trueClass = trueClasses[i],
-                                 NC1 = NC1
-                                 #,
-                                 #NC2 = NC2
-                                 )
-    }
-    res[[allModels[j]]] <- neighborCount
+    data <- model[["predictions"]]
+    ProbAccDT <- model[["ProbAccDT"]]
+    testLabelRaw <- model[["testLabelRaw"]]
+    # select only the correct classified datapoints
+    dataRed <- data[ProbAccDT$Correct]
+    testLabelRed <- testLabelRaw[ProbAccDT$Correct]
+    
+    # gives the name of the category with the 2nd highest probability
+    # works correctly, checked with 1st highest probability
+    # sum(predictions2ndProb == testLabelRed)
+    predictions2ndProb <- as.vector(
+      t(apply(dataRed, 1 , function(x) {
+        names(x[order(x, decreasing = TRUE)[2]])
+      })))
+    
+    dt <- data.table(testLabel = testLabelRed,
+                     neighborClass = predictions2ndProb)
+    dtRes <- dt[, .N, by = .(testLabel, neighborClass)]
+    # get the classes with the highest count in one DT
+    resTmp <- dtRes[, {
+      count <- max(N)
+      index <- which.max(N)
+      neighbor <- neighborClass[index]
+      .(neighbor = paste0("it{" ,neighbor, "} ($", count, "$)"))
+    }, by = .(testLabel)]
+
+
+    res[[allModels[j]]] <- resTmp
   }
-
-  resListed <- lapply(res, function(x) rbindlist(x))
-
+  browser()
+  # Marc todo: checken ob das alles so stimmt
   
-  resDT <- data.table(trueClass = resListed[[1]]$trueClass)
-  for(i in seq_along(resListed)) {
-    tmpName <- names(resListed)[i]
-    setnames(resListed[[i]], "NC1", paste0(tmpName, "_NC1"))
-    #setnames(resListed[[i]], "NC2", paste0(tmpName, "_NC2"))
-    resDT <- merge(resDT, resListed[[i]], by = "trueClass")
-  }
   return(resDT)
+}
+
+
+identifyMisclassSums <- function(inPath) {
+  assertString(inPath)
+  
+  allModels <- list.files(path = inPath)
+  # subset to only .rds files
+  allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
+  
+  res <- data.table()
+  
+  for(j in 1:length((allModels))) {
+    model <- readRDS(paste0(inPath, allModels[j]))
+    data <- model[["confusionMatrix"]]
+
+    quants <- sort(colSums(data) - diag(data), decreasing = TRUE)
+    
+    res[, newVar := paste0("it{" ,names(quants), "} ($", quants, "$)")]
+    setnames(res, "newVar", allModels[j])
+  }
+
+  return(res)
 }
 
 

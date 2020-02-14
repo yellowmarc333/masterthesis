@@ -129,7 +129,7 @@ Bei diesen Methoden wird zuerst für den gesamten Textkorpus ein Vokabular gebil
       \hline
 Satz 1 & $1$ & $0$ & $1$ & $0$ & $1$ & $1$ & $1$ & $0$ & $0$ &  $0$ & $0$ \\
 Satz 2 & $1$ & $1$ & $0$ & $1$ & $0$ & $0$ & $0$ & $1$ & $1$ &  $1$ & $1$ \\
-Satz 3 & $0$ & $1$ & $0$ & $0$ & $1$ & $0$ & $0$ & $1$ & $0$ &  $0$ & $0$ \\
+Satz 3 & $1$ & $1$ & $0$ & $0$ & $1$ & $0$ & $0$ & $1$ & $0$ &  $0$ & $0$ \\
 
 \hline
 
@@ -273,7 +273,7 @@ $\textbf{(}0.006, 0.017,  0.002, -0.017,  0.017, \dots , -0.004, -0.016, -0.008,
 
 \subsubsection{Sequentielle Darstellung} \label{Kap:Seq}
 
-Eine weitere Möglichkeit, Sätze und Wörter zu repräsentieren ist als Sequenz von Indices. So bekommt jedes Wort eine natürliche Zahl aus dem Vokabular zugeordnet. Durch die Aneinanderreihung dieser Indices wird ein Satz als Sequenz von natürlichen Zahlen dargestellt. Die resultierende Datenmatrix hat also die Dimensionen $N \times W_{max}$, wobei $W_{max}$ analog wie in Kapitel \ref{Kap:Glove} gewählt wird. Diese kann als Trainingsdatensatz für ein klassisches \textit{machine-learning} Modell wie \textit{random Forest} (Kapitel \ref{kap:RF}), oder als Input für neuronale Netze wie \textit{CNN} (Kapitel \ref{kap:CNN}) oder \textit{LSTM} (Kapitel \ref{kap:LSTM}) dienen. Eine \textit{embedding} Eingangsschicht im neuronalen Netz lernt jeden Index dann zu einem Wort-Vektor einer vorgegebenen Größe $F$ und jeder Datenpunkt wird intern zu einer Matrix der Dimension $F \times W_{max}$ während des Trainieren des Netzes geformt. Das Bilden der \textit{word embeddings} geschieht in diesem Fall durch überwachtes Lernen und nicht durch unüberwachtes Lernen wie bei \textit{GloVe} in Kapitel \ref{Kap:Glove} (vgl. \cite{keras}, S.159f).\\
+Eine weitere Möglichkeit, Sätze und Wörter zu repräsentieren ist als Sequenz von Indices. So bekommt jedes Wort eine natürliche Zahl aus dem Vokabular zugeordnet. Durch die Aneinanderreihung dieser Indices wird ein Satz als Sequenz von natürlichen Zahlen dargestellt. Die resultierende Datenmatrix hat also die Dimensionen $N \times W_{max}$, wobei $W_{max}$ analog wie in Kapitel \ref{Kap:Glove} gewählt wird. Diese kann als Trainingsdatensatz für ein klassisches \textit{machine-learning} Modell wie \textit{random Forest} (Kapitel \ref{kap:RF}), oder als Input für neuronale Netze wie \textit{CNN} (Kapitel \ref{kap:CNN}) oder \textit{LSTM} (Kapitel \ref{kap:LSTM}) dienen. Eine \textit{embedding} Eingangsschicht im neuronalen Netz lernt jeden Index dann zu einem Wort-Vektor einer vorgegebenen Größe $F$ und jeder Datenpunkt wird intern zu einer Matrix der Dimension $F \times W_{max}$ während des Trainierens des Netzes geformt. Das Bilden der \textit{word embeddings} geschieht in diesem Fall durch überwachtes Lernen und nicht durch unüberwachtes Lernen wie bei \textit{GloVe} in Kapitel \ref{Kap:Glove} (vgl. \cite{keras}, S.159f).\\
 Die Erstellung der Wort-Sequenzen erfolgte in \texttt{R} mit dem Paket \texttt{keras} (\cite{kerasR}). In Kapitel \ref{kap:preselection} ist diese Art der Repräsentation der Wörter mit dem Kürzel \textit{Sequence} benannt. \\
 
 
@@ -289,8 +289,8 @@ Dieses Unterkapitel gibt eine Einführung in das Gebiet der neuronalen Netze und
 
 \subsubsection{Multi-Layer-Perceptron Neural Net}
 
-Dieser Abschnitt basiert größtenteils auf \cite{deepEssentials}, S.60-71 und S.214-230.
-Das \textit{Multi-Layer-Perceptron} (kurz \textit{MLP}) ist die einfachste Form eines neuronalen Netzes. Anhand des \textit{MLP} wird im Folgenden beschrieben, wie die Struktur und die Bestandteile eines neuronalen Netzes aussehen, wie es die Gewichtsparameter lernt und welche Komponenten besonders wichtig sind für die erfolgreiche Anwendung. Abbildung \ref{abb:MLPScreen} zeigt die klassische Struktur eines \textit{MLP}:
+Dieser Abschnitt basiert größtenteils auf \cite{deepEssentials}, S.60-71 und S.214-230. %todo Di et al. (2018; S.60-71 ...)
+Das \textit{Multi-Layer-Perceptron} (kurz \textit{MLP}) ist die einfachste Form eines neuronalen Netzes. Anhand des \textit{MLP} wird im Folgenden beschrieben, wie die Struktur und die Bestandteile eines neuronalen Netzes aussehen, wie es die Gewichtsparameter lernt und welche Komponenten besonders wichtig sind für die erfolgreiche Anwendung. Abbildung \ref{abb:MLPScreen} zeigt die klassische Struktur eines \textit{MLP}.
 
 
 \begin{figure}[!ht]
@@ -301,8 +301,8 @@ Das \textit{Multi-Layer-Perceptron} (kurz \textit{MLP}) ist die einfachste Form 
 \end{center}
 \end{figure}
 
-In der Abbildung \ref{abb:MLPScreen} ist zu sehen, dass das Netz in verschiedenen Schichten organisiert ist, die jeweils aus Neuronen (auch Knoten oder Zellen genannt) bestehen. Die Eingangsschicht (\textit{input layer}) besteht aus den als numerischen Werten kodierten Trainingsdaten und enthält entsprechend viele Neuronen. Darauf folgen mehrere Zwischenschichten (\textit{hidden layer}. Die Zwischenschichten enthalten jeweils eine vom Nutzer wählbare Anzahl von Neuronen. Die Ausgangsschicht (\textit{output layer}) schließt das Netz ab. Wie viele Knoten die Ausgangsschicht enthält, ist abhängig von der Problemstellung. Im Falle einer Klassifikation mit $C$ Klassen enthält es ebenso viele Knoten. Nun bedeutet \textit{fully-connected}, dass jedes Neuron mit allen Neuronen aus der vorherigen und nachfolgenden Schicht verbunden ist. Bei einem \textit{feed-forward} Netz werden nur Verbindungslinien in eine Richtung zugelassen und zwar von Eingangs- bis Ausgangsschicht. Die Verbindungslinien werden durch Gewichte repräsentiert, die den Einfluss des Eingangsneuron auf das Ausgangsneuron beschreiben. Seien $a_1^{(k-1)},..., a_{m^{(k-1)}}^{(k-1)}$ die Ausgangssignale der $k-1$-ten Zwischenschicht und $a_{1}^{(k)},..., a_{m^{(k)}}^{(k)}$ die Neuronen der $k$-ten Zwischenschicht. $m^{(k)}$ bezeichnet hierbei die Anzahl Neuronen in der $k$-ten Zwischenschicht. 
-Das Gewicht $w_{i_l}^{(k)}$ gehört zur Verbindungslinie von Knoten $i$ der $k-1$-ten Zwischenschicht mit Knoten $l$ der $k$-ten Zwischenschicht. Das Signal, dass das $l$-te Neuron der $k$-ten Zwischenschicht $a_{l}^{(k)}$ erreicht, berechnet sich aus der gewichteten Summe der Eingangsdaten und einem \textit{bias}, auf die dann eine Aktivierungsfunktion $\sigma$ angewandt wird:
+In der Abbildung \ref{abb:MLPScreen} ist zu sehen, dass das Netz in verschiedenen Schichten organisiert ist, die jeweils aus Neuronen (auch Knoten oder Zellen genannt) bestehen. Die Eingangsschicht (\textit{input layer}) besteht aus den als numerischen Werten kodierten Trainingsdaten und enthält entsprechend viele Neuronen. Darauf folgen mehrere Zwischenschichten (\textit{hidden layer}). Die Zwischenschichten enthalten jeweils eine vom Nutzer wählbare Anzahl von Neuronen. Die Ausgangsschicht (\textit{output layer}) schließt das Netz ab. Wie viele Knoten die Ausgangsschicht enthält, ist abhängig von der Problemstellung. Im Falle einer Klassifikation mit $C$ Klassen enthält es ebenso viele Knoten. Nun bedeutet \textit{fully-connected}, dass jedes Neuron mit allen Neuronen aus der vorherigen und nachfolgenden Schicht verbunden ist. Bei einem \textit{feed-forward} Netz werden nur Verbindungslinien in eine Richtung zugelassen und zwar von Eingangs- bis Ausgangsschicht. Die Verbindungslinien werden durch Gewichte repräsentiert, die den Einfluss des Eingangsneuron auf das Ausgangsneuron beschreiben. Seien $a_1^{(k-1)},..., a_{m^{(k-1)}}^{(k-1)}$ die Ausgangssignale der $k-1$-ten Zwischenschicht und $a_{1}^{(k)},..., a_{m^{(k)}}^{(k)}$ die Neuronen der $k$-ten Zwischenschicht. $m^{(k)}$ bezeichnet hierbei die Anzahl Neuronen in der $k$-ten Zwischenschicht. 
+Das Gewicht $w_{il}^{(k)}$ gehört zur Verbindungslinie von Knoten $i$ der $k-1$-ten Zwischenschicht mit Knoten $l$ der $k$-ten Zwischenschicht. Das Signal, dass das $l$-te Neuron der $k$-ten Zwischenschicht $a_{l}^{(k)}$ erreicht, berechnet sich aus der gewichteten Summe der Eingangsdaten und einem \textit{bias}, auf die dann eine Aktivierungsfunktion $\sigma$ angewandt wird:
 
 \[ a_{l}^{(k)} = \sigma (b_l + \sum_{i=1}^{m^{(k-1)}} w_{il}^{(k)} a_{i}^{(k-1)}).\]
 
@@ -322,23 +322,23 @@ Die Konvergenz der Parameter erfolgt schneller als unter der Nutzung von einer \
 
 \[relu(x) = 
 \begin{cases}
-max(0,x), & x >= 0 \\
+max(0,x), & x \geq 0 \\
 0, & x <0
 \end{cases}{}
 .\]
 
-Es wurde gezeigt, dass im Lernprozess die Konvergenz der Parameter unter Nutzung von \textit{relu} bis zu 6-Mal schneller erreicht werden kann. Außerdem benötigt ihre Berechnung weniger Rechenleistung als klassische Aktivierungsfunktionen. \textit{relu} wird heutzutage aus diesen Gründen in den meisten neuronalen Netzen in den Zwischenschichten verwendet (vgl. \cite{deepEssentials}, S. 64). Für die Ausgangsschicht muss eine Aktivierungsfunktion gewählt werden, die Werte im Intervall $\left[0, 1\right]$ annimmt und dabei gleichzeitig eine Art Wahrscheinlichkeit modelliert. Hierbei wird im Klassifikationsfall zur \textit{softmax} Aktivierungsfunktion gegriffen. 
+Es wurde gezeigt, dass im Lernprozess die Konvergenz der Parameter unter Nutzung von \textit{relu} bis zu 6-Mal schneller erreicht werden kann. Außerdem benötigt ihre Berechnung weniger Rechenleistung als klassische Aktivierungsfunktionen. \textit{relu} wird heutzutage aus diesen Gründen in den meisten neuronalen Netzen in den Zwischenschichten verwendet (vgl. \cite{deepEssentials}, S. 64). Für die Ausgangsschicht muss eine Aktivierungsfunktion gewählt werden, die Werte im Intervall $\left[0, 1\right]$ annimmt und dabei gleichzeitig eine Art Wahrscheinlichkeit modelliert. Hierbei wird im Klassifikationsfall zur \textit{softmax} Aktivierungsfunktion gegriffen:
 
-\[p(y = j |z_j) = \phi(z_j) = \frac{e^{z_j}}{\sum_j^C z_j} \]
+\[p(y = j |z_j) = \phi(z_j) = \frac{e^{z_j}}{\sum_{j=1}^C z_j} .\]
 
 Hierbei bezeichnet $z_j$ das Eingangssignal in das Neuron der $j$-ten Klasse und $y$ die wahre Klasse. $\phi$ transformiert und normiert die Ausgangssignale für jedes der $C$ Neuronen in der Ausgangsschicht und modelliert unter der Bedingung $z_j$, für jede der Klassen $j = 1,..., C$ eine Wahrscheinlichkeit $p(y=j|z_j) \in \left[0, 1\right]$. Insgesamt ergibt sich $\sum_{j = 1}^C \phi(z_j) = 1$. Für die in dieser Arbeit verwendeten neuronalen Netze wird jeweils eine Ausgangsschicht mit $n = 32$ Knoten gewählt und die \textit{softmax} Aktivierungsfunktion zur Transformation der Eingangssignale genutzt (vgl. \cite{deepEssentials}, S. 65).\\
 \\
 Nachdem nun die grundlegende Architektur des Netzwerkes und die Aktivierungsfunktionen erläutert wurden, wird nun der Lernprozess durch den Gradientenabstieg und die damit verbundene Anpassung der Gewichte beschrieben. Die Optimierung des Netzwerkes geht insofern von statten, dass die Funktion $f(x)$ bezüglich einer Verlustfunktion minimiert wird, indem $x$ geändert wird. $x$ ist hier das mathematische Resultat der \textit{forward propagation}. Dies ist der Prozess, bei dem die Input Daten durch das Netz geschleust werden und wird später noch beispielhaft erklärt.
 Der Wert, der $f$ minimiert, wird notiert als 
 
-\[\bm{x}^\ast = argmin f(x)\]
+\[\bm{x}^\ast = argmin f(x),\]
 
-$\bm{x}^\ast$ ist der resultierende Parametervektor.
+wobei $\bm{x}^\ast$ der resultierende Parametervektor ist.
 Seien $x, y := f(x) \in \mathbb{R}$, so ist $f'(x) = \frac{\mathop{dx}}{\mathop{dy}}$ die Steigung in $x$ und gibt an, in was für einer Änderung $f(x)$ bei einer kleinen Änderung von $x$ resultiert. Unter Kenntnis von $f'(x)$ kann $f(x)$ schrittweise durch eine Änderung von $x$ in die Gegenrichtung der Ableitung minimiert werden. Diese Methode ist bekannt als Gradientenabstieg. Ist $f'(x) = 0$, so handelt es sich entweder um ein Minimum, Maximum oder einen Sattelpunkt. Ziel des Gradientenabstieg ist es, ein globales Minimum zu finden. Es ist möglich, dass die Funktion auch einige lokale Minima besitzt, in denen $f(x)$ in einem Teil des Wertebereichs ein Minima annimmt, aber eben nicht den kleinsten Wert im gesamten Wertebereich. Das Vorliegen von mehreren Sattelpunkten und lokalen Minima macht die Optimierung sehr schwierig, besonders, da es sich in der Praxis um multidimensionale Optimierungen handelt. Oft werden solche Lösungen akzeptiert, die nicht global minimal sind, aber einen signifikant niedrigen Wert der Verlustfunktion aufweisen. Abbildung \ref{abb:MinimaSearch} zeigt eine beispielhafte Darstellung einer eindimensionalen Verlustfunktion mit verschiedenen Minima und Sattelpunkten.
 
 \begin{figure}[!ht]
@@ -363,7 +363,7 @@ Nun soll die Methode des Gradientenabstiegs an einem einfachen Beispiel erläute
 $\bm{z_1}, \bm{z_2}$ sind die Vektoren, die in den Zwischenschichten eintreffen, $\bm{a_1}, \bm{a_2}$ die Signale, die die Neuronen der Zwischenschichten wieder verlassen und $\sigma$ die \textit{relu} Aktivierungsfunktion. Anschließend wird der Fehler des Netzwerkes berechnet mit 
 \[\nabla \bm{a} = \bm{a_2} - \bm{y} .\]
 In diesem Beispiel wird die Verlustfunktion aus der Differenz des Ausgangssignal des letzten \textit{layers} und der Zielvariable $y$ gebildet. Die Verlustfunktion ist je nach Zielstellung passend zu wählen. Im Falle der hier vorliegenden \textit{multi-class} Klassifikation wird die in Kapitel \ref{kap:guetemass} beschriebene kategorische \textit{cross-entropy} $CE$ als geeignete Verlustfunktion angesehen (vgl. \cite{deepEssentials}, S. 220, \cite{keras}, S.179). Sie wird bei den neuronalen Netzen dieser Thesis ausschließlich verwendet. 
-Nun werden im Rahmen der \textit{backpropagation} die Gradienten berechnet:
+Nun werden im Rahmen der \textit{Back-Propagation} die Gradienten berechnet:
 
 % bei align sind zeilen wichtig
 \begin{align*}
@@ -450,8 +450,9 @@ Das Lernen der Gewichte sowie \textit{tuning} und Regularisierung erfolgt bei ei
 \subsubsection{Recurrent Neural net und Long-Short-Term-Memory Neural Net} \label{kap:LSTM}
 
 Dieses Unterkapitel erläutert die Idee von \textit{recurrent neural networks} (kurz \textit{RNN}) und motiviert anschließend die darauf basierenden \textit{long-short-term-memory neural networks} (kurz \textit{LSTM}). Die Informationen über das \textit{RNN} entspringen größtenteils \cite{deepL}, S. 378-381, der darauf folgende Abschnitt über \textit{LSTM} basiert größtenteils auf \cite{deepNLP}, S.138-143.\\
+%todo: jahr, seiten manuell in klammern
 
-Liegen Daten in sequentieller Form vor, wie beispielsweise Sprachaufnahmen als Signale über die Zeit, Videos als Serie von Bildern oder Kurztexte als Sequenz von Wörtern, so sind traditionelle \textit{MLP} aufgrund ihrer Limitierungen nicht geeignet. Sie erwarten statische Daten, bei denen jede Variable zeitlich unabhängig von allen anderen ist. Es fehlt ihnen die Fähigkeit, Informationen über einen zeitlichen Verlauf hinweg zu speichern. In der Architektur eines \textit{feed-forward} Netzes, dass auf einer sequentiellen Darstellung der Wörter (Kapitel \ref{Kap:Seq}) aufbaut, wird jedes Wort unabhängig von allen anderen verarbeitet. Im Modell wird also keinerlei Korrelation von dem nächstem Wort im Satz zu den vorherigen modelliert (vgl. \cite{deepEssentials}, S.145). Im Bereich des \textit{deep learning} werden Klassifikationsprobleme, die auf sequentiellen Daten basieren, meist mit \textit{RNN} bewältigt. \textit{LSTM} haben sich als Unterklasse der \textit{RNN} sehr erfolgreich im Bereich des \textit{NLP} erwiesen (vgl. \cite{deepEssentials}, S.150 und \cite{keras}, S.175). In Abbildung \ref{abb:RNNExample} ist die Verarbeitung eines Satzes von einem \textit{RNN} dargestellt.
+Häufig liegen Daten in sequentieller Form vor, wie beispielsweise Sprachaufnahmen als Signale über die Zeit, Videos als Serie von Bildern oder Kurztexte als Sequenz von Wörtern. Die Information liegt hierbei nicht in den Daten selbst, sondern in der Änderung der Daten über die Zeit. Traditionelle \textit{MLP}'s sind für diesen Typ von Daten aufgrund ihrer Limitierungen nicht geeignet. Zur optimalen Funktionsweise benötigen sie statische Daten als Input, bei denen jede Variable zeitlich unabhängig von allen anderen ist. Dem \textit{MLP} fehlt die Fähigkeit, Informationen über einen zeitlichen Verlauf hinweg zu modellieren. In der Architektur eines \textit{feed-forward} Netzes, dass auf einer sequentiellen Darstellung der Wörter (Kapitel \ref{Kap:Seq}) aufbaut, wird jedes Wort unabhängig von allen anderen verarbeitet. Im Modell wird demnach keinerlei Korrelation von dem nächstem Wort im Satz zu den vorherigen modelliert (vgl. \cite{deepEssentials}, S.145). Im Bereich des \textit{deep learning} werden Klassifikationsprobleme, die auf sequentiellen Daten basieren, meist mit \textit{RNN} gelöst. \textit{LSTM} haben sich als Unterklasse der \textit{RNN} im Bereich des \textit{NLP} erwiesen (vgl. \cite{deepEssentials}, S.150 und \cite{keras}, S.175). In Abbildung \ref{abb:RNNExample} ist die Verarbeitung eines Satzes durch ein \textit{RNN} dargestellt.
 
 \begin{figure}[!ht]
 \begin{center}
@@ -474,7 +475,7 @@ bezeichnet und kann mit einer kategoriellen Variable als Ausgabewert auch in der
 \end{figure}
 
 In der Grafik ist jeder Knoten des Netzwerkes einem spezifischen Zeitpunkt in der Sequenz zugehörig.
-Dort ist $\bm{x}^{(t)}$ der $t$-te Teil der Input Sequenz, also der $t$-te Wort-Vektor. $\bm{h}^{(t)}$ ist der \textit{hidden state} zum Zeitpunkt $t$ der Sequenz. $\bm{o}^{(\tau)}$ ist der Vektor des Outputs zum $\tau$-ten Zeitpunkt, dem Ende der Sequenz. Im Falle einer Multiklassifikation nimmt er die nicht-normalisierten log-likelihood Wahrscheinlichkeiten für jede der möglichen Ausprägungen der Zielvariable an.
+Dort ist $\bm{x}^{(t)}$ der $t$-te Teil der Input Sequenz, also der $t$-te Wort-Vektor. $\bm{h}^{(t)}$ ist der \textit{hidden state} zum Zeitpunkt $t$ der Sequenz. $\bm{o}^{(\tau)}$ ist der Vektor des Outputs zum $\tau$-ten Zeitpunkt, dem Ende der Sequenz. Im Falle einer Multiklassifikation nimmt er die nicht-normalisierten \textit{Log-Likelihoods} für jede der möglichen Ausprägungen der Zielvariable an.
 Die Verbindung zwischen Input und \textit{hidden} Neuronen wird durch die Gewichtsmatrix $\bm{U}$ parametrisiert und die \textit{hidden state} zu \textit{hidden state} Verbindung durch die Gewichtsmatrix $\bm{W}$. Eine weitere Gewichtsmatrix $\bm{V}$ parametrisiert die Verbindung zwischen \textit{hidden state} und Ausgangssignal. Eine Verlustfunktion $L^{(\tau)}$ misst dann den Abstand der Zielvariable $\bm{y}^{(\tau)}$ und der Vorhersage $\bm{\hat{y}^{(\tau)}}$. Diese Vorhersage wird erhalten, indem intern auf den Output die \textit{softmax} Aktivierungsfunktion (Kapitel \ref{kap:neuralNets}) angewandt wird. Die \textit{forward propagation} beginnt mit der Initiierung des \textit{hidden state} $h^{(0)}$. Für jeden der Zeitpunkte $t=1$ bis $t = \tau$ wird dann sukzessive 
 
 \begin{align*}
@@ -484,16 +485,16 @@ Die Verbindung zwischen Input und \textit{hidden} Neuronen wird durch die Gewich
     und schließlich zum letzten Zeitpunkt $\tau$
 \begin{align*}
     \bm{o}^{(\tau)} &= \bm{c} + \bm{V}\bm{h}^{(\tau)} \\
-    \bm{\hat{y}}^{(\tau)} &= softmax(\bm{o}^{(\tau)})
+    \bm{\hat{y}}^{(\tau)} &= \phi(\bm{o}^{(\tau)})
 \end{align*}
 
-berechnet. Hier bezeichnen $\bm{b}$ und $\bm{c}$ die \textit{bias} Vektoren, die zu $\bm{W} \bm{h}^{(t-1)} $ und $\bm{V}\bm{h}^{(\tau)} $ addiert werden (vgl. \cite{deepL}, S.381).\\ 
-Die Berechnung der Gradienten durch die \textit{backpropagation} Operation funktioniert analog wie bei dem \textit{MLP} aus Kapitel \ref{kap:neuralNets}. Sie wird auf das zeitlich aufgeschlüsselte Modell (vgl. Abbildung \ref{abb:RNNArch}) angewendet und heißt deshalb auch \textit{backpropagation-through-time} (kurz \textit{BPTT}). \\
+berechnet. Hier bezeichnen $\bm{b}$ und $\bm{c}$ die \textit{bias} Vektoren, die zu $\bm{W} \bm{h}^{(t-1)} $ und $\bm{V}\bm{h}^{(\tau)} $ addiert werden und $\phi$ die \textit{softmax} Aktivierungsfunktion (vgl. \cite{deepL}, S.381).\\ 
+Die Berechnung der Gradienten durch die \textit{Back-Propagation} Operation funktioniert analog wie bei dem \textit{MLP} aus Kapitel \ref{kap:neuralNets}. Sie wird auf das zeitlich aufgeschlüsselte Modell (vgl. Abbildung \ref{abb:RNNArch}) angewendet und heißt deshalb auch \textit{Back-Propagation-Through-Time} (kurz \textit{BPTT}). \\
 Im Lernprozess der langen zeitlichen Abhängigkeiten, entsteht bei \textit{RNN} häufig das \textit{vanishing-gradient} Problem.
 Die Gewichte werden bei der \textit{BPTT} exponentiell kleiner bei langen Sequenzen (vgl. \cite{deepL}, S.401). Wird die zeitliche Komponente $\tau$ der Sequenz erhöht, so erhöht sich auch die Schwierigkeit der Optimierung.
 Bereits bei Sequenzen der Länge von $\tau = 10$ oder $\tau = 20$ kann ein \textit{RNN} nicht mehr erfolgreich gelernt werden (vgl. \cite{deepL}, S.418).\\
 
-Zur Lösung des \textit{vanishing-gradient} Problems bei dem \textit{RNN} gibt es mehrere Herangehensweisen. Eine davon ist die Nutzung der Architektur eines \textit{long-short-term-memory} Netzwerkes, welches eine Klasse der \textit{RNN} ist. Diese Netzwerke wurden speziell zur Lösung des \textit{vanishing gradient} Problems konzipiert und können Abhängigkeiten über einen langen Zeitraum besser lernen (vgl. \cite{keras}, S. 186). Mit der Einführung von \textit{gates} wird bei der \textit{BPTT} der Gradient additiv statt multiplikativ berechnet. Durch die additive Zusammensetzung wird der Effekt des \textit{vanishing gradients} Problems reduziert (vgl. \cite{deepEssentials}, S. 150, todo: ausführlicher?).
+Zur Lösung des \textit{vanishing-gradient} Problems bei dem \textit{RNN} gibt es mehrere Herangehensweisen. Eine davon ist die Nutzung der Architektur eines \textit{long-short-term-memory} Netzwerkes, welches eine Klasse der \textit{RNN} ist. Diese Netzwerke wurden speziell zur Lösung des \textit{vanishing gradient} Problems konzipiert und können Abhängigkeiten über einen langen Zeitraum besser lernen (vgl. \cite{keras}, S. 186). Mit der Einführung von \textit{gates} wird bei der \textit{BPTT} der gesamte Gradient durch die Summe von partiellen Gradienten berechnet. Ohne \textit{gates} wird er durch das Produkt der partiellen Gradienten berechnet, was bei kleinen Multiplikatoren dazu führt, dass der gesamte Gradient schnell sehr klein wird. Dieser Effekt tritt in der additiven Zusammensetzung nicht auf und reduziert somit das Problem des \textit{vanishing gradients} (vgl. \cite{deepEssentials}, S. 150).
 
 Die verschiedenen \textit{gates} bestimmen welcher Teil der Informationen über die Vergangenheit vergessen und erhalten bleibt. (vgl. \cite{deepNLP}, S.133). Die grundlegende Struktur des \textit{LSTM} entspricht der eines \textit{RNN}, nur dass die \textit{RNN}-Zelle durch eine \textit{LSTM}-Zelle ersetzt wird (vgl. \cite{keras}, S.188). Statt nur einer Zwischenschicht in einer \textit{RNN}-Zelle gibt es in der \textit{LSTM}-Zelle nun mehrere Zwischenschichten, die in einer besonderen Art miteinander interagieren. In Abbildung \ref{abb:LSTMArch} ist die Struktur für den Zeitpunkt $t$ der Sequenz dargestellt, welche im Folgenden erläutert wird.
 
@@ -506,24 +507,25 @@ Die verschiedenen \textit{gates} bestimmen welcher Teil der Informationen über 
 \end{center}
 \end{figure}
 
-Im Folgenden ist der Zeitpunkt $t$ nicht wie bisher in oben stehenden Klammern notiert, sondern basierend auf Abbildung \ref{abb:LSTMArch} als unten stehender Index. Die folgenden Formeln zur Berechnung der Variablen aus Abbildung \ref{abb:LSTMArch} stammen aus \cite{deepNLP}, S.140-142.
+Im Folgenden ist der Zeitpunkt $t$ nicht wie bisher in oben stehenden Klammern notiert, sondern basierend auf Abbildung \ref{abb:LSTMArch} als Index. Die folgenden Formeln zur Berechnung der Variablen aus Abbildung \ref{abb:LSTMArch} stammen aus \cite{deepNLP}, S.140-142.
+%todo: datum, seite in klammern
 Die \textit{input gate} Zwischenschicht $\bm{i}_t$ zum Zeitpunkt $t$ (mit vorheriger Notation $i^{(t)}$)  berechnet sich aus
 
 \[ \bm{i}_t = \sigma(\bm{W}_i [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_i),\]
 
-wobei $\bm{x}_t$ der Input zum Zeitpunkt $t$ ist, $\bm{h}_{t-1}$ der \textit{hidden state} zum Zeitpunkt $t-1$, $\bm{b}_i$ ein \textit{bias} Vektor und $\bm{W}_i$ die zum \textit{input gate} zugehörige Gewichtsmatrix. $\sigma$ und $tanh$ bezeichnen die entsprechenden Aktivierungsfunktionen, die in Kapitel \ref{kap:neuralNets} definiert sind. Des Weiteren wird ein Kandidaten-Vektor $\bm{\acute{c}}_t$ 
-\[\bm{\acute{c}}_t = tanh(\bm{W}_c [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_c),\]
+wobei $\bm{x}_t$ der Input zum Zeitpunkt $t$ ist, $\bm{h}_{t-1}$ der \textit{hidden state} zum Zeitpunkt $t-1$, $\bm{b}_i$ ein \textit{bias} Vektor und $\bm{W}_i$ die zum \textit{input gate} zugehörige Gewichtsmatrix. $\sigma$ und $tanh$ bezeichnen die entsprechenden Aktivierungsfunktionen, die in Kapitel \ref{kap:neuralNets} definiert sind. Des Weiteren wird ein Kandidaten-Vektor $\bm{\acute{c}}_t$, 
+\[\bm{\acute{c}}_t = tanh(\bm{W}_c [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_c)\]
 
-erstellt, der potentielle Werte enthält, die zum \textit{input gate} Output addiert werden. $\bm{W}_c$ ist die zugehörige Gewichtsmatrix und $\bm{b}_c$ der zugehörige \textit{bias} Vektor. Die nächste Komponente ist das \textit{forget gate} $\bm{f}_t$
+erstellt. Dieser enthält potentielle Werte, die zum \textit{input gate} Output addiert werden. $\bm{W}_c$ ist die zugehörige Gewichtsmatrix und $\bm{b}_c$ der zugehörige \textit{bias} Vektor. Die nächste Komponente ist das \textit{forget gate} $\bm{f}_t$,
 
-\[  \bm{f}_t = \sigma(\bm{W}_f [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_f), \]
+\[  \bm{f}_t = \sigma(\bm{W}_f [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_f) ,\]
 
 welches kontrolliert, welcher Anteil der Information im Gedächtnis des Netzes zum Zeitpunkt $t$ erhalten bleibt. $\bm{W}_f$ bezeichnet die Gewichtsmatrix und $\bm{b}_f$ den zugehörigen \textit{bias}. Neben dem \textit{hidden state} gibt es jetzt nun auch einen \textit{cell state} $\bm{c}_t$ . Inhaltlich repräsentiert dieser das interne Langzeitgedächnis der \textit{LSTM}-Zelle (vgl. \cite{keras}, S. 186). Dieser wird berechnet aus
 \[\bm{c}_t = \bm{f}_t \cdot \bm{c}_{t-1} + \bm{i}_t \cdot \bm{\acute{c}}_t ,\]
 
-also aus der Summe von $0$ Komponenten. Der eine Teil ist der \textit{cell state} zum Zeitpunkt $t-1$, gefiltert durch das \textit{forget gate}. Die andere Komponente ist der Kandidaten-Vektor, der durch das \textit{input gate} ebenfalls gefiltert wird.\\
+also aus der Summe von $0$ Komponenten. Der eine Teil ist der \textit{cell state} zum Zeitpunkt $t-1$, gefiltert durch das \textit{forget gate}. Die andere Komponente ist der Kandidaten-Vektor, der durch das \textit{input gate} ebenfalls gefiltert wird.
 Das letzte \textit{gate} ist das \textit{output gate} 
-\[  \bm{o}_t = \sigma(\bm{W}_o [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_o), .\]
+\[  \bm{o}_t = \sigma(\bm{W}_o [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_o).\]
 
 $\bm{W}_o$ ist die Gewichtsmatrix und $\bm{b}_o$ der \textit{bias}. Der \textit{hidden state} zum Zeitpunkt $t$ ergibt sich durch
 \[\bm{h}_t = \bm{o}_t \cdot tanh(\bm{c}_t) , \]
@@ -539,6 +541,7 @@ In der bisher beschriebenen Struktur ist der Output zum Zeitpunkt $t$ von allen 
     \item Quellen: deepEssentials: S.143-165, bidirectional 159,  keras: 174-213 (bidirectional included) (gute quelle),  deepNLP: 119-169, LSTM 138-145, MIT: 373-416, (bidirectional 394-396, LSTM 408- 413)
     \item vanishing gradient lösung: MIT S.385, 8.2.5, und S. 401, keras 184-186, essentials: 149-150
     \item tuning RNNs: deepNLP 138
+    \item bidirectional: supervised sequences S. 21
 \end{itemize}{}
 
 

@@ -20,6 +20,9 @@
 # 
 
 # [next steps: runterschreiben]
+# MIT zitat: seitenanzahl checken bzw groll hinweisen
+# email an alex: rnn/lstm dimensionen der matrizen erklären?
+# glossar bzw abkürzungsverzeichnis schreiben
 # Zusammenfassung von netzteil schreiben
 # Zusammenfassung von wordembeddings schreiben
 # mean_accuracy erklären, probIfCorrect

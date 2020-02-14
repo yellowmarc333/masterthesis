@@ -45,7 +45,7 @@
 
 \section{Statistische Auswertung}\label{Kap:statAus}
 
-In diesem Kapitel werden die in Kapitel \ref{kap:machineLearning} vorgestellten \textit{Machine Learning} Modelle auf die verschiedenen numerischen Repräsentationen (Kapitel \ref{kap:3.1Wordemb}) der Nachrichten-Schlagzeilen angewandt. Dieses Kapitel ist in $3$ Teile unterteilt. Im ersten Teil wird das Trainings-, Validierungs- und Test- \textit{Framework} beschrieben. Es folgt eine Beschreibung über die Vorauswahl der Modelle. Der zweite Teil behandelt die Evaluation der ausgewählten Modelle anhand der Gütemaße aus Abschnitt \ref{kap:guetemass}. Im dritten Teil werden die Modelle analysiert (todo: vervollständigen)\\
+In diesem Kapitel werden die in Kapitel \ref{kap:machineLearning} vorgestellten \textit{Machine Learning} Modelle auf die verschiedenen numerischen Repräsentationen (Kapitel \ref{kap:3.1Wordemb}) der Nachrichten-Schlagzeilen angewandt. Dieses Kapitel ist in $3$ Teile unterteilt. Im ersten Teil wird das Trainings-, Validierungs- und Test-\textit{Framework} beschrieben. Es folgt eine Beschreibung über die Vorauswahl der Modelle. Der zweite Teil behandelt die Evaluation der ausgewählten Modelle anhand der Gütemaße aus Abschnitt \ref{kap:guetemass}. Im dritten Teil werden die Modelle analysiert (todo: vervollständigen)\\
 Die Auswertung und Exploration der Daten sowie die Programmierung der Algorithmen erfolgte ausschließlich mit der Statistik-Software \texttt{R} (R Core Team, 2019).
 
 \subsection{Framework und Vorauswahl der Modelle}
@@ -55,9 +55,10 @@ Dieses Unterkapitel erläutert das verwendete \textit{Framework} und beschreibt 
 \subsubsection{Framework}
 
 
-Dieser Abschnitt erklärt, wie die \numprint{200847} Beobachtungen des gesamten Datensatzes in Trainings-, Test- und Validierungsdaten unterteilen.\\
-Die Testdaten ist der Teil der Daten, auf den die finalen Modelle eine Vorhersage der Nachrichtenkategorie treffen und anschließend die Gütemaße aus Kapitel \ref{kap:guetemass} berechnet und evaluiert werden. Wichtig dabei ist, dass die Testdaten den Modellen nie als Input gedient haben. Der Grund dafür ist, dass die Testdaten als Kriterium dafür dienen, wie gut die gelernten Modelle auf ungesehenen Daten generalisieren können. Zur Ermittlung einer geeigneten Größe der Testdaten, wird das Kriterium genommen, dass im Mittel $100$ Beobachtungen in der am niedrigsten repräsentierten Nachrichtensparte enthalten sind. Dies resultiert in einer Stichprobe von $\numprint{20005}$ Beobachtungen, was etwa 10 Prozent der gesamten Daten entspricht. 
-Mit dieser Größe ist eine aussagekräftige Evaluation möglich und gleichzeitig stehen den Algorithmen eine größtmögliche Anzahl von Beobachtungen zum Training zur Verfügung. Von den verbleibenden $90$ ($180842$ Datenpunkte) der Daten wurde wiederum eine Stichprobe von $10$ Prozent gezogen (insgesamt $9$ Prozent der gesamten Daten). Auf dieser Stichprobe der Größe $\numprint{18084}$ erfolgt die im nächsten Abschnitt beschriebene Vorauswahl der Algorithmen und Repräsentationen. Die Daten für die Vorauswahl (folglich Vorauswahldaten genannt) werden wiederum in $80$ Prozent Trainingsdaten ($\numprint{14467}$ Datenpunkte) und $20$ Prozent  Validierungsdaten ($\numprint{3617}$ Datenpunkte) geteilt. Auf den Vorauswahldaten werden die verschiedenen Repräsentationen der Wörter, sowohl für Training als auch Validierung erstellt. Dabei werden je nach Art des \textit{Embeddings} einige wenige Datenpunkte entfernt. Der Grund hierfür ist beispielsweise, dass  unter Nutzung von \textit{BOW} nach Entfernung der \textit{Stopwords} einige Beobachtungen keine Wörter mehr enthalten. Im Falle von \textit{Glove} werden im Zuge des \textit{paddings} alle Datenpunkte entfernt, die mehr als $W_{max}$ Wörter enthalten.
+Dieser Abschnitt erklärt, wie die \numprint{200847} Beobachtungen des gesamten Datensatzes in \\
+Trainings-,Test- und Validierungsdaten unterteilt werden.
+Die Testdaten sind der Teil der Daten, auf den die finalen Modelle eine Vorhersage der Nachrichtenkategorie treffen und anschließend die Gütemaße aus Kapitel \ref{kap:guetemass} berechnet und evaluiert werden. Wichtig dabei ist, dass die Testdaten den Modellen nie als Input gedient haben. Der Grund dafür ist, dass die Testdaten als Kriterium dafür dienen, wie gut die gelernten Modelle auf ungesehenen Daten generalisieren können. Zur Ermittlung einer geeigneten Größe der Testdaten wird das Kriterium genommen, dass im Mittel $100$ Beobachtungen in der am niedrigsten repräsentierten Nachrichtensparte enthalten sind. Dies resultiert in einer Stichprobe von $\numprint{20005}$ Beobachtungen, was etwa 10 Prozent der gesamten Daten entspricht. 
+Mit dieser Größe ist eine aussagekräftige Evaluation möglich und gleichzeitig stehen den Algorithmen eine größtmögliche Anzahl von Beobachtungen zum Training zur Verfügung. Von den verbleibenden $90$ Prozent ($\numprint{180842}$ Datenpunkte) der Daten wurde wiederum eine Stichprobe von $10$ Prozent gezogen (insgesamt $9$ Prozent der gesamten Daten). Auf dieser Stichprobe der Größe $\numprint{18084}$ erfolgt die im nächsten Abschnitt beschriebene Vorauswahl der Algorithmen und Repräsentationen. Die Daten für die Vorauswahl (folglich Vorauswahldaten genannt) werden wiederum in $80$ Prozent Trainingsdaten ($\numprint{14467}$ Datenpunkte) und $20$ Prozent  Validierungsdaten ($\numprint{3617}$ Datenpunkte) geteilt. Auf den Vorauswahldaten werden die verschiedenen Repräsentationen der Wörter, sowohl für Training als auch Validierung erstellt. Dabei werden je nach Art des \textit{Embeddings} einige wenige Datenpunkte entfernt. Der Grund hierfür ist beispielsweise, dass  unter Nutzung von \textit{BOW} nach Entfernung der \textit{Stopwords} einige Beobachtungen keine Wörter mehr enthalten. Im Falle von \textit{Glove} werden im Zuge des \textit{paddings} alle Datenpunkte entfernt, die mehr als $W_{max}$ Wörter enthalten.
 Letztlich erhalten alle Algorithmen die selben Teilmengen der Vorauswahldaten zum Trainieren und Validieren. Die Struktur der verwendeten neuronalen Netze sowie die Hyperparameter der Verfahren wurde auf den Validierungsdaten für jedes Modell in mehreren Trainings-Durchläufen angepasst.
 
 \subsubsection{Vorauswahl der Modelle}\label{kap:preselection}
@@ -96,7 +97,7 @@ Die auf den Validierungsdaten evaluierten Ergebnisse sind in Tabelle \ref{tab:pr
    \hline
 \end{tabular}
 
-  \caption{Ergebnis von $accuracy$, $fscore_M^{(1)}$ und $CE$ auf den Validierungsdaten für Kombinationen aus \textit{Word Embeddings} und \textit{Machine Learning} Modellen. In Grün ist die Kombination mit der jeweils besten Performance bezüglich eines Maßes markiert. Hellgrün ist die zweitbeste Performance, rot die schlechteste und orange die zweitschlechteste.}  
+  \caption{Ergebnis von $accuracy$, $fscore_M^{(1)}$ und $CE$ auf den Validierungsdaten für Kombinationen aus \textit{Word Embeddings} und \textit{Machine Learning} Modellen. In grün ist die Kombination mit der jeweils besten Performance bezüglich eines Maßes markiert. Hellgrün ist die zweitbeste Performance, rot die schlechteste und orange die zweitschlechteste.}  
   \label{tab:preselection}
 \end{center}
 \end{table}
@@ -132,18 +133,14 @@ In diesem Abschnitt werden nun die finalen Modelle auf den etwa $90$ Prozent der
   \textit{SOW GloVe 300D, MLP}, (4) & 0.625 & \textcolor{red}{0.455} & \textcolor{red}{0.499} & 1.358 & 0.705 \\ 
    \hline
 \end{tabular}
-\label{tab:finalSelection}
 \caption{Evaluation der Modelle der finalen Auswahl bezüglich der Gütemaße $accuracy$, $\overline{accuracy}$, $fscore_M^{(1)}$, $CE$ und  $\bar{p}_{IfCorrect}$. In dunkelgrün ist das beste Ergebnis pro Gütemaß markiert, in rot das schlechteste}
+\label{tab:finalSelection}
+
 \end{table}
 
-Es ist zu sehen, dass das \textit{Bi-LSTM} bezüglich allen betrachteten Gütemaßen am besten abschneidet. Mit einer \textit{accuracy} von $0.689$ sagt es für die Beobachtungen des Testdatensatzes in $68.9$ Prozent der Fälle die richtige der $32$ Klassen vorher. Werden alle Klassen als gleich wichtig angesehen, so erkennt das \textit{Bi-LSTM} im Mittel $55.2$ Beobachtungen pro Sparte. Bezüglich der $CE$, die auch als Verlustfunktion im Trainingsprozess minimiert wird, wird ein Wert von $1.124$ erreicht. Wenn 
-
-
-Das zweitbeste Modell 
-
-
-
-
+Zur Beschreibung aller folgenden Ergebnisse wird aus Gründen der Platzersparnis nur noch der Name des Algorithmus ohne das zugehörige \textit{Word-Embedding} genannt.
+In der Tabelle \ref{tab:finalSelection} ist zu sehen, dass das \textit{Bi-LSTM} bezüglich allen betrachteten Gütemaßen am besten abschneidet. Mit einer \textit{accuracy} von $0.689$ sagt es für die Beobachtungen des Testdatensatzes in $68.9$ Prozent der Fälle die richtige der $32$ Klassen vorher. Werden kleinere Klassen wichtiger angesehen, so erkennt das \textit{Bi-LSTM} im Mittel $55.2$ Beobachtungen pro Sparte und erzielt im Sinne des $fscore_M^{(1)}$ einen Wert von $0.582$. Bezüglich der $CE$, die auch als Verlustfunktion im Trainingsprozess minimiert wird, wird ein Wert von $1.124$ erreicht. Wenn das Modell die richtige Klasse vorhersagt, so ist es sich mit einer mittleren Modellwahrscheinlichkeit von $0.825$ mit Abstand am sichersten. Das zweitbeste Modell ist das \textit{CNN} in Bezug auf \textit{accuracy} ($0.668$),  $\overline{accuracy}$ ($0.521$), $fscore_M^{(1)}$ ($0.562$) und $CE$ ($1.247$). Im Falle einer richtigen Klassifikation ist sich dieses Modell jedoch am unsichersten ($\bar{p}_{IfCorrect} =0.646$). Den dritten Platz in Hinsicht auf $accuracy$ belegt das \textit{MLP} ($0.625$), dicht gefolgt von $XGBoost$ ($0.624$). Bei den beiden Gütemaßen, bei denen kleinere Klassen eine höhere Wichtigkeit besitzen, schneidet das \textit{MLP} am schlechtesten ab ($\overline{accuracy} = 0.455$, $fscore_M^{(1)} = 0.499$). \textit{XGBoost} belegt bezüglich der $CE$ den letzten Platz.\\
+Nachdem nun die globale Performance auf dem kompletten Testdatensatz untersucht wurde, erfolgt nun eine Betrachtung für die einzelnen Nachrichtensparten. Abbildung \ref{abb:AccByClass} zeigt die $accuracy$ pro Klasse für alle Modelle der Endauswahl.
 
 \begin{figure}[ht]
     \centering
@@ -152,14 +149,34 @@ Das zweitbeste Modell
 \label{abb:AccByClass}
 \end{figure}
 
-\paragraph{accbyclass}
+Die Grafik ist so zu betrachten, dass die Sparten nach der Anzahl Beobachtungen absteigend von links nach rechts geordnet sind. Es ist sichtbar, dass \textit{Bi-LSTM} in $22$ der $32$ Kategorien die beste $accuracy$ annimmt und gleichzeitig in keiner Sparte am schlechtesten performt. Das \textit{CNN} belegt in $8$ Kategorien den ersten Platz, unter anderem für die beiden kleinsten Klassen \textit{college} und \textit{education}. Nur in \textit{impact} erreicht das \textit{CNN} die niedrigste Trefferrate.
+\textit{XGBoost} schneidet in $12$ Kategorien am schlechtesten ab und in keiner am besten. Das \textit{MLP} performt am besten in der Kategorie \textit{sports}, belegt aber in $16$ der $32$ Sparten den letzten Platz. Besonders schlecht schneidet dieses Modell bei den $5$ kleinsten Kategorien ab. In der Sparte \textit{fifty} erreicht das \textit{MLP} als einziges Modell in einer Kategorie eine Trefferquote von $0$ Prozent. Der Bezug zu den Maßen $\overline{accuracy}$ ($0.455$) und $fscore_M^{(1)}$ ($0.499)$ für das \textit{MLP} aus Tabelle \ref{tab:finalSelection} kann hergestellt werden, da das \textit{MLP} in vielen Kategorien schlecht und nur in wenigen gut abschneidet. \\
+Generell ist in Abbildung \ref{abb:AccByClass} zu beobachten, dass die $2$ größten Kategorien \textit{politics} und \textit{wellness \& healthy living} sowie die Sparten \textit{divorce} und \textit{tech} etwa gleich gut von allen Modellen vorhergesagt werden. Kleine Kategorien schneiden tendenziell schlechter ab, was in den generell niedrigeren Maßen $\overline{accuracy}$ und $fscore_M^{(1)}$ in Tabelle \ref{tab:finalSelection} resultiert. Die $7$ Kategorien mit den meisten Beobachtungen erzielen unter Verwendung des jeweils besten Modells eine $accuracy$ zwischen $0.76$ und $0.86$ Prozent. \\
+\\
+Nachfolgend wird untersucht, wie hoch die Modelle die Wahrscheinlichkeit für die richtige Klasse einschätzen und ob diese Wahrscheinlichkeit proportional zu der Anzahl der korrekt klassifizierten Beobachtungen ist. Dazu werden $50$ (heuristischer Wert) Intervalle $([0, 0.02), [0.02, 0.04), \dots, [0.98, 1]$ gebildet und für jede der $19999$ Beobachtungen im Testdatensatz die Wahrscheinlichkeit des Modells für die richtige Klasse erfasst. Gleichzeitig wird in einer logischen Variable (nimmt $1$ für korrekt und $0$ für inkorrekt an) festgehalten, ob das Modell richtig gelegen hat, was gleichbedeutend dazu ist, dass das Modell keiner anderen Klasse eine höhere Wahrscheinlichkeit zugeordnet hat.
+Es erfolgt anschließend die Zuordnung Wahrscheinlichkeiten zu den entsprechenden Intervallen. Für alle Intervalle wird nun der Mittelwert über die binäre Variable gebildet. Dieser Mittelwert ist der Anteil der korrekt klassifizierten Beobachtungen pro Intervall der Modellwahrscheinlichkeit und ist für alle Modelle der Endauswahl in Abbildung \ref{abb:CompareProbVsAcc} dargestellt.
+
+
+\begin{figure}[ht]
+    \centering
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/FinalSelectionCompareProbVsAcc.pdf} 
+\caption{Anteil korrekt klassifizierter Beobachtungen für Intervalle der Modellwahrscheinlichkeiten der $4$ Modelle der Endauswahl. Die gestrichelte Linie markiert das Verhältnis 1:1}
+\label{abb:CompareProbVsAcc}
+\end{figure}
+
+Wie die Grafik zu lesen ist sei an einem Beispiel verdeutlicht: Für die Mitte des Intervals der Modellwahrscheinlichkeit von $0.75$ (dies sind alle Beobachtungen die eine Wahrscheinlichkeit für die richtige Klasse in $(0.74,0.76]$ von dem Modell zugeordnet bekommen haben) liegt im Falle des \textit{Bi-LSTM} der Anteil der korrekt klassifizierten Beobachtungen bei etwa $0.66$. In diesem Fall ist sich das Modell also sicherer, die korrekte Klasse vorherzusagen, als es letztendlich nach Evaluation der Fall ist. 
+Da sich der Verlauf für das \textit{Bi-LSTM} größtenteils unter der gestrichelten Linie abzeichnet, spricht dies dafür, dass dieses Modell die Wahrscheinlichkeit der richtigen Klasse überschätzt. Dies kann auch den hohen Wert von $\bar{p}_{IfCorrect}$ ($0.825$) aus Tabelle \ref{tab:finalSelection} erklären; wenn das Modell generell hohe Wahrscheinlichkeiten für die wahre Klassen zuteilt, ist der Mittelwert für alle korrekten Einschätzungen (eine Teilmenge davon) auch hoch. Sowohl bei \textit{XGBoost} als auch bei dem \textit{CNN} tritt der gegenteilige Effekt des Unterschätzens der Wahrscheinlichkeit für die richtige Klasse auf, wobei besonders das \textit{CNN} für die hohen Wahrscheinlichkeiten eine noch höhere Trefferquote besitzt. Das \textit{MLP} bewegt sich nahe an der gestrichelten Linie und ist sich tendenziell genau so sicher, wie es auch korrekt klassifiziert. Die Schwankungen sind im linken Teil der Graphik für alle Modelle höher. Dies ist dadurch zu erklären, dass Modelle mit einer guten Performance seltener niedrige Wahrscheinlichkeiten für die richtige Klasse modellieren. Demnach ist die Anzahl der Beobachtungen für kleine Intervall-Mitten geringer und resultiert in einer höheren Schwankung des Anteils der korrekt klassifizierten Beobachtungen. Aus dem gleichen Grund fehlen auch einige Punkte, da für diese keine Beobachtungen im Intervall zu finden sind. \\
+\\
+In diesem Unterkapitel wurden die Gütemaße für die Modelle der Endauswahl erläutert und die Sicherheit der Modelle untersucht.
+Im nächsten Abschnitt beschäftigt sich mit der Untersuchung von benachbarten Kategorien. todo: bessere Überleitung finden
+
+\subsection{Nachbarkategorien}
+
+In diesem Abschnitt werden $2$ Aspekte behandelt. Es stellt sich zum einen für jede Kategorie die Frage, welche, im Falle einer Fehlklassifikation des Modells, die Sparte ist, der die meisten Beobachtungen zugeordnet werden. Zum Anderen ist es von Interesse, in welche Kategorien, im Falle einer korrekten Klassifikation, die nächst wahrscheinlichste Klasse gewesen wäre.
+
+
 \begin{itemize}
-    \item \textit{XGBoost} schneidet in $14$ Kategorien am schlechtesten ab und in keiner am besten.
-     \item \textit{CNN} dominiert $8$ Kategorien, insbesondere die beiden kleinsten \textit{college} und \textit{education}.
-    \item \textit{Bi-LSTM} dominiert $19$ von $32$ Kategorien und ist in keiner am schlechtesten.
-    \item \textit{MLP} performt am besten in \textit{sports}, belegt aber in $16$ der $32$ Sparten den letzten Platz. Schneidet besonders bei den $5$ kleinsten Kategorien schlecht ab. In  \textit{fifty} $0$ Prozent $accuracy$.
-    \item Die $2$ größten Kategorien \textit{politics} und \textit{wellness \& healthy living} sowie \textit{divorce} und \textit{tech} werden von  allen Modellen etwa gleich gut vorhergesagt.
-    \item kleine Kategorien schneiden tendenziell schlechter ab, die $7$ größten Kategorien haben in den besten Modellen eine $accuracy$ von $0.76- 0.86$ Prozent.
+    \item zweite Wahl ist wahrscheinlichkeitsbasiert
 \end{itemize}{}
 
 
@@ -215,25 +232,6 @@ Wahre Kategorie & \textit{BOW}, \textit{XGBoost} & \textit{GloVe 300D}, \textit{
 
 
 
-
-
-\begin{figure}[ht]
-    \centering
-\includegraphics[width = \textwidth,  keepaspectratio]{Images/FinalSelectionCompareProbVsAcc.pdf} 
-\caption{Anteil korrekt klassifizierter Beobachtungen für Intervalle der Modellwahrscheinlichkeiten der $4$ Modelle der Endauswahl}
-\label{abb:CompareProbVsAcc}
-\end{figure}
-
-
-\paragraph{probVsAcc}
-\begin{itemize}
-    \item \textit{Bi-LSTM}: Sicherheit zu groß
-    \item \textit{CNN}, \textit{XGBoost} häufig größerer Anteil korrekt Klassifizierter Beobachtungen bei geringerer Sicherheit
-    \item \textit{MLP} Tendenziell genau so sicher, wie auch korrekt
-\end{itemize}{}
-
-\subsubsection{Performanzmaße}
-
 \begin{itemize}
 \item vorstellung: struktur, hyperparameter, word embedding sizes und dimensions
     \item metriken wie in vorauswahl nur ausführlicher
@@ -258,6 +256,25 @@ Wahre Kategorie & \textit{BOW}, \textit{XGBoost} & \textit{GloVe 300D}, \textit{
 
 \subsubsection{Anpassung des besten Modell auf den gesamten Datensatz}
 
+\section{Zusammenfassung}
 
+\subsection{Ergebnisse}
+
+\begin{itemize}
+    \item Bi-LSTM performt am besten
+    \item welches Modell ist bzgl wenig rechenzeit und Speichergröße zu empfehlen?
+\end{itemize}{}
+
+
+
+\subsection{Fazit und Ausblick}
+
+\begin{itemize}
+    \item Weitere Architekturen im Bereich Bi-LSTM (Attention, sentence level etc)
+    \item kompliziertere word embeddings wie encoder technologien wie BERT
+\end{itemize}
+
+
+\newpage
 
 \end{document}

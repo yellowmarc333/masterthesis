@@ -41,14 +41,28 @@ ggsave(filename = paste0(outPath, "FinalSelectionAccByClass.pdf"),
        device = "pdf")
 
 # neighborClasses ####
+# wenn das modell richtig klassifiziert, welches ist dann die zweite Wahl
+# und wie oft ist sie das 
+# visualisierung: Tabelle?
 res <- identifyNeighborClassesIfTRUE("03_computedData/05_modelData/finalModels/")
-print(xtable(res, label = "tab:neighborClasses", digits = 0), 
+print(xtable(res, label = "tab:neighborClassesIfTrue", digits = 0), 
       include.rownames = FALSE)
 
+# wenn das modell falsch liegt, welches ist dann die zweite Wahl und
+# wie oft ist die zweite Wahl die richtige
+# 2d categorical scatter, point size wie oft (winkelhalbierende ist gut)
+res <- identifyNeighborClassesIfFALSE("03_computedData/05_modelData/finalModels/")
+print(xtable(res, label = "tab:missclassClasses", digits = 0), 
+      include.rownames = TRUE)
+
 # missclassification counts for all kategories
+# Im falle einer missklassifikation, in welche kategorien fallen die meisten
+# beobachtungen?
 res <- identifyMisclassSums("03_computedData/05_modelData/finalModels/")
 print(xtable(res, label = "tab:missclassClasses", digits = 0), 
       include.rownames = TRUE)
+
+
 
 
 

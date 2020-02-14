@@ -305,7 +305,7 @@ plotAccByClass <- function(inPath) {
 #     
 #     
 #     
-#     browser()
+#     
 #     
 #     trueClasses <- row.names(data)
 #     neighborCount <- list()
@@ -353,17 +353,18 @@ identifyNeighborClassesIfTRUE <- function(inPath) {
   # subset to only .rds files
   allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
   
-  res <- list()
+  res <- data.table()
   
   for(j in 1:length((allModels))) {
     model <- readRDS(paste0(inPath, allModels[j]))
     data <- model[["predictions"]]
     ProbAccDT <- model[["ProbAccDT"]]
     testLabelRaw <- model[["testLabelRaw"]]
+    testLabelNames <- sort(unique(testLabelRaw))
     # select only the correct classified datapoints
     dataRed <- data[ProbAccDT$Correct]
     testLabelRed <- testLabelRaw[ProbAccDT$Correct]
-    
+  
     # gives the name of the category with the 2nd highest probability
     # works correctly, checked with 1st highest probability
     # sum(predictions2ndProb == testLabelRed)
@@ -378,19 +379,122 @@ identifyNeighborClassesIfTRUE <- function(inPath) {
     # get the classes with the highest count in one DT
     resTmp <- dtRes[, {
       count <- max(N)
+      share <- round(count/sum(N),3)
       index <- which.max(N)
       neighbor <- neighborClass[index]
-      .(neighbor = paste0("it{" ,neighbor, "} ($", count, "$)"))
+      .(neighbor = paste0("it{" ,neighbor, "} ($", share, "$)"))
     }, by = .(testLabel)]
 
 
-    res[[allModels[j]]] <- resTmp
+    res <- cbind(res, testLabel = testLabelNames)
+    res <- merge(res, resTmp, by = "testLabel", all = TRUE)
+    
+    setnames(res, "neighbor", allModels[j])
+    if(j != length((allModels))) res[, testLabel := NULL]
   }
-  browser()
-  # Marc todo: checken ob das alles so stimmt
-  
-  return(resDT)
+  return(res)
 }
+
+identifyNeighborClassesIfFALSE <- function(inPath) {
+  assertString(inPath)
+  
+  allModels <- list.files(path = inPath)
+  # subset to only .rds files
+  allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
+  
+  res <- data.table()
+  
+  for(j in 1:length((allModels))) {
+    model <- readRDS(paste0(inPath, allModels[j]))
+    data <- model[["predictions"]]
+    ProbAccDT <- model[["ProbAccDT"]]
+    testLabelRaw <- model[["testLabelRaw"]]
+    testLabelNames <- sort(unique(testLabelRaw))
+    # select only the correct classified datapoints
+
+    dataRed <- data[!ProbAccDT$Correct]
+    testLabelRed <- testLabelRaw[!ProbAccDT$Correct]
+    
+    # gives the name of the category with the 2nd highest probability
+    # works correctly, checked with 1st highest probability
+    # sum(predictions2ndProb == testLabelRed)
+    predictions2ndProb <- as.vector(
+      t(apply(dataRed, 1 , function(x) {
+        names(x[order(x, decreasing = TRUE)[2]])
+      })))
+    
+    dt <- data.table(testLabel = testLabelRed,
+                     neighborClass = predictions2ndProb)
+    dtRes <- dt[, .N, by = .(testLabel, neighborClass)]
+    # get the classes with the highest count in one DT
+    resTmp <- dtRes[, {
+      share <- round(max(N)/sum(N),3)
+      shareCorrect <- round(N[neighborClass == testLabel]/
+        sum(N), 3)
+
+      index <- which.max(N)
+      neighbor <- neighborClass[index]
+      .(neighbor = paste0("it{" ,neighbor, "} ($", shareCorrect, "$)"))
+    }, by = .(testLabel)]
+    
+    
+    res <- cbind(res, testLabel = testLabelNames)
+    res <- merge(res, resTmp, by = "testLabel", all = TRUE)
+    
+    setnames(res, "neighbor", allModels[j])
+    if(j != length((allModels))) res[, testLabel := NULL]
+  }
+  
+  browser()
+  # geom_count
+  
+  resMelted <- melt(res, id.vars = c("category"))
+  resMelted2 <- melt(res2, id.vars = c("category"),
+                     value.name = "count")
+  plotData <- merge(resMelted, resMelted2, 
+                    by = c("category", "variable"))
+  #plotData[, Order := max(value), by = .(category)]
+  # renaming for plotting (hardcode)
+  plotData[variable == "BOW_XG", variable := "BOW, XGBoost"]
+  plotData[variable == "GloveArray300_CNNArray", 
+           variable := "GloVe 300D, CNN"]
+  plotData[variable == "GloveArray300_LSTMArray", 
+           variable := "GloVe 300D, Bi-LSTM"]
+  plotData[variable == "GloveSums300_MLP", 
+           variable := "SOW GloVe 300D, MLP"]
+  
+  ggObj <- ggplot(plotData, aes(x = reorder(category, -count),
+                                y = value, fill = variable, 
+                                label = category)) +
+    geom_bar(stat = "identity", position = "dodge") + 
+    labs(x = "Nachrichtenkategorie",
+         y = "Accuracy",
+         fill = "Embedding, Modell: ") +
+    geom_text(aes(label = round(value, 3)), 
+              position = position_dodge(width = 0.9),
+              vjust = 0.5, hjust = 1.2,
+              angle = 90, size = 2.4) +
+    theme(axis.text.x  = element_text(angle = 45,
+                                      vjust = 1, hjust = 1,
+                                      size = 14),
+          axis.text.y = element_text(size = 15),
+          axis.title = element_text(size = 28),
+          axis.ticks.x = element_line(size  = 1),
+          legend.background = element_rect(fill = "lightgrey"),
+          legend.key = element_rect(fill = "lightblue", color = NA),
+          legend.position = "top",
+          legend.text = element_text(size = 15),
+          legend.title = element_text(size = 18),
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank()) 
+  
+  
+  
+  
+  return(res)
+}
+
+
 
 
 identifyMisclassSums <- function(inPath) {

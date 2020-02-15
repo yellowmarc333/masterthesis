@@ -43,24 +43,27 @@ ggsave(filename = paste0(outPath, "FinalSelectionAccByClass.pdf"),
 # neighborClasses ####
 # wenn das modell richtig klassifiziert, welches ist dann die zweite Wahl
 # und wie oft ist sie das 
-# visualisierung: Tabelle?
-res <- identifyNeighborClassesIfTRUE("03_computedData/05_modelData/finalModels/")
-print(xtable(res, label = "tab:neighborClassesIfTrue", digits = 0), 
-      include.rownames = FALSE)
-
+# visualisierung: geom_point
+ggObj <- identifyNeighborClassesIfTRUE("03_computedData/05_modelData/finalModels/")
+ggsave(filename = paste0(outPath, "NeighborClassesIfTRUE.pdf"),
+       plot = ggObj, width = fullWidth, height = fullHeight, 
+       device = "pdf")
 # wenn das modell falsch liegt, welches ist dann die zweite Wahl und
 # wie oft ist die zweite Wahl die richtige
-# 2d categorical scatter, point size wie oft (winkelhalbierende ist gut)
-res <- identifyNeighborClassesIfFALSE("03_computedData/05_modelData/finalModels/")
-print(xtable(res, label = "tab:missclassClasses", digits = 0), 
-      include.rownames = TRUE)
+ggObj <- identifyNeighborClassesIfFALSE("03_computedData/05_modelData/finalModels/")
+ggsave(filename = paste0(outPath, "NeighborClassesIfFALSE.pdf"),
+       plot = ggObj, width = fullWidth, height = fullHeight, 
+       device = "pdf")
 
-# missclassification counts for all kategories
+# missclassification counts for all kategories also 1ste Wahl
 # Im falle einer missklassifikation, in welche kategorien fallen die meisten
 # beobachtungen?
-res <- identifyMisclassSums("03_computedData/05_modelData/finalModels/")
-print(xtable(res, label = "tab:missclassClasses", digits = 0), 
-      include.rownames = TRUE)
+# visualisierung auch 2d geom_point, summe über die count muss gesamt beobachtungen
+# raus kommen
+ggObj <- identifyMisclassSums("03_computedData/05_modelData/finalModels/")
+ggsave(filename = paste0(outPath, "MissclassCounts.pdf"),
+       plot = ggObj, width = fullWidth, height = fullHeight, 
+       device = "pdf")
 
 
 

@@ -353,7 +353,7 @@ identifyNeighborClassesIfTRUE <- function(inPath) {
   # subset to only .rds files
   allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
   
-  res <- data.table()
+  res <- list()
   
   for(j in 1:length((allModels))) {
     model <- readRDS(paste0(inPath, allModels[j]))
@@ -365,6 +365,8 @@ identifyNeighborClassesIfTRUE <- function(inPath) {
     dataRed <- data[ProbAccDT$Correct]
     testLabelRed <- testLabelRaw[ProbAccDT$Correct]
   
+    tmpName <- paste0(strsplit(allModels[j], split = "_")[[1]][2:3], collapse = "_")
+    
     # gives the name of the category with the 2nd highest probability
     # works correctly, checked with 1st highest probability
     # sum(predictions2ndProb == testLabelRed)
@@ -377,22 +379,60 @@ identifyNeighborClassesIfTRUE <- function(inPath) {
                      neighborClass = predictions2ndProb)
     dtRes <- dt[, .N, by = .(testLabel, neighborClass)]
     # get the classes with the highest count in one DT
+    
     resTmp <- dtRes[, {
       count <- max(N)
+      shareCorrect <- round(count/
+                              sum(N), 3)
       share <- round(count/sum(N),3)
       index <- which.max(N)
       neighbor <- neighborClass[index]
-      .(neighbor = paste0("it{" ,neighbor, "} ($", share, "$)"))
+      .(neighbor = neighbor,
+        share = shareCorrect)
     }, by = .(testLabel)]
 
 
-    res <- cbind(res, testLabel = testLabelNames)
-    res <- merge(res, resTmp, by = "testLabel", all = TRUE)
-    
-    setnames(res, "neighbor", allModels[j])
-    if(j != length((allModels))) res[, testLabel := NULL]
+    resTmp[, ModelName := tmpName]
+
+    res[[j]] <- resTmp
   }
-  return(res)
+  
+  
+  plotData <- rbindlist(res)
+
+  ggObj <- ggplot(plotData, aes(x = testLabel, y = neighbor,
+                                color = ModelName, 
+                                size = share,
+                                shape = ModelName)) +
+    geom_count() +
+    labs(x = "Wahre Kategorie",
+         y = "Zweitwahrscheinlichste Kategorie",
+         size = "Anteil Datenpunkte:") +
+    scale_color_discrete(name = "Embedding, Modell:", 
+                         labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
+                                    "GloVe 300D, Bi-LSTM", 
+                                    "SOW GloVe 300D, MLP")) +
+    scale_shape_discrete(name = "Embedding, Modell:", 
+                         labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
+                                    "GloVe 300D, Bi-LSTM", 
+                                    "SOW GloVe 300D, MLP")) +
+    guides(fill = guide_legend(nrow = 2, byrow = TRUE)) +
+    theme(axis.text.x  = element_text(angle = 45,
+                                      vjust = 1, hjust = 1,
+                                      size = 14),
+          axis.text.y = element_text(size = 15),
+          axis.title = element_text(size = 28),
+          axis.ticks.x = element_line(size  = 1),
+          legend.background = element_rect(fill = "lightgrey", size = 4),
+          legend.key = element_rect(fill = "white",
+                                    color = NA, size = 6) ,
+          legend.box = "vertical",
+          legend.position = "top",
+          legend.text = element_text(size = 13),
+          legend.title = element_text(size = 15)) ; ggObj
+  
+  
+  return(ggObj)
 }
 
 identifyNeighborClassesIfFALSE <- function(inPath) {
@@ -402,7 +442,7 @@ identifyNeighborClassesIfFALSE <- function(inPath) {
   # subset to only .rds files
   allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
   
-  res <- data.table()
+  res <- list()
   
   for(j in 1:length((allModels))) {
     model <- readRDS(paste0(inPath, allModels[j]))
@@ -411,7 +451,9 @@ identifyNeighborClassesIfFALSE <- function(inPath) {
     testLabelRaw <- model[["testLabelRaw"]]
     testLabelNames <- sort(unique(testLabelRaw))
     # select only the correct classified datapoints
-
+    tmpName <- paste0(strsplit(allModels[j], split = "_")[[1]][2:3], collapse = "_")
+    
+    
     dataRed <- data[!ProbAccDT$Correct]
     testLabelRed <- testLabelRaw[!ProbAccDT$Correct]
     
@@ -434,64 +476,52 @@ identifyNeighborClassesIfFALSE <- function(inPath) {
 
       index <- which.max(N)
       neighbor <- neighborClass[index]
-      .(neighbor = paste0("it{" ,neighbor, "} ($", shareCorrect, "$)"))
+      #.(neighbor = paste0("it{" ,neighbor, "} ($", shareCorrect, "$)"))
+      .(neighbor = neighbor,
+        shareCorrect = shareCorrect)
     }, by = .(testLabel)]
     
-    
-    res <- cbind(res, testLabel = testLabelNames)
-    res <- merge(res, resTmp, by = "testLabel", all = TRUE)
-    
-    setnames(res, "neighbor", allModels[j])
-    if(j != length((allModels))) res[, testLabel := NULL]
+    resTmp[, ModelName := tmpName]
+  
+    res[[j]] <- resTmp
   }
   
-  browser()
+  plotData <- rbindlist(res)
   # geom_count
   
-  resMelted <- melt(res, id.vars = c("category"))
-  resMelted2 <- melt(res2, id.vars = c("category"),
-                     value.name = "count")
-  plotData <- merge(resMelted, resMelted2, 
-                    by = c("category", "variable"))
-  #plotData[, Order := max(value), by = .(category)]
-  # renaming for plotting (hardcode)
-  plotData[variable == "BOW_XG", variable := "BOW, XGBoost"]
-  plotData[variable == "GloveArray300_CNNArray", 
-           variable := "GloVe 300D, CNN"]
-  plotData[variable == "GloveArray300_LSTMArray", 
-           variable := "GloVe 300D, Bi-LSTM"]
-  plotData[variable == "GloveSums300_MLP", 
-           variable := "SOW GloVe 300D, MLP"]
-  
-  ggObj <- ggplot(plotData, aes(x = reorder(category, -count),
-                                y = value, fill = variable, 
-                                label = category)) +
-    geom_bar(stat = "identity", position = "dodge") + 
-    labs(x = "Nachrichtenkategorie",
-         y = "Accuracy",
-         fill = "Embedding, Modell: ") +
-    geom_text(aes(label = round(value, 3)), 
-              position = position_dodge(width = 0.9),
-              vjust = 0.5, hjust = 1.2,
-              angle = 90, size = 2.4) +
+  ggObj <- ggplot(plotData, aes(x = testLabel, y = neighbor,
+                              color = ModelName, 
+                              size = shareCorrect,
+                              shape = ModelName)) +
+    geom_count() +
+    labs(x = "Wahre Kategorie",
+         y = "Zweitwahrscheinlichste Kategorie",
+         size = "Anteil Datenpunkte:") +
+    scale_color_discrete(name = "Embedding, Modell:", 
+                         labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
+                                    "GloVe 300D, Bi-LSTM", 
+                                    "SOW GloVe 300D, MLP")) +
+    scale_shape_discrete(name = "Embedding, Modell:", 
+                         labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
+                                    "GloVe 300D, Bi-LSTM", 
+                                    "SOW GloVe 300D, MLP")) +
+    guides(fill = guide_legend(nrow = 2,byrow=TRUE)) +
     theme(axis.text.x  = element_text(angle = 45,
                                       vjust = 1, hjust = 1,
                                       size = 14),
           axis.text.y = element_text(size = 15),
           axis.title = element_text(size = 28),
           axis.ticks.x = element_line(size  = 1),
-          legend.background = element_rect(fill = "lightgrey"),
-          legend.key = element_rect(fill = "lightblue", color = NA),
+          legend.background = element_rect(fill = "lightgrey", size = 4),
+          legend.key = element_rect(fill = "white",
+                                    color = NA, size = 6) ,
+          legend.box = "vertical",
           legend.position = "top",
-          legend.text = element_text(size = 15),
-          legend.title = element_text(size = 18),
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank()) 
+          legend.text = element_text(size = 13),
+          legend.title = element_text(size = 15)) 
   
   
-  
-  
-  return(res)
+  return(ggObj)
 }
 
 
@@ -504,19 +534,66 @@ identifyMisclassSums <- function(inPath) {
   # subset to only .rds files
   allModels <- allModels[grepl(allModels, pattern = ".RDS", fixed = TRUE)]
   
-  res <- data.table()
+  res <- list()
   
   for(j in 1:length((allModels))) {
+    resTmp <- data.table()
     model <- readRDS(paste0(inPath, allModels[j]))
     data <- model[["confusionMatrix"]]
-
-    quants <- sort(colSums(data) - diag(data), decreasing = TRUE)
+    tmpName <- paste0(strsplit(allModels[j], split = "_")[[1]][2:3], 
+                      collapse = "_")
     
-    res[, newVar := paste0("it{" ,names(quants), "} ($", quants, "$)")]
-    setnames(res, "newVar", allModels[j])
-  }
+    dataClone <- data
+    diag(dataClone) <- 0
 
-  return(res)
+    assert(all(row.names(data) == colnames(data)))
+    names <- row.names(data)
+    
+    share <- round(apply(dataClone, 1, function(x) max(x)/sum(x)), 3)
+    neighbor <- names[apply(dataClone, 1, which.max)]
+
+    resTmp[, testLabel := names]
+    resTmp[, neighbor := neighbor]
+    resTmp[, share := share]
+    resTmp[, ModelName := tmpName]
+    
+    res[[j]] <- resTmp
+  }
+  
+  plotData <- rbindlist(res)
+  
+  ggObj <- ggplot(plotData, aes(x = testLabel, y = neighbor,
+                                color = ModelName, 
+                                size = share,
+                                shape = ModelName)) +
+    geom_count() +
+    labs(x = "Wahre Kategorie",
+         y = "Kategorie mit meisten Fehlklassifikationen",
+         size = "Anteil Datenpunkte:") +
+    scale_color_discrete(name = "Embedding, Modell:", 
+                         labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
+                                    "GloVe 300D, Bi-LSTM", 
+                                    "SOW GloVe 300D, MLP")) +
+    scale_shape_discrete(name = "Embedding, Modell:", 
+                         labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
+                                    "GloVe 300D, Bi-LSTM", 
+                                    "SOW GloVe 300D, MLP")) +
+    guides(fill = guide_legend(nrow = 2,byrow=TRUE)) +
+    theme(axis.text.x  = element_text(angle = 45,
+                                      vjust = 1, hjust = 1,
+                                      size = 14),
+          axis.text.y = element_text(size = 15),
+          axis.title = element_text(size = 28),
+          axis.ticks.x = element_line(size  = 1),
+          legend.background = element_rect(fill = "lightgrey", size = 4),
+          legend.key = element_rect(fill = "white",
+                                    color = NA, size = 6) ,
+          legend.box = "vertical",
+          legend.position = "top",
+          legend.text = element_text(size = 13),
+          legend.title = element_text(size = 15)) 
+  
+  return(ggObj)
 }
 
 

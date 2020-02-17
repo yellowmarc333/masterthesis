@@ -35,13 +35,13 @@ predictMLP <- function(dataPath, fileName,
   testLabelNumeric <- as.numeric(testLabelRaw) - 1
   names(testLabelNumeric) <- testLabelRaw
   testLabel <- to_categorical(testLabelNumeric)
-  
  
   # nVocab = max(rbind(trainData,testData)) + 1
   model <- keras_model_sequential() %>% 
     
     # Add a vanilla hidden layer:
-    layer_dense(units = 100, activation = "relu") %>%
+    layer_dense(units = 100, activation = "relu", 
+                input_shape = 300) %>%
     # Apply 20% layer dropout
     layer_dropout(0.2) %>%
     
@@ -84,10 +84,14 @@ predictMLP <- function(dataPath, fileName,
 
   evaluationResult <- model %>% 
     evaluate(as.matrix(testData), testLabel, batch_size = 32)
+
+  save_model_hdf5(model,
+    filepath = paste0("03_computedData/05_modelData/OnlyModelSave/",
+                      "mod_GloveSumsFull300_MLP.h5"))
   
   predictProb <- data.table(model %>% 
                               predict(as.matrix(testData), testLabel, batch_size = 32))
-  names(predictProb) <- levels(trainLabelRaw)
+  names(predictProb) <- levels(testLabelRaw)
   # see for which class the prop is the highest
   predictMax <- t(apply(predictProb, 1, function(x) {
     return(names(x[which.max(x)]))
@@ -820,6 +824,10 @@ predictCNNArray <- function(dataPath, fileName,
   
   evaluationResult <- model %>% 
     evaluate(testData, testLabel, batch_size = 32)
+ 
+  save_model_hdf5(model,
+                  filepath = paste0("03_computedData/05_modelData/OnlyModelSave/",
+                                    "mod_GloveArrayFull300_CNN.h5"))
   
   predictProb <- data.table(model %>% 
                               predict(testData, testLabel, batch_size = 32))
@@ -1256,6 +1264,10 @@ predictLSTMArray <- function(dataPath, fileName,
   
   evaluationResult <- model %>% 
     evaluate(testData, testLabel, batch_size = 32)
+
+  save_model_hdf5(model,
+                  filepath = paste0("03_computedData/05_modelData/OnlyModelSave/",
+                                    "mod_GloveArrayFull300_LSTM.h5"))
   
   predictProb <- data.table(model %>% 
                               predict(testData, testLabel, batch_size = 32))

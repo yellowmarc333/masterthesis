@@ -112,9 +112,6 @@ Die vier Kombinationen der Endauswahl umfassen nun $4$ Modelle und $3$ Arten der
 
 
 
-\begin{itemize}
-    \item tuning wurde klein gehalten, die Modelle werden auf 90 \% der Daten nicht nochmal verändert. (ausser nrounds, epochen, numtrees etc)
-\end{itemize}{}
 
 \subsection{Evaluation und Vergleich der Modelle} \label{kap:evalFinal}
 
@@ -138,8 +135,8 @@ In diesem Abschnitt werden nun die finalen Modelle auf den etwa $90$ Prozent der
 
 \end{table}
 
-Zur Beschreibung aller folgenden Ergebnisse wird aus Gründen der Platzersparnis nur noch der Name des Algorithmus ohne das zugehörige \textit{Word-Embedding} genannt.
-In der Tabelle \ref{tab:finalSelection} ist zu sehen, dass das \textit{Bi-LSTM} bezüglich allen betrachteten Gütemaßen am besten abschneidet. Mit einer \textit{accuracy} von $0.689$ sagt es für die Beobachtungen des Testdatensatzes in $68.9$ Prozent der Fälle die richtige der $32$ Klassen vorher. Werden kleinere Klassen wichtiger angesehen, so erkennt das \textit{Bi-LSTM} im Mittel $55.2$ Beobachtungen pro Sparte und erzielt im Sinne des $fscore_M^{(1)}$ einen Wert von $0.582$. Bezüglich der $CE$, die auch als Verlustfunktion im Trainingsprozess minimiert wird, wird ein Wert von $1.124$ erreicht. Wenn das Modell die richtige Klasse vorhersagt, so ist es sich mit einer mittleren Modellwahrscheinlichkeit von $0.825$ mit Abstand am sichersten. Das zweitbeste Modell ist das \textit{CNN} in Bezug auf \textit{accuracy} ($0.668$),  $\overline{accuracy}$ ($0.521$), $fscore_M^{(1)}$ ($0.562$) und $CE$ ($1.247$). Im Falle einer richtigen Klassifikation ist sich dieses Modell jedoch am unsichersten ($\bar{p}_{IfCorrect} =0.646$). Den dritten Platz in Hinsicht auf $accuracy$ belegt das \textit{MLP} ($0.625$), dicht gefolgt von $XGBoost$ ($0.624$). Bei den beiden Gütemaßen, bei denen kleinere Klassen eine höhere Wichtigkeit besitzen, schneidet das \textit{MLP} am schlechtesten ab ($\overline{accuracy} = 0.455$, $fscore_M^{(1)} = 0.499$). \textit{XGBoost} belegt bezüglich der $CE$ den letzten Platz.\\
+Zur Beschreibung aller folgenden Ergebnisse wird aus Gründen der Platzersparnis nur noch der Name des Algorithmus ohne das zugehörige \textit{Word-Embedding} genannt (also zum Beispiel \textit{XGBoost}, statt \textit{BOW, XGBoost}).
+In der Tabelle \ref{tab:finalSelection} ist zu sehen, dass das \textit{Bi-LSTM} bezüglich allen betrachteten Gütemaßen am besten abschneidet. Mit einer \textit{accuracy} von $0.689$ sagt es für die Beobachtungen des Testdatensatzes in $68.9$ Prozent der Fälle die richtige der $32$ Klassen vorher. Werden kleinere Klassen wichtiger angesehen, so erkennt das \textit{Bi-LSTM} im Mittel $55.2$ Beobachtungen pro Sparte und erzielt im Sinne des $fscore_M^{(1)}$ einen Wert von $0.582$. Bezüglich der $CE$, die auch als Verlustfunktion im Trainingsprozess minimiert wird, wird ein Wert von $1.124$ erreicht. Wenn das Modell die richtige Klasse vorhersagt, so ist es sich mit einer mittleren Modellwahrscheinlichkeit von $0.825$ mit Abstand am sichersten. Auch wenn für das in dieser Thesis behandelte Klassifikationsproblem die Fehlklassifikationskosten für Beobachtungen aus kleinen Kategorien höher wären, ist dennoch das \textit{Bi-LSTM} den anderen Modellen vorzuziehen. Das zweitbeste Modell ist das \textit{CNN} in Bezug auf \textit{accuracy} ($0.668$),  $\overline{accuracy}$ ($0.521$), $fscore_M^{(1)}$ ($0.562$) und $CE$ ($1.247$). Im Falle einer richtigen Klassifikation ist sich dieses Modell jedoch am unsichersten ($\bar{p}_{IfCorrect} =0.646$). Den dritten Platz in Hinsicht auf $accuracy$ belegt das \textit{MLP} ($0.625$), dicht gefolgt von $XGBoost$ ($0.624$). Bei den beiden Gütemaßen, bei denen kleinere Klassen eine höhere Wichtigkeit besitzen, schneidet das \textit{MLP} am schlechtesten ab ($\overline{accuracy} = 0.455$, $fscore_M^{(1)} = 0.499$). \textit{XGBoost} belegt bezüglich der $CE$ den letzten Platz.\\
 Nachdem nun die globale Performance auf dem kompletten Testdatensatz untersucht wurde, erfolgt nun eine Betrachtung für die einzelnen Nachrichtensparten. Abbildung \ref{abb:AccByClass} zeigt die $accuracy$ pro Klasse für alle Modelle der Endauswahl.
 
 \begin{figure}[ht]
@@ -164,7 +161,7 @@ Es erfolgt anschließend die Zuordnung Wahrscheinlichkeiten zu den entsprechende
 \label{abb:CompareProbVsAcc}
 \end{figure}
 
-Wie die Grafik zu lesen ist sei an einem Beispiel verdeutlicht: Für die Mitte des Intervals der Modellwahrscheinlichkeit von $0.75$ (dies sind alle Beobachtungen die eine Wahrscheinlichkeit für die richtige Klasse in $(0.74,0.76]$ von dem Modell zugeordnet bekommen haben) liegt im Falle des \textit{Bi-LSTM} der Anteil der korrekt klassifizierten Beobachtungen bei etwa $0.66$. In diesem Fall ist sich das Modell also sicherer, die korrekte Klasse vorherzusagen, als es letztendlich nach Evaluation der Fall ist. 
+Wie die Grafik zu lesen ist sei an einem Beispiel verdeutlicht: Für die Mitte des Intervalls der Modellwahrscheinlichkeit von $0.75$ (dies sind alle Beobachtungen die eine Wahrscheinlichkeit für die richtige Klasse in $(0.74,0.76]$ von dem Modell zugeordnet bekommen haben) liegt im Falle des \textit{Bi-LSTM} der Anteil der korrekt klassifizierten Beobachtungen bei etwa $0.66$. In diesem Fall ist sich das Modell also sicherer, die korrekte Klasse vorherzusagen, als es letztendlich nach Evaluation der Fall ist. 
 Da sich der Verlauf für das \textit{Bi-LSTM} größtenteils unter der gestrichelten Linie abzeichnet, spricht dies dafür, dass dieses Modell die Wahrscheinlichkeit der richtigen Klasse überschätzt. Dies kann auch den hohen Wert von $\bar{p}_{IfCorrect}$ ($0.825$) aus Tabelle \ref{tab:finalSelection} erklären; wenn das Modell generell hohe Wahrscheinlichkeiten für die wahre Klassen zuteilt, ist der Mittelwert für alle korrekten Einschätzungen (eine Teilmenge davon) auch hoch. Sowohl bei \textit{XGBoost} als auch bei dem \textit{CNN} tritt der gegenteilige Effekt des Unterschätzens der Wahrscheinlichkeit für die richtige Klasse auf, wobei besonders das \textit{CNN} für die hohen Wahrscheinlichkeiten eine noch höhere Trefferquote besitzt. Das \textit{MLP} bewegt sich nahe an der gestrichelten Linie und ist sich tendenziell genau so sicher, wie es auch korrekt klassifiziert. Die Schwankungen sind im linken Teil der Graphik für alle Modelle höher. Dies ist dadurch zu erklären, dass Modelle mit einer guten Performance seltener niedrige Wahrscheinlichkeiten für die richtige Klasse modellieren. Demnach ist die Anzahl der Beobachtungen für kleine Intervall-Mitten geringer und resultiert in einer höheren Schwankung des Anteils der korrekt klassifizierten Beobachtungen. Aus dem gleichen Grund fehlen auch einige Punkte, da für diese keine Beobachtungen im Intervall zu finden sind. \\
 \\
 In diesem Unterkapitel wurden die Gütemaße für die Modelle der Endauswahl erläutert und die Sicherheit der Modelle untersucht. 
@@ -174,50 +171,53 @@ Im nächsten Abschnitt beschäftigt sich mit der Untersuchung von benachbarten K
 
 \subsection{Nachbarkategorien}
 
-In diesem Abschnitt werden $3$ Aspekte behandelt. Es stellt sich zum einen für jede Kategorie die Frage, welche, im Falle einer Fehlklassifikation des Modells, die Sparte ist, der die meisten Beobachtungen zugeordnet werden und wie oft (neighborIfTRUE). Zum Anderen ist es von Interesse, in welche Kategorien, im Falle einer korrekten Klassifikation, die nächst wahrscheinlichste Klasse klassifiziert worden wäre (neighborIfFALSE). 
-
-
-\begin{itemize}
-    \item missclassification counts for all kategories also 1ste Wahl
-Im falle einer missklassifikation, in welche kategorien fallen die meisten
-beobachtungen?
-\item  wenn das modell richtig klassifiziert, welches ist dann die zweite Wahl
- und wie oft ist sie das 
-\item  wenn das modell falsch liegt, welches ist dann die zweite Wahl und
- wie oft ist die zweite Wahl die richtige
-
-\end{itemize}{}
-
+In diesem Abschnitt werden $3$ Aspekte untersucht. Diese beschäftigen sich zum einen mit Fehlklassifikation der Modelle (erste Wahl) und zum Anderen mit der Untersuchung der Beobachtungen, denen das Modell die zweit höchste Wahrscheinlichkeit zugeordnet hat (zweite Wahl). Die zweite Wahl des Modells wird in diesem Abschnitt auch als Nachbarkategorie bezeichnet und wird getrennt betrachtet, je nach dem ob das Modell richtig oder falsch mit der ersten Wahl lag. Wenn folglich von inhaltlich nahen Kategorien gesprochen wird, so ist beispielsweise \textit{weddings} und \textit{divorce} gemeint.\\
+\\
+Zunächst ist es von Interesse, in welche Kategorien die meisten Beobachtungen klassifiziert werden, wenn nicht die wahre Sparte erkannt wird. Dieser Sachverhalt wird in Abbildung \ref{abb:NeighborMissclassCounts} dargestellt.
 
 \begin{figure}[ht]
     \centering
 \includegraphics[width = \textwidth,  keepaspectratio]{Images/NeighborMissclassCounts.pdf} 
-\caption{}
+\caption{Kategorien mit den meisten Fehlklassifikationen für jede wahre Kategorie für die Modelle der Endauswahl. Die Größe der Punkte zeigt den Anteil der Datenpunkte an, die die Kategorie (Y-Achse) unter allen Fehlklassifikationen annimmt.}
 \label{abb:NeighborMissclassCounts}
 \end{figure}
 
+Die Datenpunkt in der Abbildung entsprechen der Kategorie, die das Maximum in der \textit{Confusion Matrix} pro Zeile bildet, wenn die Diagonale (\textit{True-Positives}) nicht einbezogen wird. Die Kategorien auf der Y-Achse entsprechen den Kategorien, die das Maximum der \textit{False-Positives} für jede wahre Kategorie annimmt. Die Grafik ist so zu lesen, dass zum Beispiel für die wahre Kategorie \textit{money} bei den Modellen \textit{CNN}, \textit{Bi-LSTM} und \textit{MLP} in die Sparte \textit{business} am häufigsten falsch klassifiziert wird. \textit{XGBoost} prognostiziert am häufigsten die inkorrekte Kategorie \textit{wellness \& healthy living}. Insgesamt ist auffallend, dass größtenteils in die $3$ größten Kategorien \textit{politics}, \textit{wellness \& healthy living} und \textit{entertainment} am häufigsten falsch klassifiziert wird. Besonders für \textit{XGBoost} ist \textit{wellness \& healthy living} meistens die Kategorie mit den meisten Fehlklassifikationen. Dies erklärt auch die hohe \textit{accuracy} von $0.816$ aus Abbildung \ref{abb:AccByClass}, denn wenn das Modell eine Klasse besonders häufig fehlt, dann ist auch die gesamte Trefferquote für diese Sparte hoch. In einigen Fällen ist die häufigste fehl-klassifizierte Sparte jedoch inhaltlich nahe an der wahren Kategorie. Zum Beispiel ordnet das \textit{CNN} für die wahre Klasse \textit{divorce} die meisten Beobachtungen inkorrekt \textit{weddings} zu. Ebenso wählen \textit{CNN}, \textit{Bi-LSTM} und \textit{MLP} \textit{world news} als häufigste falsche Klasse für \textit{politics}. Das \textit{MLP} wählt \textit{divorce} am häufigsten, wenn \textit{weddings} die richtige Sparte ist. Die Modelle sind sich bei den $11$ Paaren aus wahrer Kategorie und Kategorie mit den meisten Fehlklassifikationen einig. Darunter gehören unter Anderem \textit{black voices} und \textit{entertainment}, \textit{crime} und \textit{politics}, \textit{world news} und \textit{politics}, \textit{wellness \& healthy living} und \textit{parents}. Die wahre Kategorie \textit{wierd news} wird von jedem Modell in eine andere falsche Kategorie eingeordnet. Eine Ursache dafür könnte sein, dass die Schlagzeilen in dieser Sparte inhaltlich sehr verschieden sind. Generell fällt in Abbildung \ref{abb:NeighborMissclassCounts} auf, dass auf der Y-Achse nur $13$ Nachrichtensparten gelistet sind. Daraus ist zu schließen, dass $19$ Kategorien nie als häufigste Kategorie für eine Fehlklassifikation auftreten.\\
+\\
+Bei dem nächsten Aspekt ist es von Interesse, welche Kategorie am häufigsten die nächst wahrscheinlichste Klasse ist. Zuerst wird dies untersucht für alle Beobachtungen im Testdatensatz, die richtig klassifiziert wurden. Abbildung \ref{abb:NeighborClassesIfTRUE} veranschaulicht diesen Sachverhalt für jede der wahren Kategorien.
 
 
 \begin{figure}[ht]
     \centering
 \includegraphics[width = \textwidth,  keepaspectratio]{Images/NeighborClassesIfTRUE.pdf} 
-\caption{}
+\caption{Häufigste zweit-wahrscheinlichste Kategorien für die wahren Kategorien aus dem Testdatensatz für die Modelle der Endauswahl. Eingrenzung auf alle Beobachtungen, die korrekt klassifiziert wurden. Die Größe der Punkte zeigt den Anteil der Datenpunkte an, in denen die Kategorie (Y-Achse) die zweite Wahl darstellt.}
 \label{abb:NeighborClassesIfTRUE}
 \end{figure}
+
+Diese Abbildung basiert im Gegensatz zu Abbildung  \ref{abb:NeighborMissclassCounts} nicht auf der \textit{Confusion Matrix}. Hier wird das Szenario untersucht, dass die Modelle die Kategorie mit der zweit höchsten Wahrscheinlichkeit gewählt hätten. Die Grafik ist so zu lesen, dass zum Beispiel für alle Beobachtungen der Kategorie \textit{money} im Testdatensatz für alle $4$ Modelle \textit{business} die häufigste zweite Wahl ist. \textit{business} ist in diesem Fall eine inhaltlich nahe Nachbarkategorie von \textit{money}.
+Es ist wieder erkennbar, dass die $3$ größten Kategorien \textit{politics}, \textit{wellness \& healthy living} und \textit{entertainment} häufig die zweite Wahl sind. Es werden insgesamt $19$ Sparten mindestens einmal als häufigste zweit-wahrscheinlichste Kategorie gewählt, wobei die Modelle sich meistens nicht einig sind. Auffallend ist auch hier, das \textit{XGBoost} in $16$ von $32$ der wahren Kategorien \textit{wellness \& healthy living} am häufigsten die zweitgrößte Wahrscheinlichkeit zuordnet. Paare von inhaltlichen nahen Nachbarkategorien sind in diesem Zusammenhang außerdem \textit{comedy} und \textit{entertainment} (alle Modelle),
+\textit{college} und \textit{education} (\textit{CNN}, \textit{MLP}), \textit{divorce} und \textit{weddings} (\textit{Bi-LSTM}, \textit{MLP}), \textit{entertainment} und \textit{comedy} (\textit{Bi-LSTM}), \textit{good news} und \textit{green \& environment} (alle Modelle), \textit{weddings} und \textit{divorce} (\textit{Bi-LSTM}, \textit{MLP}, \textit{CNN}) sowie \textit{world news} und \textit{politics} (alle Modelle). Insgesamt wählen in $9$ Fällen alle Modelle die gleiche Nachbarkategorie am häufigsten. Die Größe der Punkte in der Abbildung indiziert, wie stark die zweit-wahrscheinlichste Kategorie gewählt wird. Bei \textit{comedy} ordnen alle Modelle etwa $80$ Prozent der Beobachtungen \textit{entertainment} als Nachbarkategorie. Bei den wahren Kategorien \textit{entertainment} oder \textit{politics} haben die dominierenden Kategorien als zweite Wahl kleinere Anteile im Bereich $20$-$40$ Prozent. Dies ist ein Indikator dafür, dass die zweit-wahrscheinlichste Klasse unter den Datenpunkten öfter unterschiedlich ausfällt. Zusammenfassend ist zu sehen, dass die häufigste zweite Wahl oft inhaltlich nachvollziehbar an der wahren Klasse liegt. Für \textit{XGBoost} ist nur in einem Fall (\textit{style \& beauty} und \textit{travel}) die häufigste zweite Wahl eine andere als \textit{wellness \& healthy living} oder \textit{politics}.\\
+\\
+
+Der letzte zu untersuchende Aspekt ist analog zu dem vorherigen, nur dass diesmal Vorhersagen der Beobachtungen aus dem Testdatensatz betrachtet werden, die sich als falsch erwiesen haben. Es stellt sich hier die Frage, ob im dem Fall der Fehlklassifikation zumindest die häufigste zweit-wahrscheinlichste Klasse korrekt gewesen wäre. Der Sachverhalt ist in Abbildung \ref{abb:NeighborClassesIfFALSE} dargestellt.
 
 \begin{figure}[ht]
     \centering
 \includegraphics[width = \textwidth,  keepaspectratio]{Images/NeighborClassesIfFALSE.pdf} 
-\caption{NeighborClassesIfFALSE}
-\label{abb:}
+\caption{Häufigste zweit-wahrscheinlichste Kategorien für die wahren Kategorien aus dem Testdatensatz für die Modelle der Endauswahl. Eingrenzung auf alle Beobachtungen, die inkorrekt klassifiziert wurden. Die Größe der Punkte zeigt den Anteil der Datenpunkte an, in denen die Kategorie (Y-Achse) die zweite Wahl darstellt.}
+\label{abb:NeighborClassesIfFALSE}
 \end{figure}
 
+Die Punkte auf der Diagonalen der Grafik bedeuten inhaltlich, dass die häufigste zweite Wahl die richtige Kategorie ist. Bis auf wenige Ausnahmen wählen alle Modelle für alle wahren Kategorien die richtige Sparte als zweite Wahl. Die Anteil der Datenpunkte, für die das zutrifft, schwanken zwischen $40$ und $60$ Prozent. \textit{XGBoost} ordnet in $11$ wahren Kategorien die meisten Beobachtungen \textit{politics} als zweit-wahrscheinlichste Klasse zu. Für die wahre Kategorie \textit{college} erkennt nur das \textit{Bi-LSTM} am häufigsten die richte Klasse als zweite Wahl. Dies gilt ebenso für die Sparte \textit{fifty}, wobei hier der Eintrag für das \textit{MLP} fehlt. Der gleiche Eintrag fehlt ebenso in der vorherigen Abbildung \ref{abb:NeighborClassesIfTRUE}. Der Grund dafür ist, dass das \textit{MLP} für keine der Beobachtungen im Testdatensatz die Klasse \textit{fifty} vorhergesagt hat. Dies erklärt auch die $accuracy$ von $0.00$ in dieser Sparte (siehe Abbildung \ref{abb:AccByClass}). Für \textit{good news} und \textit{money} ist für \textit{XGBoost} \textit{wellness \& healthy living} die häufigste zweite Wahl. Hierbei ist bemerkenswert, dass das \textit{Bi-LSTM} für jede wahre Kategorie die richtige Sparte als zweite Wahl am häufigsten wählen würde. Dies ist ein Merkmal, was zusätzlich zu den Ergebnissen aus Tabelle \ref{tab:finalSelection} für die Qualität dieses Modells spricht.\\
+\\
+todo: überleitung ins nächste kapitel schreiben
 
+
+\paragraph{Noch fehlende Punkte:}
 
 \begin{itemize}
-\item vorstellung: struktur, hyperparameter, word embedding sizes und dimensions
-    \item metriken wie in vorauswahl nur ausführlicher
-    \item eingehen auf fehlklassifikationskosten
+    \item todo: vorstellung: struktur der netze, hyperparameter, word embedding sizes und dimensions
+    \item tuning wurde klein gehalten, die Modelle werden auf 90 \% der Daten nicht nochmal verändert. (ausser nrounds, epochen, numtrees etc)
 \end{itemize}{}
 
 \subsection{Analyse der Modelle}
@@ -247,8 +247,10 @@ beobachtungen?
 \subsection{Fazit und Ausblick}
 
 \begin{itemize}
+\item unter ergebnisse von Kap 4, die Zusammenlegung der Kategorien nochmal reviewen
     \item Weitere Architekturen im Bereich Bi-LSTM (Attention, sentence level etc)
     \item kompliziertere word embeddings wie encoder technologien wie BERT
+    \item meta informationen wie author, text, shortdescriptions hinzuziehen
 \end{itemize}
 
 

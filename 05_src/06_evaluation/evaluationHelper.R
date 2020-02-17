@@ -404,9 +404,9 @@ identifyNeighborClassesIfTRUE <- function(inPath) {
                                 color = ModelName, 
                                 size = share,
                                 shape = ModelName)) +
-    geom_count() +
+    geom_count(alpha = 0.6) +
     labs(x = "Wahre Kategorie",
-         y = "Zweitwahrscheinlichste Kategorie",
+         y = "Zweit-wahrscheinlichste Kategorie",
          size = "Anteil Datenpunkte:") +
     scale_color_discrete(name = "Embedding, Modell:", 
                          labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
@@ -487,15 +487,14 @@ identifyNeighborClassesIfFALSE <- function(inPath) {
   }
   
   plotData <- rbindlist(res)
-  # geom_count
   
   ggObj <- ggplot(plotData, aes(x = testLabel, y = neighbor,
                               color = ModelName, 
                               size = shareCorrect,
                               shape = ModelName)) +
-    geom_count() +
+    geom_count(alpha = 0.6) +
     labs(x = "Wahre Kategorie",
-         y = "Zweitwahrscheinlichste Kategorie",
+         y = "Zweit-wahrscheinlichste Kategorie",
          size = "Anteil Datenpunkte:") +
     scale_color_discrete(name = "Embedding, Modell:", 
                          labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
@@ -566,7 +565,7 @@ identifyMisclassSums <- function(inPath) {
                                 color = ModelName, 
                                 size = share,
                                 shape = ModelName)) +
-    geom_count() +
+    geom_count(alpha = 0.6) +
     labs(x = "Wahre Kategorie",
          y = "Kategorie mit meisten Fehlklassifikationen",
          size = "Anteil Datenpunkte:") +

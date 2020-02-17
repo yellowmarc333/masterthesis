@@ -58,8 +58,6 @@ ggsave(filename = paste0(outPath, "NeighborClassesIfFALSE.pdf"),
 # missclassification counts for all kategories also 1ste Wahl
 # Im falle einer missklassifikation, in welche kategorien fallen die meisten
 # beobachtungen?
-# visualisierung auch 2d geom_point, summe über die count muss gesamt beobachtungen
-# raus kommen
 ggObj <- identifyMisclassSums("03_computedData/05_modelData/finalModels/")
 ggsave(filename = paste0(outPath, "MissclassCounts.pdf"),
        plot = ggObj, width = fullWidth, height = fullHeight, 

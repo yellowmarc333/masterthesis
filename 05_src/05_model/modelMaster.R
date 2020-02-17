@@ -199,7 +199,7 @@ predictPreselection <- function() {
   
   calc <- function() {
     fileName <- "GloveSums-10pc-300-FALSE.rds"
-    modelRes <- predictMLP(dataPath, fileName, epochs = 15)
+    modelRes <- predictMLP(dataPath, fileName, epochs = 3)
     modelName <- "mod_GloveSum300_NN_10"
     
     saveRDS(modelRes,
@@ -305,7 +305,7 @@ predictPreselection <- function() {
     fileName <- "GloveArray-10pc-300-FALSE.rds"
     modelRes <- predictLSTMArray(dataPath, 
                                  fileName = fileName, 
-                                 epochs = 15) # 0.6011 
+                                 epochs = 1) # 0.6011 
     # ohne bidirectional 0.5919
     
     # tuning:
@@ -360,7 +360,7 @@ predictFullModels <- function() {
     saveRDS(modelRes,
             file = paste0(psPath, modelName, "_", dateNow, ".RDS"))
   }
-  try(calc())
+  #try(calc())
   gc()
   
   calc <- function() {
@@ -372,7 +372,7 @@ predictFullModels <- function() {
     saveRDS(modelRes,
             file = paste0(psPath, modelName, "_", dateNow, ".RDS"))
   }
-  try(calc())
+  #try(calc())
   gc()
   
   # relevant atm

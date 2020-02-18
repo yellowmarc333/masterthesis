@@ -734,6 +734,7 @@ predictCNNArray <- function(dataPath, fileName,
   assertFactor(testLabelRaw)
   
   maxWords <- data$maxWords
+
   channels <- data$channels
   rm(data)  
   gc()

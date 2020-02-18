@@ -14,10 +14,8 @@
 # exploration function for word vectors (relate to wordclouds)
 # achors, lime checken
 # permutation der wichtigen wörter, bzw festhalten
-# gerharz@tu-dortmund.de
-# bi-lstm weights holen und verstehen
 # sequentiell wort sequenzen reinfüttern. am beispiel von 3 Sätzen Explaining
-# 
+
 
 # [next steps: runterschreiben]
 # MIT zitat: seitenanzahl checken bzw groll hinweisen

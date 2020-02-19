@@ -8,13 +8,10 @@
 #        die 2 maximalen Einträge auflisten für zb 50 filter
 # Glove - LSTM: beobachtungen nehmen die von anderen Falsch klassifiziert worden sind
 #               aber von LSTM richtig. 
-#               Sätze shuffeln und schauen wie die performance runtergeht.
 #               exchange words and see what happens, if the prediction gets into nearest
-#               input sequence of text (first first word, then 2nd word etc)
 # exploration function for word vectors (relate to wordclouds)
 # achors, lime checken
-# permutation der wichtigen wörter, bzw festhalten
-# sequentiell wort sequenzen reinfüttern. am beispiel von 3 Sätzen Explaining
+#
 
 
 # [next steps: runterschreiben]
@@ -46,7 +43,10 @@
 #- captions nicht alles in textit
 #- label under caption
 
-
+# xxalex die mail schreiben
+# xxpermutationfunction schreiben für glove array
+# xxauf Null setzen function (einmal random ein wort), 
+# xxauf Null setzen Sequentiell alle spalten außer die ersten J-
 # xxtabelle der vorauswahl erstellen
 # xxneighbor classes in tabelle: zweite neighborclass dazunehmen?
 # xxaccvsProb grafik finalisieren

@@ -16,7 +16,7 @@ explainXGBoost <- function(inPath = "03_computedData/05_modelData/finalModels/",
   
   # readin testSubsets
   testSubsets <- readRDS("03_computedData/06_evaluatedData/testSubsets.RDS")
-  indexesRaw <- testSubsets$allAgreed[, .(BOW_XG_rowVec)][[1]]
+  indexesRaw <- testSubsets$allCorrect[, .(BOW_XG_rowVec)][[1]]
   indexes <- indexesRaw[indexesRaw != 0]
   
   newDataSub <- newData[indexes,]
@@ -76,6 +76,7 @@ explainCNN <- function(modelPath = "03_computedData/05_modelData/OnlyModelSave/m
   assertString(modelPath)
   assertString(embeddingPath)
   
+  
   # load embeddings
   embeddingData <- readRDS(embeddingPath)
   newData <- embeddingData[["resultTest"]]
@@ -91,25 +92,58 @@ explainCNN <- function(modelPath = "03_computedData/05_modelData/OnlyModelSave/m
   # readin testSubsets
   # names(testSubsets$res)
   testSubsets <- readRDS("03_computedData/06_evaluatedData/testSubsets.RDS")
-  indexesRaw <- testSubsets$allAgreed[, .(GloveArray300_CNNArray_rowVec)][[1]]
+  # test2 <- testSubsets$allCorrect
+  # test3 <- test2[GloveArray300_CNNArray_rowVec != 0, GloveArray300_CNNArray]
+  # fehlersuche: labels sind identisch muss in identifyTestsubset der fehler liegen
+  indexesRaw <- testSubsets$allCorrect[, .(GloveArray300_CNNArray_rowVec)][[1]]
   indexes <- indexesRaw[indexesRaw != 0]
   
   newDataSub <- newData[indexes, ,]
   testLabelSub <- testLabel[indexes,]
   testLabelRawSub <- testLabelRaw[indexes]
   
-  evaluationResult <- model %>% 
-    evaluate(newDataSub, testLabelSub, batch_size = 32)
-  predictProb <- data.table(model %>% 
-                              predict(newDataSub, 
-                                      testLabelSub, batch_size = 32))
-  names(predictProb) <- levels(testLabelRaw)
-  # see for which class the prop is the highest
-  predictMax <- t(apply(predictProb, 1, function(x) {
-    return(names(x[which.max(x)]))
-  }))
+  resPerm <- modifyEmbPerm(newData = newDataSub,
+                       model = model,
+                       testLabel = testLabelSub,
+                       testLabelRaw = testLabelRawSub, permN = 30)
   
-  mean(predictMax == testLabelRawSub)
+
+  resRem1 <- modifyEmbRem(newData = newDataSub,
+                         model = model,
+                         testLabel = testLabelSub,
+                         testLabelRaw = testLabelRawSub,
+                         nWords = 1)
+  
+  resRem2 <- modifyEmbRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 2, nRemove = 30)
+   
+  resRem3 <- modifyEmbRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 3, nRemove = 30)
+
+  resRem4 <- modifyEmbRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 4, nRemove = 30)
+
+  resSeqForward <- modifyEmbSeq(newData = newDataSub, 
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub, 
+                          forward = TRUE)
+  
+  return(list(resPerm = resPerm,
+              resRem1 = resRem1,
+              resRem2 = resRem2,
+              resRem3 = resRem3,
+              resRem4 = resRem4,
+              resSeqForward = resSeqForward))
   
 }
 
@@ -117,7 +151,7 @@ explainLSTM <- function(modelPath = "03_computedData/05_modelData/OnlyModelSave/
                        embeddingPath = "03_computedData/04_preparedData/GloveArray-Full-300-FALSE.rds"){
   assertString(modelPath)
   assertString(embeddingPath)
-  browser()
+  
   # load embeddings
   embeddingData <- readRDS(embeddingPath)
   newData <- embeddingData[["resultTest"]]
@@ -133,26 +167,55 @@ explainLSTM <- function(modelPath = "03_computedData/05_modelData/OnlyModelSave/
   # readin testSubsets
   # names(testSubsets$res)
   testSubsets <- readRDS("03_computedData/06_evaluatedData/testSubsets.RDS")
-  indexesRaw <- testSubsets$allAgreed[, .(GloveArray300_LSTMArray_rowVec)][[1]]
+  indexesRaw <- testSubsets$allCorrect[, .(GloveArray300_LSTMArray_rowVec)][[1]]
   indexes <- indexesRaw[indexesRaw != 0]
   
   newDataSub <- newData[indexes, ,]
   testLabelSub <- testLabel[indexes,]
   testLabelRawSub <- testLabelRaw[indexes]
   
-  evaluationResult <- model %>% 
-    evaluate(newDataSub, testLabelSub, batch_size = 32)
-  predictProb <- data.table(model %>% 
-                              predict(newDataSub, 
-                                      testLabelSub, batch_size = 32))
-  names(predictProb) <- levels(testLabelRaw)
-  # see for which class the prop is the highest
-  predictMax <- t(apply(predictProb, 1, function(x) {
-    return(names(x[which.max(x)]))
-  }))
+  resPerm <- modifyEmbPerm(newData = newDataSub,
+                           model = model,
+                           testLabel = testLabelSub,
+                           testLabelRaw = testLabelRawSub, permN = 30)
   
-  mean(predictMax == testLabelRawSub)
   
+  resRem1 <- modifyEmbRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 1)
+  
+  resRem2 <- modifyEmbRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 2, nRemove = 30)
+  
+  resRem3 <- modifyEmbRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 3, nRemove = 30)
+  
+  resRem4 <- modifyEmbRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 4, nRemove = 30)
+  
+  resSeqForward <- modifyEmbSeq(newData = newDataSub, 
+                                model = model,
+                                testLabel = testLabelSub,
+                                testLabelRaw = testLabelRawSub, 
+                                forward = TRUE)
+  
+  return(list(resPerm = resPerm,
+              resRem1 = resRem1,
+              resRem2 = resRem2,
+              resRem3 = resRem3,
+              resRem4 = resRem4,
+              resSeqForward = resSeqForward))
 }
 
 
@@ -177,11 +240,12 @@ identifyTestSubsets <- function(inPath = "03_computedData/05_modelData/finalMode
   
   for(j in 1:length((allModels))) {
     model <- readRDS(paste0(inPath, allModels[j]))
+
     # aus der predictModel return data
     testLabelTmp <- model$testLabelRaw
     tmpName <- paste0(strsplit(allModels[j],
                                split = "_")[[1]][2:3], collapse = "_")
-
+    
     embName <- switch(tmpName,
                       BOW_XG = "BOW-Full-TRUE-FALSE.rds",
                       GloveArray300_CNNArray = "GloveArray-Full-300-FALSE.rds",
@@ -189,10 +253,11 @@ identifyTestSubsets <- function(inPath = "03_computedData/05_modelData/finalMode
                       GloveSums300_MLP = "GloveSums-Full-300-FALSE.rds")
     
     predictions <- model[["predictions"]]
+    
     predictMax <- apply(predictions, 1, function(x) {
       return(names(x[which.max(x)]))
     })
-
+    
     embedding <- readRDS(paste0(embeddingPath, embName))
     indexDT <- embedding$IndexDT
     rm(embedding)
@@ -222,17 +287,133 @@ identifyTestSubsets <- function(inPath = "03_computedData/05_modelData/finalMode
     count = Sum1 + Sum2 + Sum3 + Sum4
     .(count)
     }]
+ 
+  NonUnique <- apply(res[, .(BOW_XG, GloveArray300_CNNArray,
+                             GloveArray300_LSTMArray, GloveSums300_MLP)],
+                     1, function(x) length(unique(x)))
   
-  allAgreed <- res[count == 4]
+  res[, NonUnique := NonUnique]
+  allCorrect <- res[count == 4]
   noneCorrect <- res[count == 0]
+  
+  noneAgreed <- res[NonUnique == 4]
 
   return(list(res = res,
-              allAgreed = allAgreed,
-              noneCorrect = noneCorrect))
+              allCorrect = allCorrect,
+              noneCorrect = noneCorrect,
+              noneAgreed = noneAgreed))
 }
 
 # model <- load_model_hdf5("03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_CNN.h5")
 # model <- load_model_hdf5("03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_LSTM.h5")
+
+
+modifyEmbPerm <- function(newData, model,
+                          testLabel, testLabelRaw,
+                          permN = 10){
+  
+  set.seed(123)
+  permMat <- t(sapply(1:permN, function(x) {
+    sample.int(dim(newData)[2], dim(newData)[2])
+  }, simplify = TRUE))
+  
+  accuracy <- numeric(permN)
+  for(i in seq_len(permN)){
+    permInd <- permMat[i, ]
+    newDataModif <- newData[, permInd, ]
+    
+    predictProb <- data.table(model %>% 
+                                predict(newDataModif, 
+                                        testLabel, batch_size = 32))
+    names(predictProb) <- levels(testLabelRaw)
+    # see for which class the prop is the highest
+    predictMax <- t(apply(predictProb, 1, function(x) {
+      return(names(x[which.max(x)]))
+    }))
+    
+    accuracy[i] <- mean(predictMax == testLabelRaw)
+  }
+  
+  res <- mean(accuracy)
+  return(list(mean_accuracy = res,
+              accuracy = accuracy))
+}
+
+
+
+modifyEmbRem <- function(newData, model,
+                          testLabel, testLabelRaw,
+                          nWords = 1, nRemove = 40){
+  dims <- dim(newData)
+  
+  if(nWords == 1) {
+    nRemove <- dims[2]
+    removeIndexes <- matrix(1:dims[2], ncol = nWords, byrow = TRUE)
+  }
+
+  if(nWords > 1) {
+    set.seed(123)
+    removeIndexes <- t(sapply(1:nRemove, function(x) {
+      sample.int(dims[2], nWords)
+    }, simplify = TRUE))
+  }
+  
+                          
+  accuracy <- numeric(nrow(removeIndexes))
+  
+  for(i in seq_len(nrow(removeIndexes))){
+    removeInd <- removeIndexes[i, ]
+    newDataModif <- newData
+    # an stelle removeInd alles auf 0 setzen
+    newDataModif[, removeInd, ] <- rep(0, dims[3])
+    
+    predictProb <- data.table(model %>% 
+                                predict(newDataModif, 
+                                        testLabel, batch_size = 32))
+    names(predictProb) <- levels(testLabelRaw)
+    # see for which class the prop is the highest
+    predictMax <- t(apply(predictProb, 1, function(x) {
+      return(names(x[which.max(x)]))
+    }))
+    
+    accuracy[i] <- mean(predictMax == testLabelRaw)
+  }
+  
+  res <- mean(accuracy)
+  return(list(mean_accuracy = res,
+              accuracy = accuracy))
+}
+
+
+modifyEmbSeq <- function(newData, model,
+                          testLabel, testLabelRaw,
+                          forward = TRUE){
+  dims <- dim(newData)
+  # alle außer der erste werden 0 gesetzt.
+  seqIndizes <- 2:(dims[2])
+  
+  accuracy <- numeric(length(seqIndizes))
+  for(i in seqIndizes){
+    permInd <- i:dims[2]
+    newDataModif <- newData
+    newDataModif[, permInd, ] <- rep(0, dims[3])
+    
+    predictProb <- data.table(model %>% 
+                                predict(newDataModif, 
+                                        testLabel, batch_size = 32))
+    names(predictProb) <- levels(testLabelRaw)
+    # see for which class the prop is the highest
+    predictMax <- t(apply(predictProb, 1, function(x) {
+      return(names(x[which.max(x)]))
+    }))
+    
+    accuracy[i] <- mean(predictMax == testLabelRaw)
+  }
+  
+  res <- mean(accuracy)
+  return(list(mean_accuracy = res,
+              accuracy = accuracy))
+}
 
 
 

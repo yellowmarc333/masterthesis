@@ -287,15 +287,15 @@ identifyTestSubsets <- function(inPath = "03_computedData/05_modelData/finalMode
     count = Sum1 + Sum2 + Sum3 + Sum4
     .(count)
     }]
+  res[, TestLabelRawIndex := 1:.N]
  
   NonUnique <- apply(res[, .(BOW_XG, GloveArray300_CNNArray,
                              GloveArray300_LSTMArray, GloveSums300_MLP)],
                      1, function(x) length(unique(x)))
-  
   res[, NonUnique := NonUnique]
+  
   allCorrect <- res[count == 4]
   noneCorrect <- res[count == 0]
-  
   noneAgreed <- res[NonUnique == 4]
 
   return(list(res = res,
@@ -414,6 +414,124 @@ modifyEmbSeq <- function(newData, model,
   return(list(mean_accuracy = res,
               accuracy = accuracy))
 }
+
+
+
+
+explainIndividual <- function(modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_CNN.h5",
+                              embeddingPath = "03_computedData/04_preparedData/"){
+  assertString(modelPath)
+  assertString(embeddingPath)
+  
+  # readin testSubsets
+  testSubsets <- readRDS(
+    "03_computedData/06_evaluatedData/testSubsets.RDS")$noneAgreed
+
+  candidates <- testSubsets[count == 0]
+  selectIndexes <- 1:5
+  indexData <- readRDS("03_computedData/03_integratedData/indexesFull.rds")
+  
+  dataRaw <- read.fst("03_computedData/02_cleanedData/News.fst", 
+                      as.data.table = TRUE)
+  testDataRaw <- dataRaw[-indexData]
+  headlines <- testDataRaw[candidates$TestLabelRawIndex[selectIndexes]]$headline
+  trueLabelCheck <- testDataRaw[candidates$TestLabelRawIndex[selectIndexes]]$category
+  
+  
+  allEmbeddings <- list.files(embeddingPath)
+  selEmbeddings <- c("GloveArray-Full-300-FALSE.rds", 
+                     "GloveSums-Full-300-FALSE.rds",
+                     "BOW-Full-TRUE-FALSE.rds")
+  assertSubset(selEmbeddings, allEmbeddings)
+  
+  EmbIndexPairs <- list(list(embName = "BOW-Full-TRUE-FALSE.rds",
+                             embIndexes = candidates$BOW_XG_rowVec[selectIndexes],
+                             type = 1,
+                             modelPath = "03_computedData/05_modelData/OnlyModelSave/xgb.RDS"),
+                        list(embName = "GloveArray-Full-300-FALSE.rds",
+                             embIndexes = candidates$GloveArray300_CNNArray_rowVec[selectIndexes],
+                             type = 2,
+                             modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_CNN.h5"),
+                        list(embName = "GloveArray-Full-300-FALSE.rds",
+                             embIndexes = candidates$GloveArray300_LSTMArray_rowVec[selectIndexes],
+                             type = 3,
+                             modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_LSTM.h5"),
+                        list(embName = "GloveSums-Full-300-FALSE.rds",
+                             embIndexes = candidates$GloveSums300_MLP_rowVec[selectIndexes],
+                             type = 4,
+                             modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveSumsFull300_MLP.h5"))
+  
+  res <- list()
+  
+  for(j in seq_along(EmbIndexPairs)) {
+    # load embeddings
+    embNameTmp <- EmbIndexPairs[[j]]$embName
+    embeddingData <- readRDS(paste0(embeddingPath, embNameTmp))
+    resultTest <- embeddingData[["resultTest"]]
+    testLabelRaw <- embeddingData[["labelTest"]]
+    embIndexesTmp <- EmbIndexPairs[[j]]$embIndexes
+    typeTmp <- EmbIndexPairs[[j]]$type
+    modelPathTmp <- EmbIndexPairs[[j]]$modelPath
+    
+    if(typeTmp %in% c(1, 4)) {
+      embSubset <-resultTest[embIndexesTmp,]
+    }
+    if(typeTmp %in% c(2,3)) {
+      embSubset <-resultTest[embIndexesTmp, , ]
+    }
+
+    
+    if(typeTmp == 1) {
+      rm(embeddingData)
+      model <- readRDS(modelPathTmp)
+      
+      predictProb <- as.data.table(predict(model, 
+                                           newdata =  embSubset,
+                                           reshape = TRUE))
+      names(predictProb) <- levels(testLabelRaw)
+    }
+    if(typeTmp %in% c(2, 3)) {
+      testLabelNumeric <- as.numeric(testLabelRaw) - 1
+      names(testLabelNumeric) <- testLabelRaw
+      testLabel <- to_categorical(testLabelNumeric)[embIndexesTmp,]
+      rm(embeddingData)
+      
+      model <- load_model_hdf5(modelPathTmp)
+      predictProb <- data.table(model %>% 
+                                  predict(embSubset, 
+                                          testLabel, batch_size = 32))
+      names(predictProb) <- levels(testLabelRaw)
+    }
+    
+    
+    if(typeTmp == 4) {
+      testLabelNumeric <- as.numeric(testLabelRaw) - 1
+      names(testLabelNumeric) <- testLabelRaw
+      testLabel <- to_categorical(testLabelNumeric)[embIndexesTmp,]
+      rm(embeddingData)
+      
+      model <- load_model_hdf5(modelPathTmp)
+      predictProb <- data.table(model %>% 
+                                  predict(as.matrix(embSubset), 
+                                          testLabel, batch_size = 32))
+      names(predictProb) <- levels(testLabelRaw)
+    }
+    
+    predictMax <- t(apply(predictProb, 1, function(x) {
+      return(names(x[which.max(x)]))
+    }))
+    
+    res[[j]] <- list(embName = embNameTmp,
+                     embIndexes = embIndexesTmp,
+                     type = typeTmp,
+                     modelPath = modelPathTmp,
+                     predictProb = predictProb,
+                     predictMax = predictMax,
+                     trueLabelCheck = trueLabelCheck)
+  }
+  return(res)
+}
+
 
 
 

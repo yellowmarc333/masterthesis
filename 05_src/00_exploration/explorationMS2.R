@@ -1,4 +1,16 @@
-
+# [last steps]
+# jackys korrektur
+# symbolverzeichnis
+# englische wörter groß
+# random forest 0.5 seiten
+# xgboost beschreiben
+# Zusammenfassung von netzteil schreiben
+# Zusammenfassung von wordembeddings schreiben
+# mean_accuracy erklären, probIfCorrect
+# modelle vorstellen in kapitel 4 (struktur der netze)
+# alle Zitate checken ob klammern richtig gesetzt sind, oder et al steht
+# groll+ matze cnn korrigieren
+# Einleitung + Zusammenfassung schreiben
 
 # [analyse der modelle]
 # BOW/TFIDF - RF XGBoost: variablenwichtigkeit in Wordcloud
@@ -11,38 +23,27 @@
 #               exchange words and see what happens, if the prediction gets into nearest
 # exploration function for word vectors (relate to wordclouds)
 # achors, lime checken
-#
 
 
 # [next steps: runterschreiben]
 # MIT zitat: seitenanzahl checken bzw groll hinweisen
-# email an alex: rnn/lstm dimensionen der matrizen erklären?
-# glossar bzw abkürzungsverzeichnis schreiben
-# Zusammenfassung von netzteil schreiben
-# Zusammenfassung von wordembeddings schreiben
-# mean_accuracy erklären, probIfCorrect
 # gradientenabstieg erklären anhand anderer Quelle? MIT S.151ff, 294.
-# matzes korrektur (zusammen mit grolls zweiter ladung)
-
 
 
 # vanishing gradient problem erklären
-# matzes CNN teil korrigieren
 # wording: modelle statt algorithmen
 # matze diskutieren, macht bidirectional überhaupt sinn?
 # convolution mathematisch überhaupt nötig zu definieren?
-# alle textit großschreiben/korrigieren
-# tabelle über wie die neuronalen netze aufgestellt sind, vor vorauswahl?
 
 # [MA korrigeiren:]
 # -aus jeder korrektur die Sachen rauspicken, auf die ich achten muss
 # - matze: nicht zu umgspr. Fuellwoerter weglassen
 # - marcel: keine aussagen wie "meistens" treffen.
-# - englische wörter groß
 #- dieser Abschnitt soll -> dieser Abschnitt gibt
 #- captions nicht alles in textit
 #- label under caption
-
+#
+# xxemail an alex: rnn/lstm dimensionen der matrizen erklären?
 # xxalex die mail schreiben
 # xxpermutationfunction schreiben für glove array
 # xxauf Null setzen function (einmal random ein wort), 

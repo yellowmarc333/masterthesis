@@ -427,8 +427,10 @@ explainIndividual <- function(modelPath = "03_computedData/05_modelData/OnlyMode
   testSubsets <- readRDS(
     "03_computedData/06_evaluatedData/testSubsets.RDS")$noneAgreed
 
-  candidates <- testSubsets[count == 0]
-  selectIndexes <- 1:5
+  # select all data points where lstm is correct and all models have different
+  # prognosis
+  candidates <- testSubsets[GloveArray300_LSTMArray == TestLabel]
+  selectIndexes <- 1:nrow(candidates)
   indexData <- readRDS("03_computedData/03_integratedData/indexesFull.rds")
   
   dataRaw <- read.fst("03_computedData/02_cleanedData/News.fst", 
@@ -519,7 +521,7 @@ explainIndividual <- function(modelPath = "03_computedData/05_modelData/OnlyMode
     
     predictMax <- t(apply(predictProb, 1, function(x) {
       return(names(x[which.max(x)]))
-    }))
+    }))[1,]
     
     res[[j]] <- list(embName = embNameTmp,
                      embIndexes = embIndexesTmp,
@@ -527,11 +529,134 @@ explainIndividual <- function(modelPath = "03_computedData/05_modelData/OnlyMode
                      modelPath = modelPathTmp,
                      predictProb = predictProb,
                      predictMax = predictMax,
-                     trueLabelCheck = trueLabelCheck)
+                     trueLabelCheck = trueLabelCheck,
+                     headlines = headlines)
   }
   return(res)
 }
 
 
+plotIndividualProbs <- function(explainData, index = 1) {
+  assertList(explainData)
+  assertNumber(index)
 
+  
+  res <- data.table()
+  for(i in seq_along(explainData)) {
+    resTmp <- explainData[[i]]
+    
+    
+    predictProb <- as.numeric(resTmp$predictProb[index])
+    
+    res[, predictProb := predictProb]
+    setnames(res, "predictProb", as.character(resTmp$type))
+    
+  }
+  
+  res[, Kategorie := names(resTmp$predictProb)]
+  
+  plotData <- melt(res, id.vars = "Kategorie")
+  ggObj <- ggplot(plotData, aes(x = Kategorie,
+                                y = value, fill = variable)) +
+    geom_bar(stat = "identity", position = "dodge") + 
+    labs(x = "Nachrichtenkategorie",
+         y = "Modellwahrscheinlichkeit",
+         fill = "Embedding, Modell: ") +
+    scale_fill_discrete(name = "Embedding, Modell", 
+                         labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
+                                    "GloVe 300D, Bi-LSTM", 
+                                    "SOW GloVe 300D, MLP")) +
+    geom_text(aes(label = round(value, 3)), 
+              position = position_dodge(width = 0.9),
+              vjust = 0.5, hjust = 1.2,
+              angle = 90, size = 2.4) +
+    theme(axis.text.x  = element_text(angle = 45,
+                                      vjust = 1, hjust = 1,
+                                      size = 14),
+          axis.text.y = element_text(size = 15),
+          axis.title = element_text(size = 28),
+          axis.ticks.x = element_line(size  = 1),
+          legend.background = element_rect(fill = "lightgrey"),
+          legend.key = element_rect(fill = "lightblue", color = NA),
+          legend.position = "top",
+          legend.text = element_text(size = 15),
+          legend.title = element_text(size = 18),
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank()) 
+  
+  return(ggObj)
+}
+
+
+plotLSTMSeq <- function(explainData, index = 1) {
+  assertList(explainData)
+  assertNumber(index)
+  
+  explainData <- res[[3]]
+  embIndex <- explainData$embIndexes[index]
+  
+  modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_LSTM.h5"
+  embeddingPath = "03_computedData/04_preparedData/GloveArray-Full-300-FALSE.rds"
+
+  # load embeddings
+  embeddingData <- readRDS(embeddingPath)
+  newDataWhole <- embeddingData[["resultTest"]]
+  newDataSingle <- newDataWhole[embIndex, , ]
+  newData <- array(newDataSingle, dim = c(1, dims[2], dims[3]))
+  
+  testLabelRaw <- embeddingData[["labelTest"]]
+  testLabelNumeric <- as.numeric(testLabelRaw) - 1
+  names(testLabelNumeric) <- testLabelRaw
+  testLabel <- to_categorical(testLabelNumeric)[embIndex, ]
+  rm(embeddingData)
+  
+  # load keras model
+  model <- load_model_hdf5(modelPath)
+  
+  dims <- dim(newDataWhole)
+  # alle außer der erste werden 0 gesetzt.
+  seqIndizes <- 2:(dims[2])
+  
+  res <- matrix(numeric(length(seqIndizes)* 
+                                  length(unique(testLabelRaw))),
+                        ncol = length(unique(testLabelRaw)))
+  for(i in seqIndizes){
+    permInd <- i:dims[2]
+    newDataModif <- newData
+    newDataModif[, permInd, ] <- rep(0, dims[3])
+    
+    predictProb <- data.table(model %>% 
+                                predict(newDataModif, 
+                                        testLabel, batch_size = 32))
+    
+    # see for which class the prop is the highest
+    res[i-1, ] <- as.numeric(predictProb)
+  }
+  
+  resDT <- as.data.table(res)
+  setnames(resDT, levels(testLabelRaw))
+  resDT[, PartOfSequence := 1:.N]
+
+  plotData <- melt(resDT, id.vars = "PartOfSequence")
+  
+  ggObj <- ggplot(plotData, aes(x = PartOfSequence,
+                                y = value, color = variable)) +
+    geom_line() +
+    geom_point() +
+    labs(x = "Wörter der Sequenz",
+         y = "Modellwahrscheinlichkeit",
+         color = "Kategorie: ") +
+    guides(fill = guide_legend(nrow = 3, byrow = TRUE)) +
+    theme(axis.text.x  = element_text(size = 14),
+          axis.text.y = element_text(size = 15),
+          axis.title = element_text(size = 28),
+          axis.ticks.x = element_line(size = 1),
+          legend.background = element_rect(fill = "lightgrey"),
+          legend.key = element_rect(fill = "lightblue", color = NA),
+          legend.position = "top",
+          legend.text = element_text(size = 15),
+          legend.title = element_text(size = 18))
+  
+  return(ggObj)
+}
 

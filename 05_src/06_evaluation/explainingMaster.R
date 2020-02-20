@@ -26,16 +26,21 @@ saveRDS(resLSTM, "03_computedData/06_evaluatedData/resLSTM.RDS")
 #resLSTM <- readRDS("03_computedData/06_evaluatedData/resLSTM.RDS")
 
 # individual datapoints explaining ####
-res <- explainIndividual(modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_CNN.h5",
+explainIndividual <- explainIndividual(modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_CNN.h5",
                          embeddingPath = "03_computedData/04_preparedData/")
-saveRDS(res, "03_computedData/06_evaluatedData/explainIndividual.RDS")
+saveRDS(explainIndividual, "03_computedData/06_evaluatedData/explainIndividual.RDS")
+explainIndividual <- readRDS("03_computedData/06_evaluatedData/explainIndividual.RDS")
 
 
 
+subList <- res[[1]]
+dt <- data.table(trueLabelCheck = subList$trueLabelCheck,
+                 headline = subList$headlines, 
+                 predictMax = subList$predictMax,
+                 subList$predictProb)
 
-
-
-
+ggDataPoint1 <- plotIndividualProbs(explainData = res, index = 1)
+ggDataPoint1
 
 
 

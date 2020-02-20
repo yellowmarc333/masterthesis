@@ -43,6 +43,19 @@ ggDataPoint1 <- plotIndividualProbs(explainData = res, index = 1)
 ggDataPoint1
 
 
-
-
+modifyBOWRem <- function(){
+  test2 <- test$resultTest
+  #res <- list()
+  nWords <- 2
+  for(i in 1:nrow(test2)) {
+    colInd <- which(test2[i,] != 0)
+    if(length(colInd) >= nWords) {
+      toZero <- sample(colInd, size = nWords, replace = FALSE)
+      test2[i, toZero] <- 0
+      #res[[i]] <- colInd
+    }
+  }
+  
+}
+system.time(modifyBOWRem())
 

@@ -44,11 +44,11 @@
 
 \section{Statistische Methoden}
 
-Dieses Kapitel ist in $3$ Abschnitte unterteilt. Zuerst werden die zur Bewertung der Modelle herangezogenen Gütemaße beschrieben. Es folgt die Darlegung der verschiedenen Methoden zur numerischen Repräsentation von Wörtern. Zuletzt folgt die ausführliche Beschreibung der in dieser Arbeit benutzten \textit{machine-learning} Algorithmen.
+Dieses Kapitel ist in $3$ Abschnitte unterteilt. Zuerst werden die zur Bewertung der Modelle herangezogenen Gütemaße beschrieben. Es folgt die Darlegung der verschiedenen Methoden zur numerischen Repräsentation von Wörtern. Zuletzt folgt die ausführliche Beschreibung der in dieser Arbeit benutzten \textit{Machine-Learning} Algorithmen.
 
 \subsection{Gütemaße zur Evaluation der Modelle}\label{kap:guetemass}
 
-Die Bewertung der Modelle erfolgt über verschiedene Kennzahlen. Einige davon werden unter Verwendung der \textit{confusion matrix} (oder auch Klassifikationsmatrix) berechnet. Wird das Modell auf die Testdaten angewandt und für jeden Datenpunkt eine Kategorie vorhergesagt, so stellt die in Tabelle \ref{tab:confusionMatrix} abgebildete Matrix die resultierenden Richtig- und Fehlklassifikationen für $C$ Klassen dar.
+Die Bewertung der Modelle erfolgt über verschiedene Kennzahlen. Einige davon werden unter Verwendung der \textit{Confusion Matrix} (oder auch Klassifikationsmatrix) berechnet. Wird das Modell auf die Testdaten angewandt und für jeden Datenpunkt eine Kategorie vorhergesagt, so stellt die in Tabelle \ref{tab:confusionMatrix} abgebildete Matrix die resultierenden Richtig- und Fehlklassifikationen für $C$ Klassen dar.
 
 \begin{table}[ht]
 \begin{center}
@@ -66,44 +66,44 @@ $N = \sum_{i=1}^C \sum_{j=1}^C h_{ij}$\\
    \hline
 \end{tabular}
 
-  \caption{Übersicht über eine \textit{confusion matrix}  für $C$  Klassen (vgl. \cite{backhaus}, S. 238)}  
+  \caption{Übersicht über eine \textit{Confusion Matrix}  für $C$  Klassen (vgl. \cite{backhaus}, S. 238)}  
   \label{tab:confusionMatrix}
 \end{center}
 \end{table}
 
-Die absoluten Häufigkeiten $h_{ij}$ stehen für die Anzahl der Beobachtungen aus der wahren Klasse $i$, für die die Klasse $j$ prognostiziert wurde. Summiert man alle Einträge der Matrix, so erhält man die Anzahl der Beobachtungen $N$. Aus der \textit{confusion matrix} können folgende Größen identifiziert werden: Die \textit{true-positives} der Klasse $i$, $tp_i = h_{ii}$ sind alle Beobachtungen, die Klasse $i$ zugehörig sind und auch in selbige klassifiziert wurden. Die Beobachtungen, die in Klasse $i$ klassifiziert wurden, aber einer anderen wahren Klasse zugehörig sind, bezeichnet man als \textit{false-positives} $fp_i = \sum_{j = 1}^C h_{ji} - h_{ii}$. Als \textit{false-negatives} $tn_i = \sum_{j = 1}^C h_{ij} - h_{ii}$ werden die Beobachtungen bezeichnet, die der Klasse $i$ zugehörig sind, aber in eine andere Kategorie falsch klassifiziert werden. Letztlich sind \textit{true-negatives} $tn_i = N - (fp_i + tn_i + tp_i)$ die Datenpunkte, die nicht Kategorie $i$ angehören und für die auch nicht Klasse $i$ prognostiziert wird (vgl. \cite{sokolova}, S. 3). Unter Kenntnis der $4$ Häufigkeiten können nun verschiedene Gütemaße berechnet werden. 
+Die absoluten Häufigkeiten $h_{ij}$ stehen für die Anzahl der Beobachtungen aus der wahren Klasse $i$, für die die Klasse $j$ prognostiziert wurde. Summiert man alle Einträge der Matrix, so erhält man die Anzahl der Beobachtungen $N$. Aus der \textit{Confusion Matrix} können folgende Größen identifiziert werden: Die \textit{True-Positives} der Klasse $i$, $tp_i = h_{ii}$ sind alle Beobachtungen, die Klasse $i$ zugehörig sind und auch in selbige klassifiziert wurden. Die Beobachtungen, die in Klasse $i$ klassifiziert wurden, aber einer anderen wahren Klasse zugehörig sind, bezeichnet man als \textit{False-Positives} $fp_i = \sum_{j = 1}^C h_{ji} - h_{ii}$. Als \textit{False-Negatives} $tn_i = \sum_{j = 1}^C h_{ij} - h_{ii}$ werden die Beobachtungen bezeichnet, die der Klasse $i$ zugehörig sind, aber in eine andere Kategorie falsch klassifiziert werden. Letztlich sind \textit{True-Negatives} $tn_i = N - (fp_i + tn_i + tp_i)$ die Datenpunkte, die nicht Kategorie $i$ angehören und für die auch nicht Klasse $i$ prognostiziert wird (vgl. \cite{sokolova}, S. 3). Unter Kenntnis der $4$ Häufigkeiten können nun verschiedene Gütemaße berechnet werden. 
 
 
-Die \textit{accuracy} berechnet sich analog zur binären Klassifikation aus 
-\[ accuracy = \frac{\sum_{i=1}^C tp_i}{N},  \]
-ist also der Anteil der richtig klassifizierten Beobachtungen an allen Beobachtungen. Dieses Maß ist jedoch gerade bei unbalancierten Klassifikationsproblemen nicht ideal, da große Klassen stark favorisiert werden und ein Modell schon eine hohe Güte erzielen kann, indem es alle Beobachtungen der größten Klasse zuordnet (vgl. \cite{backhaus}, S.239). Es folgen die Maße \textit{precision}, \textit{recall} und darauf aufbauende Kennzahlen, welche bei unterschiedlichen Klassengrößen geeigneter sind. Es wird von einer hohen \textit{precision} der Klasse $i$ gesprochen, wenn nach Prognose in Klasse $i$ ein hoher Anteil dieser Beobachtungen auch tatsächlich aus derselben Kategorie stammt. Wiederum hat das Modell bezüglich Klasse $i$ einen hohen \textit{recall}, falls von den Beobachtungen der wahren Klasse $i$ auch ein hoher Anteil in Klasse $i$ eingeordnet wird.
-In der \textit{multiclass}-Klassifikation kann ein Gütemaß für das komplette Modell über \textit{micro-averaging} (mit $\mu$ indiziert) oder \textit{macro-averaging} (mit $M$ indiziert) über alle Klassen berechnet werden. Es sind dann 
-\[ precision_{\mu} = \frac{\sum_{i = 1}^C tp_i}{\sum_{i = 1}^C (tp_i + fp_i)}, \hspace{1cm} recall_{\mu} = \frac{\sum_{i = 1}^C tp_i}{\sum_{i = 1}^C (tp_i + fn_i)},\]
-\[ precision_M = \frac{\sum_{i = 1}^C \frac{tp_i}{tp_i + fp_i} }{C}, \hspace{1cm} recall_M = \frac{\sum_{i = 1}^C \frac{tp_i}{tp_i + fn_i} }{C}\]
-die Gütemaße für das gesamte Modell. Ein Maß, dass \textit{precision} und \textit{recall} kombiniert ist der \textit{fscore}. Mit der unterschiedlichen Durchschnittsbildung ergeben sich
-\[ fscore_{\mu}^{(\beta)} = \frac{(\beta^2+1) \cdot precision_{\mu} \cdot recall_{\mu}}{\beta^2 precision_{\mu}+ recall_{\mu}}, \hspace{1cm} fscore_{M}^{(\beta)} = \frac{(\beta^2+1) \cdot precision_{M} \cdot recall_{M}}{\beta^2 precision_{M}+ recall_{M}} . \]
+Die \textit{Accuracy} berechnet sich analog zur binären Klassifikation aus 
+\[ Accuracy = \frac{\sum_{i=1}^C tp_i}{N},  \]
+ist also der Anteil der richtig klassifizierten Beobachtungen an allen Beobachtungen. Dieses Maß ist jedoch gerade bei unbalancierten Klassifikationsproblemen nicht ideal, da große Klassen stark favorisiert werden und ein Modell schon eine hohe Güte erzielen kann, indem es alle Beobachtungen der größten Klasse zuordnet (vgl. \cite{backhaus}, S.239). Es folgen die Maße \textit{Precision}, \textit{Recall} und darauf aufbauende Kennzahlen, welche bei unterschiedlichen Klassengrößen geeigneter sind. Es wird von einer hohen \textit{Precision} der Klasse $i$ gesprochen, wenn nach Prognose in Klasse $i$ ein hoher Anteil dieser Beobachtungen auch tatsächlich aus derselben Kategorie stammt. Wiederum hat das Modell bezüglich Klasse $i$ einen hohen \textit{Recall}, falls von den Beobachtungen der wahren Klasse $i$ auch ein hoher Anteil in Klasse $i$ eingeordnet wird.
+In der \textit{Multiclass}-Klassifikation kann ein Gütemaß für das komplette Modell über \textit{Micro-Averaging} (mit $\mu$ indiziert) oder \textit{Macro-Averaging} (mit $M$ indiziert) über alle Klassen berechnet werden. Es sind dann 
+\[ Precision_{\mu} = \frac{\sum_{i = 1}^C tp_i}{\sum_{i = 1}^C (tp_i + fp_i)}, \hspace{1cm} Recall_{\mu} = \frac{\sum_{i = 1}^C tp_i}{\sum_{i = 1}^C (tp_i + fn_i)},\]
+\[ Precision_M = \frac{\sum_{i = 1}^C \frac{tp_i}{tp_i + fp_i} }{C}, \hspace{1cm} Recall_M = \frac{\sum_{i = 1}^C \frac{tp_i}{tp_i + fn_i} }{C}\]
+die Gütemaße für das gesamte Modell. Ein Maß, dass \textit{Precision} und \textit{Recall} kombiniert ist der \textit{fscore}. Mit der unterschiedlichen Durchschnittsbildung ergeben sich
+\[ fscore_{\mu}^{(\beta)} = \frac{(\beta^2+1) \cdot Precision_{\mu} \cdot Recall_{\mu}}{\beta^2 Precision_{\mu}+ Recall_{\mu}}, \hspace{1cm} fscore_{M}^{(\beta)} = \frac{(\beta^2+1) \cdot Precision_{M} \cdot Recall_{M}}{\beta^2 Precision_{M}+ Recall_{M}} . \]
 
-todo: $\overline{accuracy} = \frac{1}{C} \sum_{i = 1}^C accuracy_{C_i}$\\
+todo: $\overline{Accuracy} = \frac{1}{C} \sum_{i = 1}^C Accuracy_{C_i}$\\
 $\bar{p}_{IfCorrect} = \frac{1}{N}\sum_{i=1}^N  I_{\{\hat{y}(x_i) = y_i\}} p(x_i = y_i)$\\
 
 
-Hierbei ist anzumerken, dass $fscore_{\mu}^{(\beta)}$ Klassen mit vielen Beobachtungen in der Güte begünstigt während für $fscore_M^{(\beta)}$ alle Kategorien gleich wichtig sind  (vgl. \cite{sokolova}, S.3ff). Der Parameter $\beta$ gibt in den Formeln an, was für ein Gewicht \textit{recall} im Verhältnis zu \textit{precision} einnimmt.
-Wie bei dem \textit{f1-score} Maß einer binären Klassifikation wird in dieser Arbeit $\beta = 1$ verwendet. \textit{recall} und \textit{precision} besitzen also identische Wichtigkeit. \\
-Bei Betrachtung des Nenners in der Berechnung von $precision_{\mu}$ und $recall_{\mu}$ fällt auf, dass in beiden Fällen durch die gesamte Summe der \textit{Confusion Matrix} geteilt wird. Diese Summe entspricht dem Nenner $N$ bei der Berechnung der $accuracy$. Ist nun auch $\beta = 1$, so gilt 
-\[precision_{\mu} =  recall_{\mu} =  fscore_{\mu}^{(1)} = accuracy.\]
+Hierbei ist anzumerken, dass $fscore_{\mu}^{(\beta)}$ Klassen mit vielen Beobachtungen in der Güte begünstigt während für $fscore_M^{(\beta)}$ alle Kategorien gleich wichtig sind  (vgl. \cite{sokolova}, S.3ff). Der Parameter $\beta$ gibt in den Formeln an, was für ein Gewicht \textit{Recall} im Verhältnis zu \textit{Precision} einnimmt.
+Wie bei dem \textit{f1-score} Maß einer binären Klassifikation wird in dieser Arbeit $\beta = 1$ verwendet. \textit{Recall} und \textit{Precision} besitzen also identische Wichtigkeit. \\
+Bei Betrachtung des Nenners in der Berechnung von $Precision_{\mu}$ und $Recall_{\mu}$ fällt auf, dass in beiden Fällen durch die gesamte Summe der \textit{Confusion Matrix} geteilt wird. Diese Summe entspricht dem Nenner $N$ bei der Berechnung der $Accuracy$. Ist nun auch $\beta = 1$, so gilt 
+\[Precision_{\mu} =  Recall_{\mu} =  fscore_{\mu}^{(1)} = Accuracy.\]
 
 Für eine beispielhafte Erklärung dieses Sachverhaltes sei auf \cite{towards1}
 %todo: shmueli (2019) verwiesen
-verwiesen. Aus diesem Grund wird statt der mit \textit{micro-averaging} berechneten Gütemaße in der statistischen Auswertung in Kapitel \ref{Kap:statAus} die $accuracy$ verwendet.\\
+verwiesen. Aus diesem Grund wird statt der mit \textit{Micro-Averaging} berechneten Gütemaße in der statistischen Auswertung in Kapitel \ref{Kap:statAus} die $Accuracy$ verwendet.\\
 
-Ein weiteres Maß, um die Güte eines Multiklassifikationsproblems zu bewerten, ist die gemittelte \textit{categorical cross entropy} (kurz \textit{CE}). Diese berechnet sich aus
+Ein weiteres Maß, um die Güte eines Multiklassifikationsproblems zu bewerten, ist die gemittelte \textit{Categorical Cross Entropy} (kurz \textit{CE}). Diese berechnet sich aus
 
 \[ CE = - \frac{1}{N}\sum_{i=1}^N \sum_{j = 1}^C y_{ij} log(p_i(c_j)) \hspace{2cm} y_{ij} \in \{0,1\} \hspace{0.2cm} \forall i, j = 1,...,N \hspace{0.2cm} ,\]
 
 wobei $y_{ij}$ indiziert, ob die Beobachtung $i$ der wahren Klasse $j$ zugehörig ist. $p_i(c_j)$ gibt die vom Modell modellierte Wahrscheinlichkeit an, dass Beobachtung $i$ zu Klasse $j$ gehört (vgl. \cite{murphy}, S.571). Da $y_{ij}$ immer $0$ für alle falsch vorhergesagten Klassen ist, entspricht $CE$ dem negativen Mittelwert der logarithmierten Wahrscheinlichkeiten der wahren Klassen über alle Beobachtungen. So wird eine geschätzte Wahrscheinlichkeit nahe $0$ für die wahre Klasse stark bestraft und eine hohe Wahrscheinlichkeit trotz einer Fehlklassifikation weniger bestraft. Je sicherer sich das Modell für die wahren Kategorien ist, desto niedrigere Werte wird dieses Gütemaß annehmen (vgl. \cite{proMachine}, S. 72). 
-Dabei gilt es die \textit{cross entropy} zu minimieren. Sie nimmt ihr Minimum bei $0$ im Idealfall an, wenn für alle Beobachtungen eine Wahrscheinlichkeit von $1$ für die wahre Klasse prognostiziert wird. Die $CE$ wird oft als Verlustfunktion für die Modellanpassung auf den Trainingsdaten verwendet, wie zum Beispiel bei dem \textit{XGBoost}-Algorithmus und den \textit{deep learning} Verfahren aus Kapitel \ref{kap:neuralNets}.\\
+Dabei gilt es die \textit{Cross Entropy} zu minimieren. Sie nimmt ihr Minimum bei $0$ im Idealfall an, wenn für alle Beobachtungen eine Wahrscheinlichkeit von $1$ für die wahre Klasse prognostiziert wird. Die $CE$ wird oft als Verlustfunktion für die Modellanpassung auf den Trainingsdaten verwendet, wie zum Beispiel bei dem \textit{XGBoost}-Algorithmus und den \textit{Deep Learning} Verfahren aus Kapitel \ref{kap:neuralNets}.\\
 \\
-Die in diesem Abschnitt beschriebenen Maße können sowohl auf den Trainingsdaten als auch auf den  Validierungs- und Testdaten berechnet werden. Ein Vergleich der Modelle in der Vorauswahl in Abschnitt \ref{kap:preselection} erfolgt über die Evaluation auf den Validierungsdaten. Dabei werden die Maße $accuracy$, $CE$, und $fscore_M^{(1)}$ genutzt.
+Die in diesem Abschnitt beschriebenen Maße können sowohl auf den Trainingsdaten als auch auf den  Validierungs- und Testdaten berechnet werden. Ein Vergleich der Modelle in der Vorauswahl in Abschnitt \ref{kap:preselection} erfolgt über die Evaluation auf den Validierungsdaten. Dabei werden die Maße $Accuracy$, $CE$, und $fscore_M^{(1)}$ genutzt.
 Bei dem Vergleich der finalen Modelle in Kapitel \ref{kap:evalFinal} erfolgt die Auswertung der Performanzmaße auf den ungesehenen Testdaten. (todo: aufführen was noch alles verwendet wurde).
 
 
@@ -113,9 +113,9 @@ Das Extrahieren von Informationen aus Texten ist keine triviale Aufgabe, für di
 Die beschriebenen Repräsentationen der Wörter werden folglich auch als \textit{Embeddings} oder \textit{Word-Embeddings} bezeichnet.
 
 
-\subsubsection{\textit{bag-of-words} und \textit{term frequency inverse document frequency}} \label{Kap:Tfidf}
+\subsubsection{\textit{Bag-Of-Words} und \textit{Term Frequency Inverse Document Frequency}} \label{Kap:Tfidf}
 
-Bei diesen Methoden wird zuerst für den gesamten Textkorpus ein Vokabular gebildet, das für jedes vorkommende Wort die absolute Häufigkeit des Vorkommens sowie die Anzahl der Dokumente (ein Dokument ist ein Datenpunkt, also eine Schlagzeile) enthält, in der das Wort vorkommt. Aus diesem Vokabular wird anschließend die \textit{document-term-matrix} (kurz \textit{dtm}) geformt, die für jede der $N$ Beobachtungen eine Zeile und für jede der $V$ Wörter im Vokabular eine Spalte enthält. Eine beispielhafte \textit{dtm} für ist in Tabelle dargestellt.
+Bei diesen Methoden wird zuerst für den gesamten Textkorpus ein Vokabular gebildet, das für jedes vorkommende Wort die absolute Häufigkeit des Vorkommens sowie die Anzahl der Dokumente (ein Dokument ist ein Datenpunkt, also eine Schlagzeile) enthält, in der das Wort vorkommt. Aus diesem Vokabular wird anschließend die \textit{Document-Term-Matrix} (kurz \textit{DTM}) geformt, die für jede der $N$ Beobachtungen eine Zeile und für jede der $V$ Wörter im Vokabular eine Spalte enthält. Eine beispielhafte \textit{DTM} für ist in Tabelle dargestellt.
 
 \begin{table}[ht]
 \begin{center}
@@ -123,7 +123,7 @@ Bei diesen Methoden wird zuerst für den gesamten Textkorpus ein Vokabular gebil
 
 \begin{tabular}{|c||ccccccccccc|}
 \hline
-\multicolumn{12}{|c|}{\textit{BOW} \textit{dtm}} \\
+\multicolumn{12}{|c|}{\textit{BOW} \textit{DTM}} \\
 \hline 
    Satz   & the & dog & cat & like & likes &  to & sit  & owner & his &  does & not \\
       \hline
@@ -133,7 +133,7 @@ Satz 3 & $1$ & $1$ & $0$ & $0$ & $1$ & $0$ & $0$ & $1$ & $0$ &  $0$ & $0$ \\
 
 \hline
 
-\multicolumn{12}{|c|}{\textit{TFIDF} \textit{dtm}} \\
+\multicolumn{12}{|c|}{\textit{TFIDF} \textit{DTM}} \\
 \hline 
    Satz   & the & dog & cat & like & likes &  to & sit  & owner & his &  does & not \\
       \hline
@@ -143,39 +143,39 @@ Satz 3 & $0.243$ & $0.226$ & $0$ & $0$ & $0.226$ & $0$ & $0$ & $0.226$ & $0$ & $
 \hline
 \end{tabular}
 \end{center}{}
-\caption{Beispiel für eine \textit{document-term-matrix} für die $3$ Beispielsätze \textit{the cat likes to sit}, \textit{the dog does not like his owner}, \textit{the owner likes the dog} jeweils für das \textit{BOW Embedding} und das \textit{TFIDF Embedding} }  
+\caption{Beispiel für eine \textit{Document-Term-Matrix} für die $3$ Beispielsätze \textit{the cat likes to sit}, \textit{the dog does not like his owner}, \textit{the owner likes the dog} jeweils für das \textit{BOW Embedding} und das \textit{TFIDF Embedding} }  
 \label{tab:BOWExample}
 
 \end{table}
 
 Der Textkorpus im oben stehenden Beispiel besteht aus insgesamt $11$ Wörtern und jede der Spalten der Matrix repräsentiert eines davon.
-Die Einträge der \textit{dtm} bestehen aus Werten, die das Aufkommen der Wörter beschreiben. Im simplen \textit{bag-of-words} Ansatz (kurz: \textit{bow}) ist $dtm_{ij} = f_{d_i t_j}$ die Anzahl von Wort $t_j$ in Dokument $d_i$ (vgl. \cite{deepEssentials} S. 117f). Dies ist im oberen Teil von Tabelle \ref{tab:BOWExample} veranschaulicht. Es gibt einige Wörter wie \textit{the} oder \textit{and}, die häufig vorkommen aber eventuell nicht wichtig sind. Diese \textit{stopwords} können für die \textit{BOW} Methode entfernt werden. Dies muss aber nicht erfolgen, da manche \textit{stopwords} in einigen Kategorien häufiger vorkommen können als in anderen. Für das Beispiel in Tabelle \ref{tab:BOWExample} wurden die \textit{stopwords} nicht entfernt.
+Die Einträge der \textit{DTM} bestehen aus Werten, die das Aufkommen der Wörter beschreiben. Im simplen \textit{Bag-Of-Words} Ansatz (kurz: \textit{BOW}) ist $dtm_{ij} = f_{d_i t_j}$ die Anzahl von Wort $t_j$ in Dokument $d_i$ (vgl. \cite{deepEssentials} S. 117f). Dies ist im oberen Teil von Tabelle \ref{tab:BOWExample} veranschaulicht. Es gibt einige Wörter wie \textit{the} oder \textit{and}, die häufig vorkommen aber eventuell nicht wichtig sind. Diese \textit{stopwords} können für die \textit{BOW} Methode entfernt werden. Dies muss aber nicht erfolgen, da manche \textit{stopwords} in einigen Kategorien häufiger vorkommen können als in anderen. Für das Beispiel in Tabelle \ref{tab:BOWExample} wurden die \textit{stopwords} nicht entfernt.
 Bei einem \textit{BOW Embedding} wird nur gezählt, wie oft ein Wort absolut vorkommt, dabei wird aber nicht berücksichtigt, dass manche Wörter in einigen Dokumenten eine höhere Bedeutung haben können als in anderen. \\
 
-Ein Ansatz, der diese Problematik berücksichtigt ist \textit{term frequency inverse document frequency} (kurz: \textit{tf-idf}). Hierbei werden die Einträge $dtm_{ij}$ bei häufig benutzten Ausdrücken verringert und erhöht für Wörter, die insgesamt selten benutzt werden (vlg. \cite{textMiningR} S.29). Die \textit{tf-idf} für das Dokument $d_i$ und das Wort $t_j$ berechnet sich aus 
+Ein Ansatz, der diese Problematik berücksichtigt ist \textit{Term Frequency Inverse Document Frequency} (kurz: \textit{TFIDF}). Hierbei werden die Einträge $dtm_{ij}$ bei häufig benutzten Ausdrücken verringert und erhöht für Wörter, die insgesamt selten benutzt werden (vlg. \cite{textMiningR} S.29). Die \textit{TFIDF} für das Dokument $d_i$ und das Wort $t_j$ berechnet sich aus 
 \[tfidf(d_i, t_j) = tf(d_i,t_j) \cdot idf(t_j) . \]
-Sowohl für die \textit{term-frequency} $tf$ als auch für die \textit{inverse-document-frequency} $idf$ gibt es verschiedene Möglichkeiten zur Berechnung, wobei in dieser Thesis folgende Formeln genutzt werden.
-Die \textit{augmented-term-frequency}
+Sowohl für die \textit{Term-Frequency} $tf$ als auch für die \textit{Inverse-Document-Frequency} $idf$ gibt es verschiedene Möglichkeiten zur Berechnung, wobei in dieser Thesis folgende Formeln genutzt werden.
+Die \textit{Augmented-Term-Frequency}
 
 \[tf(d_i,t_j) = 0.5 +  0.5 \cdot \frac{f_{d_i t_j}}{max \{ f_{d_i t_j'}: t_j' \in d_i \}} \].
 
-berücksichtigt eine Verzerrung bei längeren Dokumenten, indem durch das Maximum der Häufigkeiten der vorkommenden Wörter in dem Dokument dividiert wird. Der Summand $0.5$ und der Multiplikator $0.5$ dienen der Normalisierung. Für die \textit{inverse document frequency} ist der Quotient zwischen der Anzahl der Dokumente $N$ im Korpus und der Anzahl der Dokumente, die das Wort enthalten, ein geeignetes Maß (vgl. \cite{deepEssentials} S. 118):
+berücksichtigt eine Verzerrung bei längeren Dokumenten, indem durch das Maximum der Häufigkeiten der vorkommenden Wörter in dem Dokument dividiert wird. Der Summand $0.5$ und der Multiplikator $0.5$ dienen der Normalisierung. Für die \textit{Inverse-Document-Frequency} ist der Quotient zwischen der Anzahl der Dokumente $N$ im Korpus und der Anzahl der Dokumente, die das Wort enthalten, ein geeignetes Maß (vgl. \cite{deepEssentials} S. 118):
 
 \[idf(t_j) = log \Bigl( \frac{N}{\# \{d_i: t_j \in d_i \}} \Bigr) .\]
 
-In dem unteren Teil von Tabelle \ref{tab:BOWExample} ist die resultierende \textit{dtm} unter Nutzung des beschriebenen \textit{TFIDF Embeddings} dargestellt. Es ist zu sehen, dass nur einmal im Textkorpus vorkommende Wörter (\say{\textit{his}}), ein höheres Gewicht bekommen als Wörter, die oft vorkommen (\say{\textit{the}}). Zudem kann das gleiche Wort ein unterschiedliches Gewicht in verschiedenen Datenpunkten enthalten (\say{\textit{dog}}).
+In dem unteren Teil von Tabelle \ref{tab:BOWExample} ist die resultierende \textit{DTM} unter Nutzung des beschriebenen \textit{TFIDF Embeddings} dargestellt. Es ist zu sehen, dass nur einmal im Textkorpus vorkommende Wörter (\say{\textit{his}}), ein höheres Gewicht bekommen als Wörter, die oft vorkommen (\say{\textit{the}}). Zudem kann das gleiche Wort ein unterschiedliches Gewicht in verschiedenen Datenpunkten enthalten (\say{\textit{dog}}).
 
 Die Umsetzung im Programmiercode erfolgte mit dem \texttt{R}-Paket \texttt{text2vec} (\cite{text2vec}).
 
-Unter Nutzung von sowohl \textit{bow} als auch \textit{tfidf} für die Repräsentation von Wörtern wird die Reihenfolge in den Dokumenten vernachlässigt (vgl. \cite{deepEssentials} S. 117). 
+Unter Nutzung von sowohl \textit{BOW} als auch \textit{TFIDF} für die Repräsentation von Wörtern wird die Reihenfolge in den Dokumenten vernachlässigt (vgl. \cite{deepEssentials} S. 117). 
 Die nachfolgend beschriebenen Methoden berücksichtigen hingegen die Reihenfolge der Wörter in einem Satz.
 
 
 \subsubsection{\textit{GloVe: Global vectors for representation of words}} \label{Kap:Glove}
 
-Eine weitere Methode zur numerischen Repräsenation von Texten sind \textit{word embeddings}, bei denen Wörter zu Vektoren fester Länge mit numerischen Werten kodiert werden. Mittlerweile haben sich \textit{word embeddings} als präferierte Methode für alle Bereiche der Sprachverarbeitung im \textit{machine-learning} durchgesetzt. Die beiden bekanntesten Methoden um \textit{word embeddings} zu generieren sind \textit{word2vec} und \textit{GloVe} (vgl. \cite{keras}, S. 139). Obwohl \textit{word2vec} auf dem Lernen durch ein neuronales Netz basiert und \textit{GloVe} auf der Zählung des Vorkommens von Wörtern im Kontext aufbaut, sind die beiden Verfahren von der grundsätzlichen Herangehensweise und den Resultaten ähnlich. Beide Methoden konstruieren einen Vektorraum, in dem die Position eines Worts durch den Kontext bestimmt wird, in dem das Wort im Textkorpus auftritt.
-\textit{GloVe} liefert im Vergleich zu \textit{word2vec} generell etwas bessere Resultate und ist mit Paralellisierung schneller zu berechnen (vgl. \cite{keras}, S. 156). Aus diesen Gründen wird in dieser Thesis \textit{GloVe} verwendet und im Folgenden beschrieben. \\
-Die Methode nutzt ein unüberwachtes Lernen zur Konstruktion der Vektoren. Zuerst wird eine \textit{term-co-occurance} (kurz \textit{tcm}) Matrix $R$ konstruiert, die so viele Zeilen enthält, wie das Vokabular Wörter besitzt. Die Spalten stehen auch für die Wörter des Vokabulars, allerdings als Kontext verstanden. Tabelle \ref{tab:GloveExample} verdeutlicht dies anhand des Beispiels aus Tabelle \ref{tab:BOWExample}.
+Eine weitere Methode zur numerischen Repräsenation von Texten sind \textit{Word Embeddings}, bei denen Wörter zu Vektoren fester Länge mit numerischen Werten kodiert werden. Mittlerweile haben sich \textit{Word Embeddings} als präferierte Methode für alle Bereiche der Sprachverarbeitung im \textit{Machine-Learning} durchgesetzt. Die beiden bekanntesten Methoden um \textit{Word Embeddings} zu generieren sind \textit{Word2vec} und \textit{GloVe} (vgl. \cite{keras}, S. 139). Obwohl \textit{Word2vec} auf dem Lernen durch ein neuronales Netz basiert und \textit{GloVe} auf der Zählung des Vorkommens von Wörtern im Kontext aufbaut, sind die beiden Verfahren von der grundsätzlichen Herangehensweise und den Resultaten ähnlich. Beide Methoden konstruieren einen Vektorraum, in dem die Position eines Worts durch den Kontext bestimmt wird, in dem das Wort im Textkorpus auftritt.
+\textit{GloVe} liefert im Vergleich zu \textit{Word2vec} generell etwas bessere Resultate und ist mit Paralellisierung schneller zu berechnen (vgl. \cite{keras}, S. 156). Aus diesen Gründen wird in dieser Thesis \textit{GloVe} verwendet und im Folgenden beschrieben. \\
+Die Methode nutzt ein unüberwachtes Lernen zur Konstruktion der Vektoren. Zuerst wird eine \textit{Term-Co-Occurance} (kurz \textit{TCM}) Matrix $R$ konstruiert, die so viele Zeilen enthält, wie das Vokabular Wörter besitzt. Die Spalten stehen auch für die Wörter des Vokabulars, allerdings als Kontext verstanden. Tabelle \ref{tab:GloveExample} verdeutlicht dies anhand des Beispiels aus Tabelle \ref{tab:BOWExample}.
 
 \begin{table}[ht]
 \begin{center}
@@ -201,12 +201,12 @@ the & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
 \end{tabular}  
  
 \end{center}{}
-\caption{Beispiel für eine \textit{term-co-occurance} Matrix für die $3$ Beispielsätze \textit{the cat likes to sit} (Satz $1$), \textit{the dog does not like his owner} (Satz $2$), \textit{the owner likes the dog} (Satz $3$) für einen symmetrischen Fensterbereich von 2}  
+\caption{Beispiel für eine \textit{Term-Co-Occurance} Matrix für die $3$ Beispielsätze \textit{the cat likes to sit} (Satz $1$), \textit{the dog does not like his owner} (Satz $2$), \textit{the owner likes the dog} (Satz $3$) für einen symmetrischen Fensterbereich von 2}  
 \label{tab:GloveExample}
 
 \end{table}
 
-In den Einträgen der \textit{tcm} Matrix stehen nun die Häufigkeit des Vorkommens der Wörter (Zeilen) im jeweiligen Kontext (Spalten). Ob ein Wort im Kontext vorkommt, ist so zu verstehen, dass es in einem vom Anwender wählbaren Fensterbereich um das Kontextwort enthalten ist. So kommt für einen symmetrischen Bereich von $2$ in Tabelle \ref{tab:GloveExample} das Wort \say{likes} dreimal im Kontext von \say{the} vor, einmal in Satz $1$ und zweimal in Satz $3$. Obwohl \say{dog} und \say{owner} in Satz $2$ und Satz $3$ zusammen vorkommen, steht in der \textit{tcm} an der betreffenden Stelle eine $0$. Zur Berechnung der \textit{GloVe Embeddings} wird nun die \textit{tcm} Matrix $\bm{R}$ in das Produkt aus $2$ Matrizen $\bm{P}$ und $\bm{Q}$ zerlegt, die multipliziert eine Matrix $\bm{\Tilde{R}}$ ergeben:
+In den Einträgen der \textit{TCM} Matrix stehen nun die Häufigkeit des Vorkommens der Wörter (Zeilen) im jeweiligen Kontext (Spalten). Ob ein Wort im Kontext vorkommt, ist so zu verstehen, dass es in einem vom Anwender wählbaren Fensterbereich um das Kontextwort enthalten ist. So kommt für einen symmetrischen Bereich von $2$ in Tabelle \ref{tab:GloveExample} das Wort \say{likes} dreimal im Kontext von \say{the} vor, einmal in Satz $1$ und zweimal in Satz $3$. Obwohl \say{dog} und \say{owner} in Satz $2$ und Satz $3$ zusammen vorkommen, steht in der \textit{TCM} an der betreffenden Stelle eine $0$. Zur Berechnung der \textit{GloVe Embeddings} wird nun die \textit{TCM} Matrix $\bm{R}$ in das Produkt aus $2$ Matrizen $\bm{P}$ und $\bm{Q}$ zerlegt, die multipliziert eine Matrix $\bm{\Tilde{R}}$ ergeben:
 
 \begin{equation*}
 \underset{N \times N}{\bm{R}} = \underset{N \times F}{\bm{P}} \cdot \underset{F \times N}{\bm{Q}} \approx  \underset{N \times N}{\Tilde{\bm{R}}} 
@@ -214,14 +214,14 @@ In den Einträgen der \textit{tcm} Matrix stehen nun die Häufigkeit des Vorkomm
 
 Die Matrix $\bm{P}$ mit Dimension $N \times F$ ergibt multipliziert mit $\bm{Q}$ mit Dimensionen $F \times N$ wieder eine $N \times N$ Matrix. $F$ ist die Länge der resultierenden Wort-Vektoren und muss vom Anwender festgelegt werden. Diese Größe bestimmt den Raum $\mathbb{R^F}$, in dem die Wort-Vektoren die Wörter repräsentieren sollen. Nun werden zu Beginn sowohl $\bm{P}$ als auch $\bm{Q}$ mit zufälligen Werten initiiert und die Matrix $\bm{\Tilde{R}}$ berechnet. Mithilfe des stochastischen Gradienten-Abstiegs (mehr dazu in Kapitel \ref{kap:neuralNets}) wird nun der Inhalt von $\bm{P}$ und $\bm{Q}$ verändert, mit dem Ziel die Summe aller Einträge der Differenz von $\bm{\Tilde{R}}$ und $\bm{R}$ zu minimieren. Dies ist ein numerischer iterativer Prozess, der wiederholt wird, bis der Fehler eine vorgegebene untere Grenze erreicht und sich die Matrizen $\bm{\Tilde{R}}$ und $\bm{R}$ im Rahmen dieser Toleranz ähnlich sind. Die Matrix $\bm{P}$ enthält zeilenweise nun die gewünschten Wort-Vektoren für jedes der $N$ Wörter des Vokabulars (vgl. \cite{keras}, S. 155f). Für eine detailierte Beschreibung der Methode sei auf \cite{glovePaper} verwiesen. 
 %todo: et al
-Es ist möglich diese Vektoren auf dem vorliegenden Trainingsdatensatz zu trainieren, wenn der Textkorpus groß genug ist. In dem Fall des \textit{news category dataset} mit \numprint{200847} ist dies durchaus plausibel. Das Trainieren der Vektoren erfolgte mit dem \texttt{R}-Paket \texttt{text2vec} (\cite{text2vec}) unter Verwendung der Parameter $skip\_grams\_window = 5$ für den symmetrischen Bereich des Kontextworts und die Dimension der Vektoren von $F = 50$. Dieses \textit{Embedding} wird mit dem Kürzel \textit{GloVe unsup. 50D} referenziert. \\
-Eine Alternative zum Training der \textit{word-embeddings} auf dem vorliegenden Textkorpus ist der Griff zu einem der vortrainierten Datensätze, die von \cite{gloveOnline}
+Es ist möglich diese Vektoren auf dem vorliegenden Trainingsdatensatz zu trainieren, wenn der Textkorpus groß genug ist. In dem Fall des \textit{News Category Dataset} mit \numprint{200847} ist dies durchaus plausibel. Das Trainieren der Vektoren erfolgte mit dem \texttt{R}-Paket \texttt{text2vec} (\cite{text2vec}) unter Verwendung der Parameter $skip\_grams\_window = 5$ für den symmetrischen Bereich des Kontextworts und die Dimension der Vektoren von $F = 50$. Dieses \textit{Embedding} wird mit dem Kürzel \textit{GloVe unsup. 50D} referenziert. \\
+Eine Alternative zum Training der \textit{Word-Embeddings} auf dem vorliegenden Textkorpus ist der Griff zu einem der vortrainierten Datensätze, die von \cite{gloveOnline}
 %todo: o.D referenz?
 zur Verfügung gestellt worden sind. Diese Vektoren wurden auf massiven Datenmengen trainiert. Für diese Arbeit wurden 2 Datensätze mit vor-trainierten Wortvektoren des \textit{GloVe} Projekts genutzt: Ein auf Wikipedia mit $6$ Milliarden Dokumenten trainierter Datensatz mit einer Länge der Vektoren von $F = 50$ (\cite{gloveWiki}) und ein auf $42$ Milliarden aus verschiedensten Quellen des Internets stammenden Textdokumenten mit $F = 300$ Dimensionen (\cite{gloveCommon}). Die beiden vortrainierten \textit{Embeddings} werden in Kapitel \ref{Kap:statAus} mit \textit{GloVe 50D} und \textit{GloVe 300D} referenziert.\\
 
-Ob nun vor-trainierte \textit{word embeddings} genutzt werden oder die Vektoren auf dem Trainingsdatensatz gelernt werden, es stellt sich die Frage, wie genau die Datenpunkte geformt werden, sodass ein \textit{machine learning} Modell immer Eingangswerte derselben Dimension erwarten kann. Nun ist unter der Annahme, dass eine Beobachtung immer aus einer Aneinanderreihung von Wörtern besteht, jeder durch Wort-Vektoren repräsentierter Datenpunkt $x_i$ bereits eine zweidimensionale Matrix mit Dimensionen $F \times  W_i$. $W_i$ steht für die Anzahl Wörter im Satz des Datenpunktes $x_i$ und $F$ ist die Anzahl der Wort-Vektoren. Die Trainingsdaten formen dann ein dreidimensionales Array $N \times F \times  W_i$, wobei $N$ die Anzahl der Datenpunkte im Trainingsset ist. In \texttt{R} müssen nun aber alle $N$ Matrizen die gleiche Anzahl Spalten und Zeilen besitzen, um zu einem Array geformt werden zu können.
+Ob nun vor-trainierte \textit{Word Embeddings} genutzt werden oder die Vektoren auf dem Trainingsdatensatz gelernt werden, es stellt sich die Frage, wie genau die Datenpunkte geformt werden, sodass ein \textit{Machine-Learning} Modell immer Eingangswerte derselben Dimension erwarten kann. Nun ist unter der Annahme, dass eine Beobachtung immer aus einer Aneinanderreihung von Wörtern besteht, jeder durch Wort-Vektoren repräsentierter Datenpunkt $x_i$ bereits eine zweidimensionale Matrix mit Dimensionen $F \times  W_i$. $W_i$ steht für die Anzahl Wörter im Satz des Datenpunktes $x_i$ und $F$ ist die Anzahl der Wort-Vektoren. Die Trainingsdaten formen dann ein dreidimensionales Array $N \times F \times  W_i$, wobei $N$ die Anzahl der Datenpunkte im Trainingsset ist. In \texttt{R} müssen nun aber alle $N$ Matrizen die gleiche Anzahl Spalten und Zeilen besitzen, um zu einem Array geformt werden zu können.
 Dementsprechend soll die Anzahl der Spalten $W_i$ immer gleich gewählt werden. Hier wird als Konstante $W_{max}$ die Anzahl Wörter gewählt, die $99.9$ Prozent der News Schlagzeilen im Trainingsset nicht überschreiten. Diese Konstante wird heuristisch vom Nutzer gewählt. Die verbleibenden längsten $0.1$ Prozent der Schlagzeilen werden entfernt.
-Für jede Schlagzeile, die weniger Wörter als $W_{max}$ enthält, wird die Matrix für die fehlenden Wörter mit Nullen aufgefüllt. Dieser Prozess wird \textit{padding} genannt. Wäre beispielsweise $W_{max} = 82$ die größte Anzahl von Wörtern, die eine Schlagzeile enthält, so hätte jeder Datenpunkt $82$ Spalten, von denen die meisten mit Nullen gefüllt sind. Durch das Entfernen der $10$ längsten Schlagzeilen wäre die Anzahl der Spalten pro Datenpunkt schon auf $36$ Spalten reduziert. Es wird also durch den Verzicht auf einige wenige Datenpunkte viel Speicherplatz gespart.\\
+Für jede Schlagzeile, die weniger Wörter als $W_{max}$ enthält, wird die Matrix für die fehlenden Wörter mit Nullen aufgefüllt. Dieser Prozess wird \textit{Padding} genannt. Wäre beispielsweise $W_{max} = 82$ die größte Anzahl von Wörtern, die eine Schlagzeile enthält, so hätte jeder Datenpunkt $82$ Spalten, von denen die meisten mit Nullen gefüllt sind. Durch das Entfernen der $10$ längsten Schlagzeilen wäre die Anzahl der Spalten pro Datenpunkt schon auf $36$ Spalten reduziert. Es wird also durch den Verzicht auf einige wenige Datenpunkte viel Speicherplatz gespart.\\
 Zur Veranschaulichung der \textit{Glove} Vektoren ist in Tabelle \ref{tab:GloVeMatrixBsp} das \textit{Embedding} eines Datenpunkts dargestellt.
 
 \begin{table}[ht]
@@ -252,19 +252,19 @@ Dim 1 & -0.42 & -0.49 & 0.60 & 0.42 & -0.04 & -0.31 & -0.04 & 0.02 & -0.02 & 0.6
 
 \end{table}
 
-Die Dimension $F$ beträgt in dem Beispiel $50$, jedes Wort wird also durch einen Vektor der Länge $50$ repräsentiert. Die Länge der Sequenz ist $maxW = 26$. Da der Satz nur $12$ Wörter enthält, sind die restlichen $26-12 = 14$ Spalten mit Nullen aufgefüllt (\textit{padding}). In dem Beispiel ist auch zu sehen, dass das zweifach vorkommende Anführungszeichen \say{'} ebenfalls einen eigenen Wort-Vektor erhält.\\
+Die Dimension $F$ beträgt in dem Beispiel $50$, jedes Wort wird also durch einen Vektor der Länge $50$ repräsentiert. Die Länge der Sequenz ist $maxW = 26$. Da der Satz nur $12$ Wörter enthält, sind die restlichen $26-12 = 14$ Spalten mit Nullen aufgefüllt (\textit{Padding}). In dem Beispiel ist auch zu sehen, dass das zweifach vorkommende Anführungszeichen \say{'} ebenfalls einen eigenen Wort-Vektor erhält.\\
 \\
-Allgemein haben die resultierenden Vektoren einige nützliche Eigenschaften. Als Ähnlichkeits\-maß zwischen 2 Vektoren kann das Kreuzprodukt genutzt werden. Wörter, die einander ähnlich sind, sind auch in ihrer Repräsentation im $F$-dimensionalen Vektorraum nahe beieinander angeordnet. Falls die \textit{word-embeddings} auf großen Datenmengen trainiert worden sind, können die Vektoren sogar semantische Beziehungen repräsentieren. So kann beispielsweise \textit{walking} zu \textit{walked} dieselbe Beziehung haben wie \textit{swimming} zu \textit{swam}. Addiert oder subtrahiert man Wort-Vektoren, so können sogar Gleichungen der Form $king - man + women \approx queen$, oder $berlin - germany + france \approx paris$ zustande kommen (vlg. \cite{deepEssentials}, S. 122).
+Allgemein haben die resultierenden Vektoren einige nützliche Eigenschaften. Als Ähnlichkeits\-maß zwischen 2 Vektoren kann das Kreuzprodukt genutzt werden. Wörter, die einander ähnlich sind, sind auch in ihrer Repräsentation im $F$-dimensionalen Vektorraum nahe beieinander angeordnet. Falls die \textit{Word-Embeddings} auf großen Datenmengen trainiert worden sind, können die Vektoren sogar semantische Beziehungen repräsentieren. So kann beispielsweise \textit{walking} zu \textit{walked} dieselbe Beziehung haben wie \textit{swimming} zu \textit{swam}. Addiert oder subtrahiert man Wort-Vektoren, so können sogar Gleichungen der Form $king - man + women \approx queen$, oder $berlin - germany + france \approx paris$ zustande kommen (vlg. \cite{deepEssentials}, S. 122).
 
 \subsubsection{Summe von Wort-Vektoren}
 
-Die im vorherigen Abschnitt \ref{Kap:Glove} beschriebenen \textit{word-embeddings} bilden bei Sätzen immer eine zweidimensionale Matrix pro Datenpunkt. Es ist aber auch eine Dimensionsreduktion möglich, indem die Summe oder Differenz der Wort-Vektoren gebildet wird und anschließend mit einer Norm normalisiert wird. \cite{sumsWords}, S. 13 zeigen,
+Die im vorherigen Abschnitt \ref{Kap:Glove} beschriebenen \textit{Word-Embeddings} bilden bei Sätzen immer eine zweidimensionale Matrix pro Datenpunkt. Es ist aber auch eine Dimensionsreduktion möglich, indem die Summe oder Differenz der Wort-Vektoren gebildet wird und anschließend mit einer Norm normalisiert wird. \cite{sumsWords}, S. 13 zeigen,
 % todo: Dilawar et al (2018, S.13)
 dass die Summe der Word-Vektoren unter Verwendung der $L1$ Normalisierung eine gute Repräsentation der Sätze ist und gute Resultate liefert. Diese Repräsentation ist definiert als
 
 \[SOW_{L1} = \frac{\sum_{i=1}^{W_{max}} \Vec{w_i}}{\| \sum_{i=1}^{W_{max}}  \vec{w_i} \|} \vspace{0.2cm}\]
 
-(\cite{sumsWords}, S. 5). Die $L1$ Norm skaliert die Einträge der $\Vec{w_i}$ so, dass die Summe aller Einträge $1$ entspricht. Es wird bis $W_{max}$ summiert, da das in Kapitel \ref{Kap:Glove} erläuterte \textit{padding} dafür sorgt, dass jede Schlagzeile mit genau $W_{max}$ Vektoren der Länge $F$ repräsentiert wird. Die Spalten, die mit Nullen aufgefüllt wurden beeinflussen den Summanden nicht.
+(\cite{sumsWords}, S. 5). Die $L1$ Norm skaliert die Einträge der $\Vec{w_i}$ so, dass die Summe aller Einträge $1$ entspricht. Es wird bis $W_{max}$ summiert, da das in Kapitel \ref{Kap:Glove} erläuterte \textit{Padding} dafür sorgt, dass jede Schlagzeile mit genau $W_{max}$ Vektoren der Länge $F$ repräsentiert wird. Die Spalten, die mit Nullen aufgefüllt wurden beeinflussen den Summanden nicht.
 Jeder Datenpunkt wird zusammenfassend als Vektor mit $F$ Einträgen dargestellt, der die Bedeutung des dahinterstehenden Satzes im $F$ dimensionalen Raum repräsentiert. Die entsprechenden Summen der \textit{Word Embeddings} aus Abschnitt \ref{Kap:Glove} werden in der Vorauswahl in Kapitel \ref{kap:preselection} als \textit{SOW GloVe unsup. 50D}, \textit{SOW GloVe 50D} und \textit{SOW Glove 300D} bezeichnet.
 Für das Beispiel aus Tabelle \ref{tab:GloVeMatrixBsp} hätte das \textit{SOW GloVe 50D} Embedding des Satzes
 \say{\textit{reese witherspoon had the 'snl' cast apologize to their moms}} die Form \\
@@ -273,18 +273,18 @@ $\textbf{(}0.006, 0.017,  0.002, -0.017,  0.017, \dots , -0.004, -0.016, -0.008,
 
 \subsubsection{Sequentielle Darstellung} \label{Kap:Seq}
 
-Eine weitere Möglichkeit, Sätze und Wörter zu repräsentieren ist als Sequenz von Indices. So bekommt jedes Wort eine natürliche Zahl aus dem Vokabular zugeordnet. Durch die Aneinanderreihung dieser Indices wird ein Satz als Sequenz von natürlichen Zahlen dargestellt. Die resultierende Datenmatrix hat also die Dimensionen $N \times W_{max}$, wobei $W_{max}$ analog wie in Kapitel \ref{Kap:Glove} gewählt wird. Diese kann als Trainingsdatensatz für ein klassisches \textit{machine-learning} Modell wie \textit{random Forest} (Kapitel \ref{kap:RF}), oder als Input für neuronale Netze wie \textit{CNN} (Kapitel \ref{kap:CNN}) oder \textit{LSTM} (Kapitel \ref{kap:LSTM}) dienen. Eine \textit{embedding} Eingangsschicht im neuronalen Netz lernt jeden Index dann zu einem Wort-Vektor einer vorgegebenen Größe $F$ und jeder Datenpunkt wird intern zu einer Matrix der Dimension $F \times W_{max}$ während des Trainierens des Netzes geformt. Das Bilden der \textit{word embeddings} geschieht in diesem Fall durch überwachtes Lernen und nicht durch unüberwachtes Lernen wie bei \textit{GloVe} in Kapitel \ref{Kap:Glove} (vgl. \cite{keras}, S.159f).\\
+Eine weitere Möglichkeit, Sätze und Wörter zu repräsentieren ist als Sequenz von Indices. So bekommt jedes Wort eine natürliche Zahl aus dem Vokabular zugeordnet. Durch die Aneinanderreihung dieser Indices wird ein Satz als Sequenz von natürlichen Zahlen dargestellt. Die resultierende Datenmatrix hat also die Dimensionen $N \times W_{max}$, wobei $W_{max}$ analog wie in Kapitel \ref{Kap:Glove} gewählt wird. Diese kann als Trainingsdatensatz für ein klassisches \textit{Machine-Learning} Modell wie \textit{Random Forest} (Kapitel \ref{kap:RF}), oder als Input für neuronale Netze wie \textit{CNN} (Kapitel \ref{kap:CNN}) oder \textit{LSTM} (Kapitel \ref{kap:LSTM}) dienen. Eine \textit{Embedding} Eingangsschicht im neuronalen Netz lernt jeden Index dann zu einem Wort-Vektor einer vorgegebenen Größe $F$ und jeder Datenpunkt wird intern zu einer Matrix der Dimension $F \times W_{max}$ während des Trainierens des Netzes geformt. Das Bilden der \textit{Word Embeddings} geschieht in diesem Fall durch überwachtes Lernen und nicht durch unüberwachtes Lernen wie bei \textit{GloVe} in Kapitel \ref{Kap:Glove} (vgl. \cite{keras}, S.159f).\\
 Die Erstellung der Wort-Sequenzen erfolgte in \texttt{R} mit dem Paket \texttt{keras} (\cite{kerasR}). In Kapitel \ref{kap:preselection} ist diese Art der Repräsentation der Wörter mit dem Kürzel \textit{Sequence} benannt. \\
 
 
-\subsection{\textit{machine learning} Modelle}\label{kap:machineLearning}
+\subsection{\textit{Machine-Learning} Modelle}\label{kap:machineLearning}
 
 \subsubsection{Extreme Gradient Boosting}\label{kap:XG}
 \subsubsection{Random Forest}\label{kap:RF}
 
 \subsection{Neuronale Netze} \label{kap:neuralNets}
 
-Dieses Unterkapitel gibt eine Einführung in das Gebiet der neuronalen Netze und die in dieser Arbeit verwendeten Architekturen. Beginnend mit dem \textit{multi-layer-perceptron} Netz werden die allgemeinen Aspekte und Komponenten des \textit{deep learnings} erläutert. Daran anknüpfend werden mit dem Fokus auf \textit{natural language processing} (die Verarbeitung von Textdaten, kurz \textit{NLP}) das \textit{convolutional neural net} (kurz \textit{CNN}) und das \textit{long-short-term-memory neural net} (kurz \textit{LSTM}) beschrieben. Die Implementierung der Netzarchitekturen im Programmiercode erfolgte mit dem \texttt{R}-Paket \texttt{keras} (\cite{kerasR}).
+Dieses Unterkapitel gibt eine Einführung in das Gebiet der neuronalen Netze und die in dieser Arbeit verwendeten Architekturen. Beginnend mit dem \textit{Multi-Layer-Perceptron} Netz werden die allgemeinen Aspekte und Komponenten des \textit{Deep Learnings} erläutert. Daran anknüpfend werden mit dem Fokus auf \textit{Natural Language Processing} (die Verarbeitung von Textdaten, kurz \textit{NLP}) das \textit{Convolutional Neural Net} (kurz \textit{CNN}) und das \textit{Long-Short-Term-Memory Neural Net} (kurz \textit{LSTM}) beschrieben. Die Implementierung der Netzarchitekturen im Programmiercode erfolgte mit dem \texttt{R}-Paket \texttt{keras} (\cite{kerasR}).
 
 
 \subsubsection{Multi-Layer-Perceptron Neural Net}
@@ -296,47 +296,47 @@ Das \textit{Multi-Layer-Perceptron} (kurz \textit{MLP}) ist die einfachste Form 
 \begin{figure}[!ht]
 \begin{center}
 \includegraphics[width = 10cm,  keepaspectratio]{Images/MLPScreenDeepLearningEssentials.PNG}
-\caption{\textit{fully-connected feed-forward} Netz mit 2 Zwischenschichten (\cite{deepEssentials}, S. 60)}
+\caption{\textit{Fully-Connected Feed-Forward} Netz mit 2 Zwischenschichten (\cite{deepEssentials}, S. 60)}
 \label{abb:MLPScreen}
 \end{center}
 \end{figure}
 
-In der Abbildung \ref{abb:MLPScreen} ist zu sehen, dass das Netz in verschiedenen Schichten organisiert ist, die jeweils aus Neuronen (auch Knoten oder Zellen genannt) bestehen. Die Eingangsschicht (\textit{input layer}) besteht aus den als numerischen Werten kodierten Trainingsdaten und enthält entsprechend viele Neuronen. Darauf folgen mehrere Zwischenschichten (\textit{hidden layer}). Die Zwischenschichten enthalten jeweils eine vom Nutzer wählbare Anzahl von Neuronen. Die Ausgangsschicht (\textit{output layer}) schließt das Netz ab. Wie viele Knoten die Ausgangsschicht enthält, ist abhängig von der Problemstellung. Im Falle einer Klassifikation mit $C$ Klassen enthält es ebenso viele Knoten. Nun bedeutet \textit{fully-connected}, dass jedes Neuron mit allen Neuronen aus der vorherigen und nachfolgenden Schicht verbunden ist. Bei einem \textit{feed-forward} Netz werden nur Verbindungslinien in eine Richtung zugelassen und zwar von Eingangs- bis Ausgangsschicht. Die Verbindungslinien werden durch Gewichte repräsentiert, die den Einfluss des Eingangsneuron auf das Ausgangsneuron beschreiben. Seien $a_1^{(k-1)},..., a_{m^{(k-1)}}^{(k-1)}$ die Ausgangssignale der $k-1$-ten Zwischenschicht und $a_{1}^{(k)},..., a_{m^{(k)}}^{(k)}$ die Neuronen der $k$-ten Zwischenschicht. $m^{(k)}$ bezeichnet hierbei die Anzahl Neuronen in der $k$-ten Zwischenschicht. 
-Das Gewicht $w_{il}^{(k)}$ gehört zur Verbindungslinie von Knoten $i$ der $k-1$-ten Zwischenschicht mit Knoten $l$ der $k$-ten Zwischenschicht. Das Signal, dass das $l$-te Neuron der $k$-ten Zwischenschicht $a_{l}^{(k)}$ erreicht, berechnet sich aus der gewichteten Summe der Eingangsdaten und einem \textit{bias}, auf die dann eine Aktivierungsfunktion $\sigma$ angewandt wird:
+In der Abbildung \ref{abb:MLPScreen} ist zu sehen, dass das Netz in verschiedenen Schichten organisiert ist, die jeweils aus Neuronen (auch Knoten oder Zellen genannt) bestehen. Die Eingangsschicht (\textit{Input Layer}) besteht aus den als numerischen Werten kodierten Trainingsdaten und enthält entsprechend viele Neuronen. Darauf folgen mehrere Zwischenschichten (\textit{Hidden Layer}). Die Zwischenschichten enthalten jeweils eine vom Nutzer wählbare Anzahl von Neuronen. Die Ausgangsschicht (\textit{Output Layer}) schließt das Netz ab. Wie viele Knoten die Ausgangsschicht enthält, ist abhängig von der Problemstellung. Im Falle einer Klassifikation mit $C$ Klassen enthält es ebenso viele Knoten. Nun bedeutet \textit{Fully-Connected}, dass jedes Neuron mit allen Neuronen aus der vorherigen und nachfolgenden Schicht verbunden ist. Bei einem \textit{Feed-Forward} Netz werden nur Verbindungslinien in eine Richtung zugelassen und zwar von Eingangs- bis Ausgangsschicht. Die Verbindungslinien werden durch Gewichte repräsentiert, die den Einfluss des Eingangsneuron auf das Ausgangsneuron beschreiben. Seien $a_1^{(k-1)},..., a_{m^{(k-1)}}^{(k-1)}$ die Ausgangssignale der $k-1$-ten Zwischenschicht und $a_{1}^{(k)},..., a_{m^{(k)}}^{(k)}$ die Neuronen der $k$-ten Zwischenschicht. $m^{(k)}$ bezeichnet hierbei die Anzahl Neuronen in der $k$-ten Zwischenschicht. 
+Das Gewicht $w_{il}^{(k)}$ gehört zur Verbindungslinie von Knoten $i$ der $k-1$-ten Zwischenschicht mit Knoten $l$ der $k$-ten Zwischenschicht. Das Signal, dass das $l$-te Neuron der $k$-ten Zwischenschicht $a_{l}^{(k)}$ erreicht, berechnet sich aus der gewichteten Summe der Eingangsdaten und einem \textit{Bias}, auf die dann eine Aktivierungsfunktion $\sigma$ angewandt wird:
 
 \[ a_{l}^{(k)} = \sigma (b_l + \sum_{i=1}^{m^{(k-1)}} w_{il}^{(k)} a_{i}^{(k-1)}).\]
 
-Der \textit{bias} $b_l$ ist ein weiterer Parameter, der im Laufe des Trainings des Netzes gelernt wird.
+Der \textit{Bias} $b_l$ ist ein weiterer Parameter, der im Laufe des Trainings des Netzes gelernt wird.
 Für die erste Zwischenschicht und die Eingangsschicht berechnen sich Signale analog indem die Eingangssignale $a_{1}^{(k-1)},..., a_{m^{(k-1)}}^{(k-1)}$ durch die Einträge des Datenvektors $x_1, ..., x_F$ ersetzt werden, mit $F$ der Anzahl der Variablen oder der Dimension des Wort-Vektors. Die Aktivierungsfunktion $\sigma$ transformiert die gewichtete Summe dann anschließend und bestimmt wie hoch das finale Signal ist. Jede Schicht außer der Eingangsschicht besitzt eine solche Aktivierungsfunktion. Sie sollte differenzierbar sein, da das Netzwerk im Prozess des Lernens Gradienten berechnet. Dieser Aspekt wird später detailliert erläutert. Es existiert eine Vielzahl an Aktivierungsfunktionen. Es werden im Folgenden Aktivierungsfunktionen vorgestellt, die in dieser Arbeit genutzt werden (vgl. \cite{deepEssentials}, S.62-65). 
 
-Die \textit{sigmoid} Aktivierungsfunktion bildet die Urmenge in das Intervall $\left[0, 1\right]$ ab. Sei $x \in \mathbb{R}$ ein Input, dann ist 
+Die \textit{Sigmoid} Aktivierungsfunktion bildet die Urmenge in das Intervall $\left[0, 1\right]$ ab. Sei $x \in \mathbb{R}$ ein Input, dann ist 
 
 \[\sigma(x) =  \frac{1}{1+ e^{-x}}.\]
 
-Eine Funktion, die die Urmenge in das Intervall $\left[-1, 1\right]$ abbildet, ist der \textit{tangens hyperbolicus}, der wie folgt definiert ist:
+Eine Funktion, die die Urmenge in das Intervall $\left[-1, 1\right]$ abbildet, ist der \textit{Tangens Hyperbolicus}, der wie folgt definiert ist:
 
 \[tanh(x) =  \frac{1- e^{-2x}}{1+ e^{-2x}}.\]
 
 
-Die Konvergenz der Parameter erfolgt schneller als unter der Nutzung von einer \textit{sigmoid} Aktivierung. Dennoch leidet $tanh$ wie die \textit{sigmoid} Funktion unter dem \textit{vanishing gradient} Problem, weshalb in der Praxis die \textit{rectified linear unit} (kurz \textit{relu}) genutzt wird. \textit{sigmoid} und \textit{tanh} finden in dieser Thesis ausschließlich Anwendung bei den in Kapitel \ref{kap:LSTM} beschriebenen \textit{long-short-term-memory neural networks}. Die \textit{relu} Funktion ist wie folgt definiert:
+Die Konvergenz der Parameter erfolgt schneller als unter der Nutzung von einer \textit{Sigmoid} Aktivierung. Dennoch leidet $tanh$ wie die \textit{Sigmoid} Funktion unter dem \textit{Vanishing Gradient} Problem, weshalb in der Praxis die \textit{Rectified Linear Unit} (kurz \textit{Relu}) genutzt wird. \textit{Sigmoid} und \textit{tanh} finden in dieser Thesis ausschließlich Anwendung bei den in Kapitel \ref{kap:LSTM} beschriebenen \textit{Long-Short-Term-Memory Neural Networks}. Die \textit{Relu} Funktion ist wie folgt definiert:
 
-\[relu(x) = 
+\[Relu(x) = 
 \begin{cases}
 max(0,x), & x \geq 0 \\
 0, & x <0
 \end{cases}{}
 .\]
 
-Es wurde gezeigt, dass im Lernprozess die Konvergenz der Parameter unter Nutzung von \textit{relu} bis zu 6-Mal schneller erreicht werden kann. Außerdem benötigt ihre Berechnung weniger Rechenleistung als klassische Aktivierungsfunktionen. \textit{relu} wird heutzutage aus diesen Gründen in den meisten neuronalen Netzen in den Zwischenschichten verwendet (vgl. \cite{deepEssentials}, S. 64). Für die Ausgangsschicht muss eine Aktivierungsfunktion gewählt werden, die Werte im Intervall $\left[0, 1\right]$ annimmt und dabei gleichzeitig eine Art Wahrscheinlichkeit modelliert. Hierbei wird im Klassifikationsfall zur \textit{softmax} Aktivierungsfunktion gegriffen:
+Es wurde gezeigt, dass im Lernprozess die Konvergenz der Parameter unter Nutzung von \textit{Relu} bis zu 6-Mal schneller erreicht werden kann. Außerdem benötigt ihre Berechnung weniger Rechenleistung als klassische Aktivierungsfunktionen. \textit{Relu} wird heutzutage aus diesen Gründen in den meisten neuronalen Netzen in den Zwischenschichten verwendet (vgl. \cite{deepEssentials}, S. 64). Für die Ausgangsschicht muss eine Aktivierungsfunktion gewählt werden, die Werte im Intervall $\left[0, 1\right]$ annimmt und dabei gleichzeitig eine Art Wahrscheinlichkeit modelliert. Hierbei wird im Klassifikationsfall zur \textit{Softmax} Aktivierungsfunktion gegriffen:
 
 \[p(y = j |z_j) = \phi(z_j) = \frac{e^{z_j}}{\sum_{j=1}^C z_j} .\]
 
-Hierbei bezeichnet $z_j$ das Eingangssignal in das Neuron der $j$-ten Klasse und $y$ die wahre Klasse. $\phi$ transformiert und normiert die Ausgangssignale für jedes der $C$ Neuronen in der Ausgangsschicht und modelliert unter der Bedingung $z_j$, für jede der Klassen $j = 1,..., C$ eine Wahrscheinlichkeit $p(y=j|z_j) \in \left[0, 1\right]$. Insgesamt ergibt sich $\sum_{j = 1}^C \phi(z_j) = 1$. Für die in dieser Arbeit verwendeten neuronalen Netze wird jeweils eine Ausgangsschicht mit $n = 32$ Knoten gewählt und die \textit{softmax} Aktivierungsfunktion zur Transformation der Eingangssignale genutzt (vgl. \cite{deepEssentials}, S. 65).\\
+Hierbei bezeichnet $z_j$ das Eingangssignal in das Neuron der $j$-ten Klasse und $y$ die wahre Klasse. $\phi$ transformiert und normiert die Ausgangssignale für jedes der $C$ Neuronen in der Ausgangsschicht und modelliert unter der Bedingung $z_j$, für jede der Klassen $j = 1,..., C$ eine Wahrscheinlichkeit $p(y=j|z_j) \in \left[0, 1\right]$. Insgesamt ergibt sich $\sum_{j = 1}^C \phi(z_j) = 1$. Für die in dieser Arbeit verwendeten neuronalen Netze wird jeweils eine Ausgangsschicht mit $n = 32$ Knoten gewählt und die \textit{Softmax} Aktivierungsfunktion zur Transformation der Eingangssignale genutzt (vgl. \cite{deepEssentials}, S. 65).\\
 \\
-Nachdem nun die grundlegende Architektur des Netzwerkes und die Aktivierungsfunktionen erläutert wurden, wird nun der Lernprozess durch den Gradientenabstieg und die damit verbundene Anpassung der Gewichte beschrieben. Die Optimierung des Netzwerkes geht insofern von statten, dass die Funktion $f(x)$ bezüglich einer Verlustfunktion minimiert wird, indem $x$ geändert wird. $x$ ist hier das mathematische Resultat der \textit{forward propagation}. Dies ist der Prozess, bei dem die Input Daten durch das Netz geschleust werden und wird später noch beispielhaft erklärt.
+Nachdem nun die grundlegende Architektur des Netzwerkes und die Aktivierungsfunktionen erläutert wurden, wird nun der Lernprozess durch den Gradientenabstieg und die damit verbundene Anpassung der Gewichte beschrieben. Die Optimierung des Netzwerkes geht insofern von statten, dass die Funktion $f(x)$ bezüglich einer Verlustfunktion minimiert wird, indem $x$ geändert wird. $x$ ist hier das mathematische Resultat der \textit{Forward Propagation}. Dies ist der Prozess, bei dem die Input Daten durch das Netz geschleust werden und wird später noch beispielhaft erklärt.
 Der Wert, der $f$ minimiert, wird notiert als 
 
-\[\bm{x}^\ast = argmin f(x),\]
+\[\bm{x}^\ast = argmin \hspace{0.1cm} f(x),\]
 
 wobei $\bm{x}^\ast$ der resultierende Parametervektor ist.
 Seien $x, y := f(x) \in \mathbb{R}$, so ist $f'(x) = \frac{\mathop{dx}}{\mathop{dy}}$ die Steigung in $x$ und gibt an, in was für einer Änderung $f(x)$ bei einer kleinen Änderung von $x$ resultiert. Unter Kenntnis von $f'(x)$ kann $f(x)$ schrittweise durch eine Änderung von $x$ in die Gegenrichtung der Ableitung minimiert werden. Diese Methode ist bekannt als Gradientenabstieg. Ist $f'(x) = 0$, so handelt es sich entweder um ein Minimum, Maximum oder einen Sattelpunkt. Ziel des Gradientenabstieg ist es, ein globales Minimum zu finden. Es ist möglich, dass die Funktion auch einige lokale Minima besitzt, in denen $f(x)$ in einem Teil des Wertebereichs ein Minima annimmt, aber eben nicht den kleinsten Wert im gesamten Wertebereich. Das Vorliegen von mehreren Sattelpunkten und lokalen Minima macht die Optimierung sehr schwierig, besonders, da es sich in der Praxis um multidimensionale Optimierungen handelt. Oft werden solche Lösungen akzeptiert, die nicht global minimal sind, aber einen signifikant niedrigen Wert der Verlustfunktion aufweisen. Abbildung \ref{abb:MinimaSearch} zeigt eine beispielhafte Darstellung einer eindimensionalen Verlustfunktion mit verschiedenen Minima und Sattelpunkten.
@@ -353,26 +353,26 @@ Die Verlustfunktion ist in Abhängigkeit des Parameter-Vektors $\bm{x}^\ast$ üb
 
 Ist $\bm{x} = (x_1, ..., x_l) \in \mathbb{R}^l$, so werden partielle Ableitungen $\frac{\partial}{\partial x_i} f(\bm{x})$ gebildet, die die Richtungsänderung von $f$ darstellt, wenn nur $x_i$ in $\bm{x}$ modifiziert wird. Der Vektor aller partiellen Ableitungen $(\frac{\partial f(\bm{x})}{\partial x_i}, \dots, \frac{\partial f(\bm{x})}{\partial x_l)})$ ist der Gradient von $f$ und wird notiert als $\nabla_{\bm{x}} f(\bm{x})$ (vgl. \cite{deepL}, S.82 ff).\\
 
-Nun soll die Methode des Gradientenabstiegs an einem einfachen Beispiel erläutert werden. In einem Netzwerk mit 2 Zwischenschichten sei $(\bm{x_0}, \bm{y})$ der Eingangsvektor und der Vektor der dazugehörigen Zielvariable sowie $(\bm{w_1}, \bm{b_1})$, $(\bm{w_2}, \bm{b_2})$ die Vektoren der Gewichte und \textit{bias} der Zwischenschichten. Der erste Schritt ist die Initialisierung der Gewichte und der \textit{bias} Parameter. Die Gewichte werden mit kleinen zufällige Werten initialisiert und die \textit{bias} Parameter entweder auf $0$ gesetzt oder auch mit kleinen positiven Zufallszahlen belegt (vgl. \cite{deepL}, S. 177). Als nächstes werden die Eingangsvektoren im Rahmen der \textit{forward-propagation} vorwärts durch das Netz geleitet. Die Berechnung erfolgt sukzessive mit
+Nun soll die Methode des Gradientenabstiegs an einem einfachen Beispiel erläutert werden. In einem Netzwerk mit 2 Zwischenschichten sei $(\bm{x_0}, \bm{y})$ der Eingangsvektor und der Vektor der dazugehörigen Zielvariable sowie $(\bm{w_1}, \bm{b_1})$, $(\bm{w_2}, \bm{b_2})$ die Vektoren der Gewichte und \textit{Bias} der Zwischenschichten. Der erste Schritt ist die Initialisierung der Gewichte und der \textit{Bias} Parameter. Die Gewichte werden mit kleinen zufällige Werten initialisiert und die \textit{Bias} Parameter entweder auf $0$ gesetzt oder auch mit kleinen positiven Zufallszahlen belegt (vgl. \cite{deepL}, S. 177). Als nächstes werden die Eingangsvektoren im Rahmen der \textit{Forward-Propagation} vorwärts durch das Netz geleitet. Die Berechnung erfolgt sukzessive mit
 \begin{align*}
-    \bm{z_1} &= \bm{x_0} \cdot \bm{w_1} + \bm{b_1} \\
+    \bm{z_1} &= \bm{x_0} \circ \bm{w_1} + \bm{b_1} \\
     \bm{a_1} &= \sigma(\bm{z_1}) \\
-    \bm{z_2} &= \bm{a_1} \cdot \bm{w_2} + \bm{b_2} \\
+    \bm{z_2} &= \bm{a_1} \circ \bm{w_2} + \bm{b_2} \\
     \bm{a_2} &= \sigma (\bm{z_2})
 \end{align*}{}
-$\bm{z_1}, \bm{z_2}$ sind die Vektoren, die in den Zwischenschichten eintreffen, $\bm{a_1}, \bm{a_2}$ die Signale, die die Neuronen der Zwischenschichten wieder verlassen und $\sigma$ die \textit{relu} Aktivierungsfunktion. Anschließend wird der Fehler des Netzwerkes berechnet mit 
+$\bm{z_1}, \bm{z_2}$ sind die Vektoren, die in den Zwischenschichten eintreffen, $\bm{a_1}, \bm{a_2}$ die Signale, die die Neuronen der Zwischenschichten wieder verlassen und $\sigma$ die \textit{Relu} Aktivierungsfunktion. Die Operation $\circ$ bezeichnet die elementweise Multiplikation der Vektoren. Anschließend wird der Fehler des Netzwerkes berechnet mit 
 \[\nabla \bm{a} = \bm{a_2} - \bm{y} .\]
-In diesem Beispiel wird die Verlustfunktion aus der Differenz des Ausgangssignal des letzten \textit{layers} und der Zielvariable $y$ gebildet. Die Verlustfunktion ist je nach Zielstellung passend zu wählen. Im Falle der hier vorliegenden \textit{multi-class} Klassifikation wird die in Kapitel \ref{kap:guetemass} beschriebene kategorische \textit{cross-entropy} $CE$ als geeignete Verlustfunktion angesehen (vgl. \cite{deepEssentials}, S. 220, \cite{keras}, S.179). Sie wird bei den neuronalen Netzen dieser Thesis ausschließlich verwendet. 
+In diesem Beispiel wird die Verlustfunktion aus der Differenz des Ausgangssignal des letzten \textit{Layers} und der Zielvariable $y$ gebildet. Die Verlustfunktion ist je nach Zielstellung passend zu wählen. Im Falle der hier vorliegenden \textit{Multiclass} Klassifikation wird die in Kapitel \ref{kap:guetemass} beschriebene kategorische \textit{Cross-Entropy} $CE$ als geeignete Verlustfunktion angesehen (vgl. \cite{deepEssentials}, S. 220, \cite{keras}, S.179). Sie wird bei den neuronalen Netzen dieser Thesis ausschließlich verwendet. 
 Nun werden im Rahmen der \textit{Back-Propagation} die Gradienten berechnet:
 
 % bei align sind zeilen wichtig
 \begin{align*}
-    \nabla \bm{z_2} &= \nabla \bm{a} \cdot \sigma' (\bm{z_2}) \\
+    \nabla \bm{z_2} &= \nabla \bm{a} \circ \sigma' (\bm{z_2}) \\
     \nabla \bm{b_2} &= \nabla \bm{z_2} \\
-    \nabla \bm{w_2} &= a_1^T \cdot \nabla \bm{z_2} \\
-    \nabla \bm{z_1} &= \nabla \bm{a_1} \cdot \sigma (\bm{z_1}) \\
+    \nabla \bm{w_2} &= a_1^T \circ \nabla \bm{z_2} \\
+    \nabla \bm{z_1} &= \nabla \bm{a_1} \circ \sigma (\bm{z_1}) \\
     \nabla \bm{b_1} &= \nabla \bm{z_1} \\
-    \nabla \bm{w_1} &= a_0^T \cdot \nabla \bm{z_1} 
+    \nabla \bm{w_1} &= a_0^T \circ \nabla \bm{z_1} 
 \end{align*}{}
 
 Anschließend werden die Parameter des Netzwerkes wie folgt angepasst:
@@ -384,11 +384,11 @@ Anschließend werden die Parameter des Netzwerkes wie folgt angepasst:
     \bm{b_2} &\leftarrow \bm{b_2} - \eta \cdot \nabla \bm{b_2} \\
 \end{align*}{}
 
-Die Gewichte und \textit{bias} werden also in die negative Richtung ihrer partiellen Ableitung angepasst. Wie groß der Schritt des Abstiegs ist, bestimmt die Lernrate $eta$. 
-Wie genau $\eta$ bestimmt wird, hängt unter anderem vom dem verwendeten Optimierungsalgorithmus ab. Für die Durchführung der Methode des Gradientenabstiegs gibt es mehrere Varianten. Es wird davon abgesehen, den Gradienten mit allen Beobachtungen des Datensatzes zu berechnen. Dies ist sehr rechenintensiv und ineffizient in dem Sinne, dass in einem schlechten Szenario die Beobachtungen sehr ähnlich sind und eine kleine Auswahl der Datenpunkte zu einer ähnlichen Verbesserung der Verlustfunktion beiträgt wie unter Nutzung aller Datenpunkte. Auch wenn dies ein Extremfall ist, finden sich oft viele Beobachtungen, die ähnlich zur Anpassung der Gewichte beitragen. Optimierungsalgorithmen konvergieren in der Regel in einer schnelleren Rechenzeit, falls sie schnell hintereinander ungefähre Schätzungen des Gradienten erstellen, statt in einer hohen Rechenzeit den gesamten Gradienten zu berechnen (vgl. \cite{deepEssentials}, S. 220). Methoden, die jeweils nur eine Beobachtung nutzen um den neuen Gradienten zu berechnen, werden als Stochastische Methoden bezeichnet. Optimierungsalgorithmen, die den kompletten Trainingsdatensatz nutzen, werden als \textit{batch} oder deterministische Gradienten Methoden bezeichnet. Das Wort \textit{batch} wird jedoch auch in dem anderen Kontext von \textit{batch}-Größe genutzt, um die Größe des \textit{minibatch} bei der Methode \textit{minibatch-stochastic-gradient-descent} zu beschreiben. Hierbei bezeichnet die \textit{batch}-Größe $m$ die Anzahl Datenpunkte aus dem Trainingsset, die herangezogen werden um die Gewichte des neuronalen Netzes in einem Schritt zu aktualisieren (vgl. \cite{keras}, S.19). Diese Methode ist ein Kompromiss aus \textit{batch}- und stochastischem Gradientenabstieg und wird bei von den meisten \textit{deep-learning}-Algorithmen genutzt. Die \textit{minibatch} Methode wird heutzutage einfach als \textit{stochastischer} Methode bezeichnet (vgl. \cite{deepL}, S. 279f). Nun gibt es viele \textit{minibatch} Optimierungsmethoden, die mit der Zeit immer verbesserte Ansätze zur Bildung der Lernrate $\eta$ lieferten. Die in dieser Thesis verwendete \textit{adam}-Methode nutzt adaptive Lernraten und kombiniert die Konzepte des Momentums und der Beschleunigung bei der Anpassung der Gewichte nach jedem Optimierungsschritt. \textit{adam} liefert verglichen mit anderen Methoden sehr gute Ergebnisse (vgl. \cite{keras}, S. 36). Für eine detaillierte Einführung in die Evolution der Optimierungsmethoden sei auf Kapitel 8 in \cite{deepL} verwiesen. \\
+Die Gewichte und \textit{Bias} werden also in die negative Richtung ihrer partiellen Ableitung angepasst. Wie groß der Schritt des Abstiegs ist, bestimmt die Lernrate $eta$. 
+Wie genau $\eta$ bestimmt wird, hängt unter anderem vom dem verwendeten Optimierungsalgorithmus ab. Für die Durchführung der Methode des Gradientenabstiegs gibt es mehrere Varianten. Es wird davon abgesehen, den Gradienten mit allen Beobachtungen des Datensatzes zu berechnen. Dies ist sehr rechenintensiv und ineffizient in dem Sinne, dass in einem schlechten Szenario die Beobachtungen sehr ähnlich sind und eine kleine Auswahl der Datenpunkte zu einer ähnlichen Verbesserung der Verlustfunktion beiträgt wie unter Nutzung aller Datenpunkte. Auch wenn dies ein Extremfall ist, finden sich oft viele Beobachtungen, die ähnlich zur Anpassung der Gewichte beitragen. Optimierungsalgorithmen konvergieren in der Regel in einer schnelleren Rechenzeit, falls sie schnell hintereinander ungefähre Schätzungen des Gradienten erstellen, statt in einer hohen Rechenzeit den gesamten Gradienten zu berechnen (vgl. \cite{deepEssentials}, S. 220). Methoden, die jeweils nur eine Beobachtung nutzen um den neuen Gradienten zu berechnen, werden als Stochastische Methoden bezeichnet. Optimierungsalgorithmen, die den kompletten Trainingsdatensatz nutzen, werden als \textit{Batch} oder deterministische Gradienten Methoden bezeichnet. Das Wort \textit{Batch} wird jedoch auch in dem anderen Kontext von \textit{Batch}-Größe genutzt, um die Größe des \textit{Minibatch} bei der Methode \textit{Minibatch-Stochastic-Gradient-Descent} zu beschreiben. Hierbei bezeichnet die \textit{Batch}-Größe $m$ die Anzahl Datenpunkte aus dem Trainingsset, die herangezogen werden um die Gewichte des neuronalen Netzes in einem Schritt zu aktualisieren (vgl. \cite{keras}, S.19). Diese Methode ist ein Kompromiss aus \textit{Batch}- und stochastischem Gradientenabstieg und wird bei von den meisten \textit{Deep-Learning}-Algorithmen genutzt. Die \textit{Minibatch} Methode wird heutzutage einfach als stochastische Methode bezeichnet (vgl. \cite{deepL}, S. 279f). Nun gibt es viele \textit{Minibatch} Optimierungsmethoden, die mit der Zeit immer verbesserte Ansätze zur Bildung der Lernrate $\eta$ lieferten. Die in dieser Thesis verwendete \textit{Adam}-Methode nutzt adaptive Lernraten und kombiniert die Konzepte des Momentums und der Beschleunigung bei der Anpassung der Gewichte nach jedem Optimierungsschritt. \textit{Adam} liefert verglichen mit anderen Methoden sehr gute Ergebnisse (vgl. \cite{keras}, S. 36). Für eine detaillierte Einführung in die Evolution der Optimierungsmethoden sei auf Kapitel 8 in \cite{deepL} verwiesen. \\
 
-Eine weitere Herausforderung für die erfolgreiche Anwendung eines neuronalen Netzes ist die Eigenschaft, dass das Netz nicht nur auf den Trainingsdaten eine hinreichende Güte erzielt, sondern auch auf ungesehenen Daten eine gute Vorhersage liefert. Ist die Vorhersage trotz einer guten Anpassung an die Trainingsdaten schlecht, so betreibt das Netz \textit{overfitting} und kann schlecht generalisieren. Strategien, die das Ziel der Vermeidung von \textit{overfitting} verfolgen, werden Regularisierungstechniken genannt. Eine effektive Methode hierfür ist die Nutzung von \textit{dropout}. Hierbei wird während einer Trainings-Iteration eines \textit{minibatch} zufällig ein gewisser prozentualer Anteil der Gewichte der Eingangs-Neuronen einer Schicht auf $0$ gesetzt. Damit wird erreicht, dass verschiedene Fraktionen des Netzes aus unterschiedlicher Information lernen. So kann das Netz besser generalisieren, da während des Lernprozesses effizient mehrere Teil-Architekturen des Netzes kombiniert werden (vgl. \cite{deepEssentials}, S. 71). In dem Paket \texttt{keras} kann \textit{dropout} implementiert werden, indem zwischen den Schichten eine \textit{dropout} Schicht eingefügt wird (vgl. \cite{keras}, S. 68).\\
-Im Prozess des Trainings werden dem Netz alle Beobachtungen nacheinander in \textit{batches} der Größe $m$ präsentiert. Dies wird als eine Epoche bezeichnet. Um den Fehler auf das Trainings- und Testdatensatz zu minimieren werden mehrere Epochen genutzt um die Gewichte zu optimieren. Werden $E$ Epochen genutzt, so werden die Parameter $\lceil \frac{N}{m} \rceil \times E$ Mal im Trainingsprozess aktualisiert (\cite{deepNLP}, S. 227). Es ist immer möglich die Anzahl Epochen zu erhöhen, unter der Vorraussetzung, dass das Modell sich verbessert (\cite{deepNLP}, S. 172). Dabei kann als Abbruchkriterium die Epoche gewählt werden, nach der sich der Fehler auf dem Testdatensatz erstmals verschlechtert oder sich nicht mehr signifikant verringert (\cite{deepEssentials}, S. 223). Die Erhöhung der Anzahl der Epochen stoppt bei den neuronalen Netzen dieser Thesis, falls sich entweder der  Testfehler erstmals erhöht, oder das Verlustmaß $CE$ nicht weiter als um $0.002$ fällt. Eine Methode, den Trainingsprozess zu überwachen, ist die visuelle Betrachtung wie in von in Abbildung \ref{abb:overfitting} dargestellt.
+Eine weitere Herausforderung für die erfolgreiche Anwendung eines neuronalen Netzes ist die Eigenschaft, dass das Netz nicht nur auf den Trainingsdaten eine hinreichende Güte erzielt, sondern auch auf ungesehenen Daten eine gute Vorhersage liefert. Ist die Vorhersage trotz einer guten Anpassung an die Trainingsdaten schlecht, so betreibt das Netz \textit{Overfitting} und kann schlecht generalisieren. Strategien, die das Ziel der Vermeidung von \textit{Overfitting} verfolgen, werden Regularisierungstechniken genannt. Eine effektive Methode hierfür ist die Nutzung von \textit{Dropout}. Hierbei wird während einer Trainings-Iteration eines \textit{Minibatch} zufällig ein gewisser prozentualer Anteil der Gewichte der Eingangs-Neuronen einer Schicht auf $0$ gesetzt. Damit wird erreicht, dass verschiedene Fraktionen des Netzes aus unterschiedlicher Information lernen. So kann das Netz besser generalisieren, da während des Lernprozesses effizient mehrere Teil-Architekturen des Netzes kombiniert werden (vgl. \cite{deepEssentials}, S. 71). In dem Paket \texttt{keras} kann \textit{Dropout} implementiert werden, indem zwischen den Schichten eine \textit{Dropout} Schicht eingefügt wird (vgl. \cite{keras}, S. 68).\\
+Im Prozess des Trainings werden dem Netz alle Beobachtungen nacheinander in \textit{Batches} der Größe $m$ präsentiert. Dies wird als eine Epoche bezeichnet. Um den Fehler auf das Trainings- und Testdatensatz zu minimieren werden mehrere Epochen genutzt um die Gewichte zu optimieren. Werden $E$ Epochen genutzt, so werden die Parameter $\lceil \frac{N}{m} \rceil \times E$ Mal im Trainingsprozess aktualisiert (\cite{deepNLP}, S. 227). Es ist immer möglich die Anzahl Epochen zu erhöhen, unter der Vorraussetzung, dass das Modell sich verbessert (\cite{deepNLP}, S. 172). Dabei kann als Abbruchkriterium die Epoche gewählt werden, nach der sich der Fehler auf dem Testdatensatz erstmals verschlechtert oder sich nicht mehr signifikant verringert (\cite{deepEssentials}, S. 223). Die Erhöhung der Anzahl der Epochen stoppt bei den neuronalen Netzen dieser Thesis, falls sich entweder der  Testfehler erstmals erhöht, oder das Verlustmaß $CE$ nicht weiter als um $0.002$ fällt. Eine Methode, den Trainingsprozess zu überwachen, ist die visuelle Betrachtung wie in von in Abbildung \ref{abb:overfitting} dargestellt.
 
 \begin{figure}[!ht]
 \begin{center}
@@ -398,32 +398,32 @@ Im Prozess des Trainings werden dem Netz alle Beobachtungen nacheinander in \tex
 \end{center}
 \end{figure}
 
-Es ist zu sehen, dass \textit{overfitting} ab dem Zeitpunkt eintritt, bei dem der Validierungsfehlers anfängt zu steigen. Der Trainingsfehler sinkt ab diesem Zeitpunkt zwar noch weiter, das Modell kann jedoch nicht mehr gut generalisieren. Beim Trainieren eines Netzes ist es wichtig die Anzahl von Epochen zu identifizieren, ab dem das Netz \textit{overfitting} betreibt.
+Es ist zu sehen, dass \textit{Overfitting} ab dem Zeitpunkt eintritt, bei dem der Validierungsfehlers anfängt zu steigen. Der Trainingsfehler sinkt ab diesem Zeitpunkt zwar noch weiter, das Modell kann jedoch nicht mehr gut generalisieren. Beim Trainieren eines Netzes ist es wichtig die Anzahl von Epochen zu identifizieren, ab dem das Netz \textit{Overfitting} betreibt.
 
 \begin{itemize}
-    \item todo: vanishing gradient problem (bei relu eingehen?
-    \item todo: gradientenabschnitt neu machen
+    \item todo: Vanishing Gradient problem (bei Relu eingehen?
+    \item todo: Gradientenabschnitt neu machen
 \end{itemize}{}
 
 \subsubsection{Convolutional Neural Net} \label{kap:CNN}
 
 Dieser Abschnitt basiert größtenteils auf \cite{deepEssentials}, S. 71-76 und S.93-95.
-\textit{convolutional neural networks} (kurz \textit{CNN}) wurden ursprünglich für das Feld des maschinellen Sehens entwickelt und stellen dort die erste Wahl für Aufgaben wie Klassifikation von Bildern dar. Aber auch für \textit{natural language processing} erwiesen sich \textit{CNN} als äußerst effektiv (\cite{cnnSentence}, S. 1746). Liegt ein Datenpunkt in einer Gitterform vor, wie beispielsweise ein Bild aus Pixeln oder eine Matrix aus Wort-Vektoren, so müsste in der Organisation eines traditionellen \textit{MLP} jeder Eintrag der Matrix mit jedem Neuron in der ersten Zwischenschicht verbunden werden. Bei einem Satz mit $20$ Wörtern und einer Dimension der Wort-Vektoren von $F = 300$ gäbe es bei $100$ Neuronen in der ersten Zwischenschicht bereits $20 \times 300 \times 100  = \numprint{600000}$ Gewichte, die angepasst werden müssten. Um diese Gewichte angemessen zu trainieren, wäre eine massive Datenmenge und Rechenleistung nötig. Des Weiteren wäre \textit{overfitting} bei dieser großen Parameter-Menge unvermeidbar. \textit{CNN} stellen eine Lösung dieses Problems dar. Eine \textit{convolution}, oder auch Faltung ist die Messung der Auswirkung des Aufeinandertreffens zweier Signale. Das eine Signal ist der Datenpunkt, das andere der Faltungskern der \textit{convolution}. In Abbildung \ref{abb:convolution} ist die Faltungsoperation beispielhaft dargestellt.
+\textit{Convolutional Neural Networks} (kurz \textit{CNN}) wurden ursprünglich für das Feld des maschinellen Sehens entwickelt und stellen dort die erste Wahl für Aufgaben wie Klassifikation von Bildern dar. Aber auch für \textit{Natural Language Processing} erwiesen sich \textit{CNN} als äußerst effektiv (\cite{cnnSentence}, S. 1746). Liegt ein Datenpunkt in einer Gitterform vor, wie beispielsweise ein Bild aus Pixeln oder eine Matrix aus Wort-Vektoren, so müsste in der Organisation eines traditionellen \textit{MLP} jeder Eintrag der Matrix mit jedem Neuron in der ersten Zwischenschicht verbunden werden. Bei einem Satz mit $20$ Wörtern und einer Dimension der Wort-Vektoren von $F = 300$ gäbe es bei $100$ Neuronen in der ersten Zwischenschicht bereits $20 \times 300 \times 100  = \numprint{600000}$ Gewichte, die angepasst werden müssten. Um diese Gewichte angemessen zu trainieren, wäre eine massive Datenmenge und Rechenleistung nötig. Des Weiteren wäre \textit{Overfitting} bei dieser großen Parameter-Menge unvermeidbar. \textit{CNN} stellen eine Lösung dieses Problems dar. Eine \textit{Convolution}, oder auch Faltung ist die Messung der Auswirkung des Aufeinandertreffens zweier Signale. Das eine Signal ist der Datenpunkt, das andere der Faltungskern der \textit{Convolution}. In Abbildung \ref{abb:Convolution} ist die Faltungsoperation beispielhaft dargestellt.
 
 
 \begin{figure}[!ht]
 \begin{center}
-\includegraphics[width = 0.7 \textwidth,  keepaspectratio]{Images/convolution.PNG}
+\includegraphics[width = 0.7 \textwidth,  keepaspectratio]{Images/Convolution.PNG}
 \caption{Beispiel einer Faltungsoperation mit einem $3 \times 4$ Datenpunkt und einem $2 \times 2$ Faltungskern (\cite{deepL}, S. 334)}
-\label{abb:convolution}
+\label{abb:Convolution}
 \end{center}
 \end{figure}
 
-Anschaulich bewegt sich der Kern schrittweise über das Eingangssignal und für jeden Schritt berechnet sich das Ergebnis als Summe der elementweisen Multiplikation der Einträge. Die \textit{convolution} definiert sich mathematisch wie folgt.
+Anschaulich bewegt sich der Kern schrittweise über das Eingangssignal und für jeden Schritt berechnet sich das Ergebnis als Summe der elementweisen Multiplikation der Einträge. Die \textit{Convolution} definiert sich mathematisch wie folgt.
 
 \[s(t) = (x \odot w)(t) =  \int_{- \infty}^{\infty} x(k)w(t-k) \partial k  .\]
 
-Hierbei ist $x$ der Datenpunkt (Eingangssignal), $w$ der Faltungskern und $s$ das Ausgangssignal oder auch \textit{feature map}. Auffallend ist in Abbildung \ref{abb:convolution}, dass die Dimension des Abbilds kleiner ist als die des Eingangssignals. Allgemein entsteht bei einem Datenpunkt der Dimension $x \times y$ und einem Kern der Dimension $v \times w$ ein $(x-v + 1) \times (y - w +1)$ Ausgangssignal. Eine solche Faltung wird auch als enge Faltung bezeichnet. Ist es von Interesse, dass sich die Dimension des Ausgangssignals nicht verändert, so werden an den Rändern der Eingangsmatrix mit Nullen hinzugefügt und somit die Matrix in beiden Dimensionen um $1$ erhöht. Dementsprechend geht keine Information an den Rändern verloren. Dieses Vorgehen wird als \textit{zero padding} oder \textit{same padding} bezeichnet und die \textit{convolution} ist dann eine weite Faltung. Die Kalkulation der Ausgangsdimension geht von der Annahme aus, dass sich das Fenster des Kerns immer nur um eine Einheit bewegt. Die Größe des Sprungs des Fensters heißt \textit{stride} und kann auch größer als $1$ gewählt werden. Je größer der Sprung, desto kleiner die Dimension der \textit{feature map} beziehungsweise desto mehr Nullen müssen am Rand für das \textit{zero padding} hinzugefügt werden. In dem Feld des maschinellen Sehens ist der Faltungskern üblicherweise zweidimensional (Höhe $\times$ Breite) oder dreidimensional (inklusive des Farbkanals). Dienen Texte in Form von Sequenzen aus Wort-Vektoren als Eingangsdaten, so ist Breite des Faltungskerns mit $F$ (die Dimension der \textit{word embeddings}) fest und die \textit{convolution} erfolgt in eine Richtung. In Abbildung \ref{abb:CNN_NLP} ist die Architektur eines \textit{CNN} für einen \textit{NLP} Anwendungsfall zu sehen.
+Hierbei ist $x$ der Datenpunkt (Eingangssignal), $w$ der Faltungskern und $s$ das Ausgangssignal oder auch \textit{Feature Map}. Auffallend ist in Abbildung \ref{abb:Convolution}, dass die Dimension des Abbilds kleiner ist als die des Eingangssignals. Allgemein entsteht bei einem Datenpunkt der Dimension $x \times y$ und einem Kern der Dimension $v \times w$ ein $(x-v + 1) \times (y - w +1)$ Ausgangssignal. Eine solche Faltung wird auch als enge Faltung bezeichnet. Ist es von Interesse, dass sich die Dimension des Ausgangssignals nicht verändert, so werden an den Rändern der Eingangsmatrix mit Nullen hinzugefügt und somit die Matrix in beiden Dimensionen um $1$ erhöht. Dementsprechend geht keine Information an den Rändern verloren. Dieses Vorgehen wird als \textit{Zero Padding} oder \textit{Same Padding} bezeichnet und die \textit{Convolution} ist dann eine weite Faltung. Die Kalkulation der Ausgangsdimension geht von der Annahme aus, dass sich das Fenster des Kerns immer nur um eine Einheit bewegt. Die Größe des Sprungs des Fensters heißt \textit{Stride} und kann auch größer als $1$ gewählt werden. Je größer der Sprung, desto kleiner die Dimension der \textit{Feature Map} beziehungsweise desto mehr Nullen müssen am Rand für das \textit{Zero Padding} hinzugefügt werden. In dem Feld des maschinellen Sehens ist der Faltungskern üblicherweise zweidimensional (Höhe $\times$ Breite) oder dreidimensional (inklusive des Farbkanals). Dienen Texte in Form von Sequenzen aus Wort-Vektoren als Eingangsdaten, so ist Breite des Faltungskerns mit $F$ (die Dimension der \textit{Word Embeddings}) fest und die \textit{Convolution} erfolgt in eine Richtung. In Abbildung \ref{abb:CNN_NLP} ist die Architektur eines \textit{CNN} für einen \textit{NLP} Anwendungsfall zu sehen.
 
 \begin{figure}[!ht]
 \begin{center}
@@ -433,11 +433,11 @@ Hierbei ist $x$ der Datenpunkt (Eingangssignal), $w$ der Faltungskern und $s$ da
 \end{center}
 \end{figure}
 
-Links in der Graphik ist ein Satz als Sequenz von $9$ Wort-Vektoren zu sehen. Nach der Anwendung von mehreren Faltungskernen der Dimension $2 \times 6$ und $3 \times 6$ entstehen eindimensionale \textit{feature map} Vektoren. Unter Verwendung eines \textit{zero padding} hätten diese die gleiche Länge des Satzes. Es können mehrere \textit{convolution}-Zwischenschichten mit unterschiedlichen Größen des Kerns und \textit{strides} hintereinander geschaltet werden. Dies erhöht die Tiefe des Modells und seine Fähigkeit komplexe hierarchische Strukturen zu lernen. Nach jeder Zwischenschicht folgt eine Aktivierungsfunktion, wobei auch hier \textit{relu} üblicherweise verwendet wird.
+Links in der Graphik ist ein Satz als Sequenz von $9$ Wort-Vektoren zu sehen. Nach der Anwendung von mehreren Faltungskernen der Dimension $2 \times 6$ und $3 \times 6$ entstehen eindimensionale \textit{Feature Map} Vektoren. Unter Verwendung eines \textit{Zero Padding} hätten diese die gleiche Länge des Satzes. Es können mehrere \textit{Convolution}-Zwischenschichten mit unterschiedlichen Größen des Kerns und \textit{Strides} hintereinander geschaltet werden. Dies erhöht die Tiefe des Modells und seine Fähigkeit komplexe hierarchische Strukturen zu lernen. Nach jeder Zwischenschicht folgt eine Aktivierungsfunktion, wobei auch hier \textit{Relu} üblicherweise verwendet wird.
 
-Im nächsten Schritt erfolgt eine Dimensionsreduktion der \textit{feature maps} durch eine \textit{pooling} Operation. Mit besseren Resultaten in der Praxis hat sich \textit{max-pooling} als geläufigste Form des \textit{poolings} gegenüber anderen Arten durchgesetzt. Hierbei wird aus jedem der \textit{feature maps} der maximale Wert extrahiert. Die dahinterstehende Idee ist es, die Information auf den wichtigsten Teil zu reduzieren. In dem Beispiel aus Abbildung \ref{abb:CNN_NLP} könnte es von Interesse sein zu klassifizieren, ob eine Rezension für einen Film positiv oder negativ ist. Das Netz könnte dann die Gewichte eines Faltungskerns so lernen, dass dieser speziell bei Wort-Tupeln wie \say{do not} oder \say{is not} eine hohe \textit{convolution} erzeugt. Unter \textit{max-pooling} wird dann das \textit{feature map} auf diesen Informationsteil reduziert (vgl. \cite{cnnSentence}, S. 1747). Das Netzwerk kann also Muster variabler Länge in den Sätzen erkennen, doch durch die \textit{pooling} Operation geht die Position des Musters im Satz verloren und wird nicht mit modelliert.
-Im letzten Teil der Architektur in Abbildung \ref{abb:CNN_NLP} folgen reguläre Zwischenschichten eines \textit{MLP} und eine \textit{softmax} Ausgangsschicht für den Multiklassifikations Anwendungsfall.\\
-Das Lernen der Gewichte sowie \textit{tuning} und Regularisierung erfolgt bei einem \textit{CNN} analog wie bei dem in Kapitel \ref{kap:neuralNets} beschrieben traditionellen \textit{MLP}.
+Im nächsten Schritt erfolgt eine Dimensionsreduktion der \textit{Feature Maps} durch eine \textit{Pooling} Operation. Mit besseren Resultaten in der Praxis hat sich \textit{Max-Pooling} als geläufigste Form des \textit{Poolings} gegenüber anderen Arten durchgesetzt. Hierbei wird aus jedem der \textit{Feature Maps} der maximale Wert extrahiert. Die dahinterstehende Idee ist es, die Information auf den wichtigsten Teil zu reduzieren. In dem Beispiel aus Abbildung \ref{abb:CNN_NLP} könnte es von Interesse sein zu klassifizieren, ob eine Rezension für einen Film positiv oder negativ ist. Das Netz könnte dann die Gewichte eines Faltungskerns so lernen, dass dieser speziell bei Wort-Tupeln wie \say{do not} oder \say{is not} eine hohe \textit{Convolution} erzeugt. Unter \textit{Max-Pooling} wird dann das \textit{Feature Map} auf diesen Informationsteil reduziert (vgl. \cite{cnnSentence}, S. 1747). Das Netzwerk kann also Muster variabler Länge in den Sätzen erkennen, doch durch die \textit{Pooling} Operation geht die Position des Musters im Satz verloren und wird nicht mit modelliert.
+Im letzten Teil der Architektur in Abbildung \ref{abb:CNN_NLP} folgen reguläre Zwischenschichten eines \textit{MLP} und eine \textit{Softmax} Ausgangsschicht für den Multiklassifikations Anwendungsfall.\\
+Das Lernen der Gewichte sowie \textit{Tuning} und Regularisierung erfolgt bei einem \textit{CNN} analog wie bei dem in Kapitel \ref{kap:neuralNets} beschrieben traditionellen \textit{MLP}.
 
 
 \begin{itemize}
@@ -449,34 +449,35 @@ Das Lernen der Gewichte sowie \textit{tuning} und Regularisierung erfolgt bei ei
 
 \subsubsection{Recurrent Neural net und Long-Short-Term-Memory Neural Net} \label{kap:LSTM}
 
-Dieses Unterkapitel erläutert die Idee von \textit{recurrent neural networks} (kurz \textit{RNN}) und motiviert anschließend die darauf basierenden \textit{long-short-term-memory neural networks} (kurz \textit{LSTM}). Die Informationen über das \textit{RNN} entspringen größtenteils \cite{deepL}, S. 378-381, der darauf folgende Abschnitt über \textit{LSTM} basiert größtenteils auf \cite{deepNLP}, S.138-143.\\
+Dieses Unterkapitel erläutert die Idee von \textit{Recurrent Neural Networks} (kurz \textit{RNN}) und motiviert anschließend die darauf basierenden \textit{Long-Short-Term-Memory Neural Networks} (kurz \textit{LSTM}). Die Informationen über das \textit{RNN} entspringen größtenteils \cite{deepL}, S. 378-381, der darauf folgende Abschnitt über \textit{LSTM} basiert größtenteils auf \cite{deepNLP}, S.138-143.\\
 %todo: jahr, seiten manuell in klammern
 
-Häufig liegen Daten in sequentieller Form vor, wie beispielsweise Sprachaufnahmen als Signale über die Zeit, Videos als Serie von Bildern oder Kurztexte als Sequenz von Wörtern. Die Information liegt hierbei nicht in den Daten selbst, sondern in der Änderung der Daten über die Zeit. Traditionelle \textit{MLP}'s sind für diesen Typ von Daten aufgrund ihrer Limitierungen nicht geeignet. Zur optimalen Funktionsweise benötigen sie statische Daten als Input, bei denen jede Variable zeitlich unabhängig von allen anderen ist. Dem \textit{MLP} fehlt die Fähigkeit, Informationen über einen zeitlichen Verlauf hinweg zu modellieren. In der Architektur eines \textit{feed-forward} Netzes, dass auf einer sequentiellen Darstellung der Wörter (Kapitel \ref{Kap:Seq}) aufbaut, wird jedes Wort unabhängig von allen anderen verarbeitet. Im Modell wird demnach keinerlei Korrelation von dem nächstem Wort im Satz zu den vorherigen modelliert (vgl. \cite{deepEssentials}, S.145). Im Bereich des \textit{deep learning} werden Klassifikationsprobleme, die auf sequentiellen Daten basieren, meist mit \textit{RNN} gelöst. \textit{LSTM} haben sich als Unterklasse der \textit{RNN} im Bereich des \textit{NLP} erwiesen (vgl. \cite{deepEssentials}, S.150 und \cite{keras}, S.175). In Abbildung \ref{abb:RNNExample} ist die Verarbeitung eines Satzes durch ein \textit{RNN} dargestellt.
+Häufig liegen Daten in sequentieller Form vor, wie beispielsweise Sprachaufnahmen als Signale über die Zeit, Videos als Serie von Bildern oder Kurztexte als Sequenz von Wörtern. Die Information liegt hierbei nicht in den Daten selbst, sondern in der Änderung der Daten über die Zeit. Traditionelle \textit{MLP}'s sind für diesen Typ von Daten aufgrund ihrer Limitierungen nicht geeignet. Zur optimalen Funktionsweise benötigen sie statische Daten als Input, bei denen jede Variable zeitlich unabhängig von allen anderen ist. Dem \textit{MLP} fehlt die Fähigkeit, Informationen über einen zeitlichen Verlauf hinweg zu modellieren. In der Architektur eines \textit{Feed-Forward} Netzes, dass auf einer sequentiellen Darstellung der Wörter (Kapitel \ref{Kap:Seq}) aufbaut, wird jedes Wort unabhängig von allen anderen verarbeitet. Im Modell wird demnach keinerlei Korrelation von dem nächstem Wort im Satz zu den vorherigen modelliert (vgl. \cite{deepEssentials}, S.145). Im Bereich des \textit{Deep Learning} werden Klassifikationsprobleme, die auf sequentiellen Daten basieren, meist mit \textit{RNN} gelöst. \textit{LSTM} haben sich als Unterklasse der \textit{RNN} im Bereich des \textit{NLP} erwiesen (vgl. \cite{deepEssentials}, S.150 und \cite{keras}, S.175). In Abbildung \ref{abb:RNNExample} ist die Verarbeitung eines Satzes durch ein \textit{RNN} dargestellt.
 
 \begin{figure}[!ht]
 \begin{center}
-\includegraphics[width = \textwidth,  keepaspectratio]{Images/RNN_Example_DeepNLPpage128.PNG}
-\caption{\textit{RNN} Model bei Input des Satzes: Sachin is a great (\cite{deepNLP}, S.128)}
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/RNNNewGrafik.PNG}
+\caption{\textit{RNN} Modell bei Input der Schlagzeile: \textit{trump suggests north korea summit could still happen} (angelehnt an \cite{deepNLP}, S.128). In grün sind die Input Wörter markiert, in grau das ausgefaltete \textit{Hidden Layer}, in blau die Zellen des \textit{Hidden Layers} und in orange die Zielkategorie als Output.}
 \label{abb:RNNExample}
 \end{center}
 \end{figure}
 
-In der Grafik ist zu sehen, dass die Wörter dem \textit{hidden layer} sequentiell als Input dienen. Das \textit{hidden layer} ist eine Zwischenschicht, die das Gedächtnis des Netzes repräsentiert. Die Wörter sind entweder Wort-Vektoren oder Indizes, die von einem \textit{embedding layer} intern zu Wort-Vektoren transformiert werden (Kapitel \ref{Kap:Seq}). Nach Input der Sequenz \say{Sachin is a great} sagt das Netz eine Sequenz der Länge 1 vorher. Diese Sequenz ist das nächste Wort im Satz und hängt von den vorherigen Wörtern ab. 
-Eine solche Architektur wird als \textit{many-to-one}
-bezeichnet und kann mit einer kategoriellen Variable als Ausgabewert auch in der Multiklassifikation als Anwendung dienen (vgl. \cite{deepEssentials}, S. 14). Die \textit{hidden neurons} in Abbildung \ref{abb:RNNExample} sind mit jeweils $6$ Einheiten sequentiell in $4$ \textit{RNN} Zellen (eine für jeden Teil der Input Sequenz) organisiert. Die Bestandteile des Prozesses des \textit{RNN} sind in Abbildung \ref{abb:RNNArch} dargestellt.
+In der Grafik ist zu sehen, dass die Wörter dem \textit{Hidden Layer} sequentiell als Input dienen. Das \textit{Hidden Layer} ist eine rekurrente Zwischenschicht, die das Gedächtnis des Netzes repräsentiert. Die Wörter werden entweder als in Form von Wort-Vektoren oder Indizes (Kapitel \ref{Kap:Seq}) repräsentiert. Nach Input der Sequenz sagt das Netz eine Sequenz der Länge $1$ vorher. Diese Sequenz ist die Zielkategorie und hängt von allen vorherigen Wörtern der Inputsequenz ab. 
+Eine solche Architektur wird als \textit{Many-To-One}
+bezeichnet und dient mit einer kategoriellen Variable als Ausgabewert in der Multiklassifikation als Anwendung (vgl. \cite{deepEssentials}, S. 14). Die Anzahl der \textit{Hidden Neurons} in Abbildung \ref{abb:RNNExample} ist vom Nutzer zu wählen. Die mathematischen Bestandteile des Prozesses des \textit{RNN} sind in Abbildung \ref{abb:RNNArch} dargestellt.
 
 \begin{figure}[!ht]
 \begin{center}
 \includegraphics[width = 0.7 \textwidth,  keepaspectratio]{Images/RNN_MIT_S382.PNG}
-\caption{Bestandteile eines zeitlich aufgeschlüsselten \textit{RNN} Modells mit einer \textit{many-to-one} Struktur (\cite{deepL}, S.382)}
+\caption{Bestandteile eines zeitlich aufgeschlüsselten \textit{RNN} Modells mit einer \textit{Many-To-One} Struktur (\cite{deepL}, S.382)}
 \label{abb:RNNArch}
 \end{center}
 \end{figure}
 
-In der Grafik ist jeder Knoten des Netzwerkes einem spezifischen Zeitpunkt in der Sequenz zugehörig.
-Dort ist $\bm{x}^{(t)}$ der $t$-te Teil der Input Sequenz, also der $t$-te Wort-Vektor. $\bm{h}^{(t)}$ ist der \textit{hidden state} zum Zeitpunkt $t$ der Sequenz. $\bm{o}^{(\tau)}$ ist der Vektor des Outputs zum $\tau$-ten Zeitpunkt, dem Ende der Sequenz. Im Falle einer Multiklassifikation nimmt er die nicht-normalisierten \textit{Log-Likelihoods} für jede der möglichen Ausprägungen der Zielvariable an.
-Die Verbindung zwischen Input und \textit{hidden} Neuronen wird durch die Gewichtsmatrix $\bm{U}$ parametrisiert und die \textit{hidden state} zu \textit{hidden state} Verbindung durch die Gewichtsmatrix $\bm{W}$. Eine weitere Gewichtsmatrix $\bm{V}$ parametrisiert die Verbindung zwischen \textit{hidden state} und Ausgangssignal. Eine Verlustfunktion $L^{(\tau)}$ misst dann den Abstand der Zielvariable $\bm{y}^{(\tau)}$ und der Vorhersage $\bm{\hat{y}^{(\tau)}}$. Diese Vorhersage wird erhalten, indem intern auf den Output die \textit{softmax} Aktivierungsfunktion (Kapitel \ref{kap:neuralNets}) angewandt wird. Die \textit{forward propagation} beginnt mit der Initiierung des \textit{hidden state} $h^{(0)}$. Für jeden der Zeitpunkte $t=1$ bis $t = \tau$ wird dann sukzessive 
+In der Grafik ist jeder Knoten des zeitlich aufgeschlüsselten Netzwerkes einem spezifischen Zeitpunkt in der Sequenz zugehörig.
+Dort ist $\bm{x}^{(t)}$ der $t$-te Teil der Input Sequenz, welcher der $t$-te Wort-Vektor ist. $\bm{h}^{(t)}$ ist der \textit{Hidden State} zum Zeitpunkt $t$ der Sequenz. $\bm{o}^{(\tau)}$ ist der Vektor des Outputs zum $\tau$-ten Zeitpunkt, dem Ende der Sequenz. Im Falle einer Multiklassifikation nimmt er die nicht-normalisierten \textit{Log-Likelihoods} für jede der möglichen Ausprägungen der Zielvariable an.
+Die Verbindung zwischen Input und \textit{Hidden} Neuronen wird durch die Gewichtsmatrix $\bm{U}$ parametrisiert und die \textit{Hidden State} zu \textit{Hidden State} Verbindung durch die Gewichtsmatrix $\bm{W}$. Eine weitere Gewichtsmatrix $\bm{V}$ parametrisiert die Verbindung zwischen \textit{Hidden State} und Ausgangssignal. $\bm{U}$ und $\bm{W}$ enthalten die Gewichte, die im rekurrenten Teil des Netzes zur Transformation der Signale genutzt werden. Dahingegen enthält $\bm{V}$ die Gewichte einer statischen \textit{Fully Connected} Zwischenschicht zwischen dem \textit{Hidden State} der letzten Sequenz und dem Output.
+Eine Verlustfunktion $L^{(\tau)}$ misst den Abstand der Zielvariable $\bm{y}^{(\tau)}$ und der Vorhersage $\bm{\hat{y}^{(\tau)}}$. Diese Vorhersage wird erhalten, indem intern auf den Output die \textit{Softmax} Aktivierungsfunktion (Kapitel \ref{kap:neuralNets}) angewandt wird. Die \textit{Forward Propagation} beginnt mit der Initiierung des \textit{Hidden State} $h^{(0)}$ mit Nullen. Für jeden der Zeitpunkte $t=1$ bis $t = \tau$ wird dann sukzessive 
 
 \begin{align*}
     \bm{a}^{(t)} &= \bm{b} + \bm{W} \bm{h}^{(t-1)} + \bm{U}\bm{x}^{(t)} \\
@@ -488,15 +489,15 @@ Die Verbindung zwischen Input und \textit{hidden} Neuronen wird durch die Gewich
     \bm{\hat{y}}^{(\tau)} &= \phi(\bm{o}^{(\tau)})
 \end{align*}
 
-berechnet. Hier bezeichnen $\bm{b}$ und $\bm{c}$ die \textit{bias} Vektoren, die zu $\bm{W} \bm{h}^{(t-1)} $ und $\bm{V}\bm{h}^{(\tau)} $ addiert werden und $\phi$ die \textit{softmax} Aktivierungsfunktion (vgl. \cite{deepL}, S.381).\\ 
+berechnet. Hier bezeichnen $\bm{b}$ und $\bm{c}$ die \textit{Bias} Vektoren, die zu $\bm{W} \bm{h}^{(t-1)} $ und $\bm{V}\bm{h}^{(\tau)} $ addiert werden und $\phi$ die \textit{Softmax} Aktivierungsfunktion (vgl. \cite{deepL}, S.381).\\ 
 Die Berechnung der Gradienten durch die \textit{Back-Propagation} Operation funktioniert analog wie bei dem \textit{MLP} aus Kapitel \ref{kap:neuralNets}. Sie wird auf das zeitlich aufgeschlüsselte Modell (vgl. Abbildung \ref{abb:RNNArch}) angewendet und heißt deshalb auch \textit{Back-Propagation-Through-Time} (kurz \textit{BPTT}). \\
-Im Lernprozess der langen zeitlichen Abhängigkeiten, entsteht bei \textit{RNN} häufig das \textit{vanishing-gradient} Problem.
+Im Lernprozess der langen zeitlichen Abhängigkeiten, entsteht bei \textit{RNN} häufig das \textit{Vanishing-Gradient} Problem.
 Die Gewichte werden bei der \textit{BPTT} exponentiell kleiner bei langen Sequenzen (vgl. \cite{deepL}, S.401). Wird die zeitliche Komponente $\tau$ der Sequenz erhöht, so erhöht sich auch die Schwierigkeit der Optimierung.
 Bereits bei Sequenzen der Länge von $\tau = 10$ oder $\tau = 20$ kann ein \textit{RNN} nicht mehr erfolgreich gelernt werden (vgl. \cite{deepL}, S.418).\\
 
-Zur Lösung des \textit{vanishing-gradient} Problems bei dem \textit{RNN} gibt es mehrere Herangehensweisen. Eine davon ist die Nutzung der Architektur eines \textit{long-short-term-memory} Netzwerkes, welches eine Klasse der \textit{RNN} ist. Diese Netzwerke wurden speziell zur Lösung des \textit{vanishing gradient} Problems konzipiert und können Abhängigkeiten über einen langen Zeitraum besser lernen (vgl. \cite{keras}, S. 186). Mit der Einführung von \textit{gates} wird bei der \textit{BPTT} der gesamte Gradient durch die Summe von partiellen Gradienten berechnet. Ohne \textit{gates} wird er durch das Produkt der partiellen Gradienten berechnet, was bei kleinen Multiplikatoren dazu führt, dass der gesamte Gradient schnell sehr klein wird. Dieser Effekt tritt in der additiven Zusammensetzung nicht auf und reduziert somit das Problem des \textit{vanishing gradients} (vgl. \cite{deepEssentials}, S. 150).
+Zur Lösung des \textit{Vanishing-Gradient} Problems bei dem \textit{RNN} gibt es mehrere Herangehensweisen. Eine davon ist die Nutzung der Architektur eines \textit{Long-Short-Term-Memory} Netzwerkes, welches eine Klasse der \textit{RNN} ist. Diese Netzwerke wurden speziell zur Lösung des \textit{Vanishing Gradient} Problems konzipiert und können Abhängigkeiten über einen langen Zeitraum besser lernen (vgl. \cite{keras}, S. 186). Mit der Einführung von \textit{Gates} wird bei der \textit{BPTT} der gesamte Gradient durch die Summe von partiellen Gradienten berechnet. Ohne \textit{Gates} wird er durch das Produkt der partiellen Gradienten berechnet, was bei kleinen Multiplikatoren dazu führt, dass der gesamte Gradient schnell sehr klein wird. Dieser Effekt tritt in der additiven Zusammensetzung nicht auf und reduziert somit das Problem des \textit{Vanishing Gradients} (vgl. \cite{deepEssentials}, S. 150).
 
-Die verschiedenen \textit{gates} bestimmen welcher Teil der Informationen über die Vergangenheit vergessen und erhalten bleibt. (vgl. \cite{deepNLP}, S.133). Die grundlegende Struktur des \textit{LSTM} entspricht der eines \textit{RNN}, nur dass die \textit{RNN}-Zelle durch eine \textit{LSTM}-Zelle ersetzt wird (vgl. \cite{keras}, S.188). Statt nur einer Zwischenschicht in einer \textit{RNN}-Zelle gibt es in der \textit{LSTM}-Zelle nun mehrere Zwischenschichten, die in einer besonderen Art miteinander interagieren. In Abbildung \ref{abb:LSTMArch} ist die Struktur für den Zeitpunkt $t$ der Sequenz dargestellt, welche im Folgenden erläutert wird.
+Die verschiedenen \textit{Gates} bestimmen welcher Teil der Informationen über die Vergangenheit vergessen und erhalten bleibt. (vgl. \cite{deepNLP}, S.133). Die grundlegende Struktur des \textit{LSTM} entspricht der eines \textit{RNN}, nur dass die \textit{RNN}-Zelle durch eine \textit{LSTM}-Zelle ersetzt wird (vgl. \cite{keras}, S.188). Statt nur einer Zwischenschicht in einer \textit{RNN}-Zelle gibt es in der \textit{LSTM}-Zelle nun mehrere Zwischenschichten, die in einer besonderen Art miteinander interagieren. In Abbildung \ref{abb:LSTMArch} ist die Struktur für den Zeitpunkt $t$ der Sequenz dargestellt, welche im Folgenden erläutert wird.
 
 
 \begin{figure}[!ht]
@@ -507,45 +508,46 @@ Die verschiedenen \textit{gates} bestimmen welcher Teil der Informationen über 
 \end{center}
 \end{figure}
 
-Im Folgenden ist der Zeitpunkt $t$ nicht wie bisher in oben stehenden Klammern notiert, sondern basierend auf Abbildung \ref{abb:LSTMArch} als Index. Die folgenden Formeln zur Berechnung der Variablen aus Abbildung \ref{abb:LSTMArch} stammen aus \cite{deepNLP}, S.140-142.
+Im Folgenden ist der Zeitpunkt $t$ nicht wie bisher in oben stehenden Klammern notiert, sondern basierend auf Abbildung \ref{abb:LSTMArch} als Index. Die Formeln zur Berechnung der Variablen aus Abbildung \ref{abb:LSTMArch} stammen aus \cite{deepNLP}, S.140-142.
 %todo: datum, seite in klammern
-Die \textit{input gate} Zwischenschicht $\bm{i}_t$ zum Zeitpunkt $t$ (mit vorheriger Notation $i^{(t)}$)  berechnet sich aus
+Die Operation $\circ$ bezeichnet folglich die elementweise Multiplikation, welche in Abbildung \ref{abb:LSTMArch} mit dem Symbol $\otimes$ gekennzeichnet ist.
+Die \textit{Input Gate} Zwischenschicht $\bm{i}_t$ zum Zeitpunkt $t$ (mit vorheriger Notation $i^{(t)}$)  berechnet sich aus
 
 \[ \bm{i}_t = \sigma(\bm{W}_i [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_i),\]
 
-wobei $\bm{x}_t$ der Input zum Zeitpunkt $t$ ist, $\bm{h}_{t-1}$ der \textit{hidden state} zum Zeitpunkt $t-1$, $\bm{b}_i$ ein \textit{bias} Vektor und $\bm{W}_i$ die zum \textit{input gate} zugehörige Gewichtsmatrix. $\sigma$ und $tanh$ bezeichnen die entsprechenden Aktivierungsfunktionen, die in Kapitel \ref{kap:neuralNets} definiert sind. Des Weiteren wird ein Kandidaten-Vektor $\bm{\acute{c}}_t$, 
+wobei $\bm{x}_t$ der Input zum Zeitpunkt $t$ ist, $\bm{h}_{t-1}$ der \textit{Hidden State} zum Zeitpunkt $t-1$, $\bm{b}_i$ ein \textit{Bias} Vektor und $\bm{W}_i$ die zum \textit{Input Gate} zugehörige Gewichtsmatrix. $\sigma$ und $tanh$ bezeichnen die entsprechenden Aktivierungsfunktionen, die in Kapitel \ref{kap:neuralNets} definiert sind. Des Weiteren wird ein Kandidaten-Vektor $\bm{\acute{c}}_t$, 
 \[\bm{\acute{c}}_t = tanh(\bm{W}_c [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_c)\]
 
-erstellt. Dieser enthält potentielle Werte, die zum \textit{input gate} Output addiert werden. $\bm{W}_c$ ist die zugehörige Gewichtsmatrix und $\bm{b}_c$ der zugehörige \textit{bias} Vektor. Die nächste Komponente ist das \textit{forget gate} $\bm{f}_t$,
+erstellt. Dieser enthält potentielle Werte, die zum \textit{Input Gate} Output addiert werden. $\bm{W}_c$ ist die zugehörige Gewichtsmatrix und $\bm{b}_c$ der zugehörige \textit{Bias} Vektor. Die nächste Komponente ist das \textit{Forget Gate} $\bm{f}_t$,
 
 \[  \bm{f}_t = \sigma(\bm{W}_f [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_f) ,\]
 
-welches kontrolliert, welcher Anteil der Information im Gedächtnis des Netzes zum Zeitpunkt $t$ erhalten bleibt. $\bm{W}_f$ bezeichnet die Gewichtsmatrix und $\bm{b}_f$ den zugehörigen \textit{bias}. Neben dem \textit{hidden state} gibt es jetzt nun auch einen \textit{cell state} $\bm{c}_t$ . Inhaltlich repräsentiert dieser das interne Langzeitgedächnis der \textit{LSTM}-Zelle (vgl. \cite{keras}, S. 186). Dieser wird berechnet aus
-\[\bm{c}_t = \bm{f}_t \cdot \bm{c}_{t-1} + \bm{i}_t \cdot \bm{\acute{c}}_t ,\]
+welches kontrolliert, welcher Anteil der Information im Gedächtnis des Netzes zum Zeitpunkt $t$ erhalten bleibt. $\bm{W}_f$ bezeichnet die Gewichtsmatrix und $\bm{b}_f$ den zugehörigen \textit{Bias}. Neben dem \textit{Hidden State} gibt es nun zusätzlich einen \textit{Cell State} $\bm{c}_t$ . Inhaltlich repräsentiert dieser das interne Langzeitgedächnis der \textit{LSTM}-Zelle (vgl. \cite{keras}, S. 186). Dieser wird berechnet aus
+\[\bm{c}_t = \bm{f}_t \circ \bm{c}_{t-1} + \bm{i}_t \circ \bm{\acute{c}}_t ,\]
 
-also aus der Summe von $0$ Komponenten. Der eine Teil ist der \textit{cell state} zum Zeitpunkt $t-1$, gefiltert durch das \textit{forget gate}. Die andere Komponente ist der Kandidaten-Vektor, der durch das \textit{input gate} ebenfalls gefiltert wird.
-Das letzte \textit{gate} ist das \textit{output gate} 
+also aus der Summe von $2$ Komponenten. Der eine Teil ist der \textit{Cell State} zum Zeitpunkt $t-1$, gefiltert durch das \textit{Forget Gate}. Die andere Komponente ist der Kandidaten-Vektor, der durch das \textit{Input Gate} ebenfalls gefiltert wird.
+Das letzte \textit{Gate} ist das \textit{Output Gate} 
 \[  \bm{o}_t = \sigma(\bm{W}_o [\bm{h}_{t-1}, \bm{x}_t] + \bm{b}_o).\]
 
-$\bm{W}_o$ ist die Gewichtsmatrix und $\bm{b}_o$ der \textit{bias}. Der \textit{hidden state} zum Zeitpunkt $t$ ergibt sich durch
-\[\bm{h}_t = \bm{o}_t \cdot tanh(\bm{c}_t) , \]
-also aus dem \textbf{cell state}, auf den die \textit{tanh} Aktivierungsfunktion angewandt wird und durch das \textit{output gate} gefiltert wird.  
+$\bm{W}_o$ ist die Gewichtsmatrix und $\bm{b}_o$ der \textit{Bias}. Der \textit{Hidden State} zum Zeitpunkt $t$ ergibt sich durch
+\[\bm{h}_t = \bm{o}_t \circ tanh(\bm{c}_t) , \]
+also aus dem \textbf{Cell State}, auf den die \textit{tanh} Aktivierungsfunktion angewandt wird und durch das \textit{Output Gate} gefiltert wird.  
 
-In der bisher beschriebenen Struktur ist der Output zum Zeitpunkt $t$ von allen vergangenen Zeitpunkten $1,...,t-1$ abhängig. Nun ist es möglich, dass der Output zum Zeitpunkt $t$ auch von den zukünftigen Zeitpunkten $t+1,..., \tau$ abhängt. Dies kann von einem regulären \textit{LSTM} nicht modelliert werden. Eine Erweiterung der Architektur ist das \textit{bidirectional LSTM}. Dort werden $0$ \textit{LSTM} Schichten genutzt, wobei die eine Schicht den Input regulär nutzt und die andere die Sequenz rückwärts ließt. So kann sowohl der Kontext aus der Vergangenheit als auch von der Zukunft modelliert werden (vgl. \cite{deepEssentials}, S.159).
-\textit{bidirectional LSTM} zeichnen sich generell durch eine gute Performance auf vielen \textit{NLP} Problemen aus (vgl. \cite{deepNLP}, S.142).
+In der bisher beschriebenen Struktur ist der Output zum Zeitpunkt $t$ von allen vergangenen Zeitpunkten $1,...,t-1$ abhängig. Nun ist es möglich, dass der Output zum Zeitpunkt $t$ auch von den zukünftigen Zeitpunkten $t+1,..., \tau$ abhängt. Dies kann von einem regulären \textit{LSTM} nicht modelliert werden. Eine Erweiterung der Architektur ist das \textit{Bidirectional LSTM}. Dort werden $0$ \textit{LSTM} Schichten genutzt, wobei die eine Schicht den Input regulär nutzt und die andere die Sequenz rückwärts ließt. So kann sowohl der Kontext aus der Vergangenheit als auch von der Zukunft modelliert werden (vgl. \cite{deepEssentials}, S.159).
+\textit{Bidirectional LSTM} zeichnen sich generell durch eine gute Performance auf vielen \textit{NLP} Problemen aus (vgl. \cite{deepNLP}, S.142).
 
 
 
 \begin{itemize}
 \item wie wird verlust berechnet? (1, 0, 0, 0) verglichen mit (0.7, 0.1, 0.2, 0.1)?
-    \item Quellen: deepEssentials: S.143-165, bidirectional 159,  keras: 174-213 (bidirectional included) (gute quelle),  deepNLP: 119-169, LSTM 138-145, MIT: 373-416, (bidirectional 394-396, LSTM 408- 413)
-    \item vanishing gradient lösung: MIT S.385, 8.2.5, und S. 401, keras 184-186, essentials: 149-150
-    \item tuning RNNs: deepNLP 138
-    \item bidirectional: supervised sequences S. 21
+    \item Quellen: deepEssentials: S.143-165, Bidirectional 159,  keras: 174-213 (Bidirectional included) (gute quelle),  deepNLP: 119-169, LSTM 138-145, MIT: 373-416, (Bidirectional 394-396, LSTM 408- 413)
+    \item Vanishing Gradient lösung: MIT S.385, 8.2.5, und S. 401, keras 184-186, essentials: 149-150
+    \item Tuning RNNs: deepNLP 138
+    \item Bidirectional: supervised sequences S. 21
 \end{itemize}{}
 
 
-
+\newpage
 
 
 

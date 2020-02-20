@@ -10,7 +10,10 @@
 # modelle vorstellen in kapitel 4 (struktur der netze)
 # alle Zitate checken ob klammern richtig gesetzt sind, oder et al steht
 # groll+ matze cnn korrigieren
+# alex seine korrektur
 # Einleitung + Zusammenfassung schreiben
+# seitenzahl nur für teil der arbeit anzeigen
+# xxeidesstaaatliche erklärung
 
 # [analyse der modelle]
 # BOW/TFIDF - RF XGBoost: variablenwichtigkeit in Wordcloud

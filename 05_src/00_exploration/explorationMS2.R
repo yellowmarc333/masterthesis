@@ -1,7 +1,5 @@
 # [last steps]
 # jackys korrektur
-# symbolverzeichnis
-# englische wörter groß
 # random forest 0.5 seiten
 # xgboost beschreiben
 # Zusammenfassung von netzteil schreiben
@@ -13,6 +11,9 @@
 # alex seine korrektur
 # Einleitung + Zusammenfassung schreiben
 # seitenzahl nur für teil der arbeit anzeigen
+
+# xxenglische wörter groß
+# xxsymbolverzeichnis
 # xxeidesstaaatliche erklärung
 
 # [analyse der modelle]
@@ -38,10 +39,11 @@
 # matze diskutieren, macht bidirectional überhaupt sinn?
 # convolution mathematisch überhaupt nötig zu definieren?
 
-# [MA korrigeiren:]
+# [MA korrigeiren (sachen zum achten):]
+# -englische Wörter groß
+# - numprint für hohe zahlen
 # -aus jeder korrektur die Sachen rauspicken, auf die ich achten muss
-# - matze: nicht zu umgspr. Fuellwoerter weglassen
-# - marcel: keine aussagen wie "meistens" treffen.
+# - umgspr vermeiden
 #- dieser Abschnitt soll -> dieser Abschnitt gibt
 #- captions nicht alles in textit
 #- label under caption

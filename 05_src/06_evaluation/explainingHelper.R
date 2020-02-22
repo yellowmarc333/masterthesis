@@ -1,35 +1,82 @@
-explainXGBoost <- function(inPath = "03_computedData/05_modelData/finalModels/", 
-                           modelName = "mod_BOW_XG_Full_2020-01-29.RDS",
+explainXGBoost <- function(modelPath,
                            embeddingPath = "03_computedData/04_preparedData/BOW-Full-TRUE-FALSE.rds"){
-  assertString(inPath)
-  assertString(modelName)
+  assertString(modelPath)
   assertString(embeddingPath)
+  
+  model <- readRDS(modelPath)
   
   embeddingData <- readRDS(embeddingPath)
   newData <- embeddingData[["resultTest"]]
+  testLabelRaw <- embeddingData[["labelTest"]]
+  testLabel <- as.numeric(testLabelRaw) - 1
+
   rm(embeddingData)
-  
-  modelData <- readRDS(file = paste0(inPath, modelName))
-  
-  model <- modelData[["model"]]
-  testLabelRaw <- modelData[["testLabelRaw"]]
-  
+
   # readin testSubsets
   testSubsets <- readRDS("03_computedData/06_evaluatedData/testSubsets.RDS")
   indexesRaw <- testSubsets$allCorrect[, .(BOW_XG_rowVec)][[1]]
   indexes <- indexesRaw[indexesRaw != 0]
   
   newDataSub <- newData[indexes,]
-  testLabelSub <- testLabelRaw[indexes]
+  testLabelSub <- testLabel[indexes]
+  testLabelRawSub <- testLabelRaw[indexes]
   
-  predictions <- as.data.table(predict(model, 
-                                       newdata =  newDataSub,
-                                       reshape = TRUE))
-  names(predictions) <- levels(testLabelRaw)
-  predictionsMax <- apply(predictions, 1 , function(x) {
-    names(x[which.max(x)])
-  })
-  mean(predictionsMax == testLabelSub)
+  # getting indexes from the testData (raw format)
+  testLabelRawIndexes <- testSubsets$allCorrect$TestLabelRawIndex
+  # getting original text
+  indexData <- readRDS("03_computedData/03_integratedData/indexesFull.rds")
+  
+  dataRaw <- read.fst("03_computedData/02_cleanedData/News.fst", 
+                      as.data.table = TRUE)
+  testDataRaw <- dataRaw[-indexData]
+  headlines <- testDataRaw[testLabelRawIndexes, ]$headline
+  trueLabelCheck <- testDataRaw[testLabelRawIndexes]$category
+  
+  headlinesToken <- quanteda::tokens(headlines, what = "word", remove_numbers = FALSE, 
+                             remove_punct = FALSE, remove_symbols = FALSE, 
+                             remove_hyphens = FALSE)
+  headlinesToken <- tokens_remove(headlinesToken, c(stopwords("english")))
+  headlinesList <- as.list(headlinesToken)
+  
+  # from here the results for alterning the data
+  resRem1 <- modifyBOWRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 1, nRemove = 30)
+
+
+  # resRem2 <- modifyBOWRem(newData = newDataSub,
+  #                         model = model,
+  #                         testLabel = testLabelSub,
+  #                         testLabelRaw = testLabelRawSub,
+  #                         nWords = 2, nRemove = 30)
+  # 
+  # resRem3 <- modifyBOWRem(newData = newDataSub,
+  #                         model = model,
+  #                         testLabel = testLabelSub,
+  #                         testLabelRaw = testLabelRawSub,
+  #                         nWords = 3, nRemove = 30)
+  # 
+  # resRem4 <- modifyBOWRem(newData = newDataSub,
+  #                         model = model,
+  #                         testLabel = testLabelSub,
+  #                         testLabelRaw = testLabelRawSub,
+  #                         nWords = 4, nRemove = 30)
+  # 
+  # resSeq <- modifyBOWSeq(newData = newDataSub,
+  #                        model = model,
+  #                        testLabel = testLabelSub,
+  #                        testLabelRaw = testLabelRawSub, forward = TRUE,
+  #                        headlinesList = headlinesList,
+  #                        maxW = 27)
+  
+  return(list(resRem1 = resRem1,
+              resRem2 = resRem2,
+              resRem3 = resRem3,
+              resRem4 = resRem4,
+              resSeq = resSeq))
+ 
   
 }
 
@@ -37,36 +84,70 @@ explainXGBoost <- function(inPath = "03_computedData/05_modelData/finalModels/",
 
 
 
-explainMLP <- function(modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveSums300_MLP.h5",
-                       embeddingPath = "03_computedData/04_preparedData/GloveSums-Full-300-FALSE.rds"){
+explainMLP <- function(modelPath,
+                       embeddingPath = "03_computedData/04_preparedData/GloveArray-Full-300-FALSE.rds"){
   assertString(modelPath)
   assertString(embeddingPath)
   
   # load embeddings
   embeddingData <- readRDS(embeddingPath)
+  
   newData <- embeddingData[["resultTest"]]
   testLabelRaw <- embeddingData[["labelTest"]]
   testLabelNumeric <- as.numeric(testLabelRaw) - 1
   names(testLabelNumeric) <- testLabelRaw
   testLabel <- to_categorical(testLabelNumeric)
   rm(embeddingData)
+  gc()
   
-
   # load keras model
   model <- load_model_hdf5(modelPath)
-    
-  evaluationResult <- model %>% 
-    evaluate(as.matrix(newData), testLabel, batch_size = 32)
   
-  predictProb <- data.table(model %>% 
-                              predict(as.matrix(newData), 
-                                      testLabel, batch_size = 32))
-  names(predictProb) <- levels(trainLabelRaw)
-  # see for which class the prop is the highest
-  predictMax <- t(apply(predictProb, 1, function(x) {
-    return(names(x[which.max(x)]))
-  }))
+  # readin testSubsets
+  testSubsets <- readRDS("03_computedData/06_evaluatedData/testSubsets.RDS")
+  indexesRaw <- testSubsets$allCorrect[, .(GloveSums300_MLP_rowVec)][[1]]
+  indexes <- indexesRaw[indexesRaw != 0]
   
+  newDataSub <- newData[indexes, , ]
+  testLabelSub <- testLabel[indexes, ]
+  testLabelRawSub <- testLabelRaw[indexes]
+  
+  resRem1 <- modifySOWRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 1)
+  
+  # resRem2 <- modifyEmbRem(newData = newDataSub,
+  #                         model = model,
+  #                         testLabel = testLabelSub,
+  #                         testLabelRaw = testLabelRawSub,
+  #                         nWords = 2, nRemove = 30)
+  # 
+  # resRem3 <- modifyEmbRem(newData = newDataSub,
+  #                         model = model,
+  #                         testLabel = testLabelSub,
+  #                         testLabelRaw = testLabelRawSub,
+  #                         nWords = 3, nRemove = 30)
+  # 
+  # resRem4 <- modifyEmbRem(newData = newDataSub,
+  #                         model = model,
+  #                         testLabel = testLabelSub,
+  #                         testLabelRaw = testLabelRawSub,
+  #                         nWords = 4, nRemove = 30)
+  # 
+  # resSeqForward <- modifyEmbSeq(newData = newDataSub, 
+  #                               model = model,
+  #                               testLabel = testLabelSub,
+  #                               testLabelRaw = testLabelRawSub, 
+  #                               forward = TRUE)
+  
+  return(list(resPerm = resPerm,
+              resRem1 = resRem1,
+              resRem2 = resRem2,
+              resRem3 = resRem3,
+              resRem4 = resRem4,
+              resSeqForward = resSeqForward))
   
   
 }
@@ -343,7 +424,7 @@ modifyEmbPerm <- function(newData, model,
 
 modifyEmbRem <- function(newData, model,
                           testLabel, testLabelRaw,
-                          nWords = 1, nRemove = 40){
+                          nWords = 1, nRemove = 30){
   dims <- dim(newData)
   
   if(nWords == 1) {
@@ -398,6 +479,137 @@ modifyEmbSeq <- function(newData, model,
     newDataModif <- newData
     newDataModif[, permInd, ] <- rep(0, dims[3])
     
+    predictProb <- data.table(model %>% 
+                                predict(newDataModif, 
+                                        testLabel, batch_size = 32))
+    names(predictProb) <- levels(testLabelRaw)
+    # see for which class the prop is the highest
+    predictMax <- t(apply(predictProb, 1, function(x) {
+      return(names(x[which.max(x)]))
+    }))
+    
+    accuracy[i] <- mean(predictMax == testLabelRaw)
+  }
+  
+  res <- mean(accuracy)
+  return(list(mean_accuracy = res,
+              accuracy = accuracy))
+}
+
+
+modifyBOWRem <- function(newData, model,
+                         testLabel, testLabelRaw,
+                         nWords = 1, nRemove = 30){
+
+  accuracy <- numeric(nRemove)
+  for(j in seq_len(nRemove)){
+    newDataTmp <- newData
+    # setting random nWords to 0
+    for(i in 1:nrow(newDataTmp)) {
+      colInd <- which(newDataTmp[i,] != 0)
+      if(length(colInd) >= nWords) {
+        toZero <- sample(colInd, size = nWords, replace = FALSE)
+        newDataTmp[i, toZero] <- 0
+      }
+    }
+
+    predictions <- as.data.table(predict(model, 
+                                         newdata = newDataTmp,
+                                         reshape = TRUE))
+    names(predictions) <- levels(testLabelRaw)
+    predictionsMax <- apply(predictions, 1 , function(x) {
+      names(x[which.max(x)])
+    })
+    accuracy[j] <- mean(predictionsMax == testLabelRaw)
+  }
+  
+  res <- mean(accuracy)
+  return(list(mean_accuracy = res,
+              accuracy = accuracy))
+}
+
+
+modifyBOWSeq <- function(newData, model,
+                         testLabel, testLabelRaw,
+                         forward = TRUE, headlinesList, maxW = 27){
+  assert(length(headlinesList) == nrow(newData))
+  seqIndizes <- 2:(maxW+1)
+  accuracy <- numeric(length(seqIndizes))
+  allWordsInd <- 1:length(newData@Dimnames[[2]])
+  names(allWordsInd) <- newData@Dimnames[[2]]
+  allWords <- newData@Dimnames[[2]]
+  
+  for(j in seqIndizes){
+    newDataTmp <- newData
+    print(paste("calc iteration", j-1, "/", maxW))
+    # setting random nWords to 0
+    for(i in 1:nrow(newDataTmp)) {
+      wordsTmp <- headlinesList[[i]]
+      lengthTmp <- length(wordsTmp)
+      # if we feed more or equal words than exist, then no alternation should be made
+      if (j >= lengthTmp){ 
+        next
+      } else{
+        toZero <- wordsTmp[j:lengthTmp]
+        toZero <- toZero[toZero %in% allWords]
+        if(length(toZero) > 0) {
+          colInd <- allWordsInd[toZero]
+          newDataTmp[i, toZero] <- 0
+        }
+      }
+    }
+    predictions <- as.data.table(predict(model, 
+                                         newdata = newDataTmp,
+                                         reshape = TRUE))
+    names(predictions) <- levels(testLabelRaw)
+    predictionsMax <- apply(predictions, 1 , function(x) {
+      names(x[which.max(x)])
+    })
+    accuracy[j-1] <- mean(predictionsMax == testLabelRaw)
+  }
+  
+  res <- mean(accuracy)
+  return(list(mean_accuracy = res,
+              accuracy = accuracy))
+}
+
+
+modifySOWRem <- function(newData, model,
+                         testLabel, testLabelRaw,
+                         nWords = 1, nRemove = 30){
+  dims <- dim(newData)
+
+  
+  if(nWords == 1) {
+    nRemove <- dims[2]
+    removeIndexes <- matrix(1:dims[2], ncol = nWords, byrow = TRUE)
+  }
+  
+  if(nWords > 1) {
+    set.seed(123)
+    removeIndexes <- t(sapply(1:nRemove, function(x) {
+      sample.int(dims[2], nWords)
+    }, simplify = TRUE))
+  }
+  
+  accuracy <- numeric(nrow(removeIndexes))
+  
+  for(i in seq_len(nrow(removeIndexes))){
+    removeInd <- removeIndexes[i, ]
+    newDataModif <- newData
+    # an stelle removeInd alles auf 0 setzen
+    newDataModif[, removeInd, ] <- rep(0, dims[3])
+    
+    SOWMatrix <- matrix(numeric(dims[3]*dims[1]), nrow = dims[1])
+    for(z in seq_len(dims[1])) {
+      ArrayTmp <- newDataModif[z, , ]
+      colSumsTmp <- colSums(ArrayTmp)
+      SOWMatrix[z, ] <- colSumsTmp/sum(abs(colSumsTmp))
+      print(z)
+    }
+    
+    newDataModif <- data.table(SOWMatrix)
+    browser()
     predictProb <- data.table(model %>% 
                                 predict(newDataModif, 
                                         testLabel, batch_size = 32))

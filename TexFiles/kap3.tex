@@ -153,15 +153,15 @@ Die Einträge der \textit{DTM} bestehen aus Werten, die das Aufkommen der Wörte
 Bei einem \textit{BOW Embedding} wird nur gezählt, wie oft ein Wort absolut vorkommt, dabei wird aber nicht berücksichtigt, dass manche Wörter in einigen Dokumenten eine höhere Bedeutung haben können als in anderen. \\
 
 Ein Ansatz, der diese Problematik berücksichtigt ist \textit{Term Frequency Inverse Document Frequency} (kurz: \textit{TFIDF}). Hierbei werden die Einträge $dtm_{ij}$ bei häufig benutzten Ausdrücken verringert und erhöht für Wörter, die insgesamt selten benutzt werden (vlg. \cite{textMiningR} S.29). Die \textit{TFIDF} für das Dokument $d_i$ und das Wort $t_j$ berechnet sich aus 
-\[tfidf(d_i, t_j) = tf(d_i,t_j) \cdot idf(t_j) . \]
+\[TFIDF(d_i, t_j) = TF(d_i,t_j) \cdot IDF(t_j) . \]
 Sowohl für die \textit{Term-Frequency} $tf$ als auch für die \textit{Inverse-Document-Frequency} $idf$ gibt es verschiedene Möglichkeiten zur Berechnung, wobei in dieser Thesis folgende Formeln genutzt werden.
 Die \textit{Augmented-Term-Frequency}
 
-\[tf(d_i,t_j) = 0.5 +  0.5 \cdot \frac{f_{d_i t_j}}{max \{ f_{d_i t_j'}: t_j' \in d_i \}} \].
+\[TF(d_i,t_j) = 0.5 +  0.5 \cdot \frac{f_{d_i t_j}}{max \{ f_{d_i t_j'}: t_j' \in d_i \}} \].
 
 berücksichtigt eine Verzerrung bei längeren Dokumenten, indem durch das Maximum der Häufigkeiten der vorkommenden Wörter in dem Dokument dividiert wird. Der Summand $0.5$ und der Multiplikator $0.5$ dienen der Normalisierung. Für die \textit{Inverse-Document-Frequency} ist der Quotient zwischen der Anzahl der Dokumente $N$ im Korpus und der Anzahl der Dokumente, die das Wort enthalten, ein geeignetes Maß (vgl. \cite{deepEssentials} S. 118):
 
-\[idf(t_j) = log \Bigl( \frac{N}{\# \{d_i: t_j \in d_i \}} \Bigr) .\]
+\[IDF(t_j) = log \Bigl( \frac{N}{\# \{d_i: t_j \in d_i \}} \Bigr) .\]
 
 In dem unteren Teil von Tabelle \ref{tab:BOWExample} ist die resultierende \textit{DTM} unter Nutzung des beschriebenen \textit{TFIDF Embeddings} dargestellt. Es ist zu sehen, dass nur einmal im Textkorpus vorkommende Wörter (\say{\textit{his}}), ein höheres Gewicht bekommen als Wörter, die oft vorkommen (\say{\textit{the}}). Zudem kann das gleiche Wort ein unterschiedliches Gewicht in verschiedenen Datenpunkten enthalten (\say{\textit{dog}}).
 
@@ -173,8 +173,8 @@ Die nachfolgend beschriebenen Methoden berücksichtigen hingegen die Reihenfolge
 
 \subsubsection{\textit{GloVe: Global vectors for representation of words}} \label{Kap:Glove}
 
-Eine weitere Methode zur numerischen Repräsenation von Texten sind \textit{Word Embeddings}, bei denen Wörter zu Vektoren fester Länge mit numerischen Werten kodiert werden. Mittlerweile haben sich \textit{Word Embeddings} als präferierte Methode für alle Bereiche der Sprachverarbeitung im \textit{Machine-Learning} durchgesetzt. Die beiden bekanntesten Methoden um \textit{Word Embeddings} zu generieren sind \textit{Word2vec} und \textit{GloVe} (vgl. \cite{keras}, S. 139). Obwohl \textit{Word2vec} auf dem Lernen durch ein neuronales Netz basiert und \textit{GloVe} auf der Zählung des Vorkommens von Wörtern im Kontext aufbaut, sind die beiden Verfahren von der grundsätzlichen Herangehensweise und den Resultaten ähnlich. Beide Methoden konstruieren einen Vektorraum, in dem die Position eines Worts durch den Kontext bestimmt wird, in dem das Wort im Textkorpus auftritt.
-\textit{GloVe} liefert im Vergleich zu \textit{Word2vec} generell etwas bessere Resultate und ist mit Paralellisierung schneller zu berechnen (vgl. \cite{keras}, S. 156). Aus diesen Gründen wird in dieser Thesis \textit{GloVe} verwendet und im Folgenden beschrieben. \\
+Eine weitere Methode zur numerischen Repräsentation von Texten sind \textit{Word Embeddings}, bei denen Wörter zu Vektoren fester Länge mit numerischen Werten kodiert werden. Mittlerweile haben sich \textit{Word Embeddings} als präferierte Methode für alle Bereiche der Sprachverarbeitung im \textit{Machine-Learning} durchgesetzt. Die beiden bekanntesten Methoden um \textit{Word Embeddings} zu generieren sind \textit{Word2vec} und \textit{GloVe} (vgl. \cite{keras}, S. 139). Obwohl \textit{Word2vec} auf dem Lernen durch ein neuronales Netz basiert und \textit{GloVe} auf der Zählung des Vorkommens von Wörtern im Kontext aufbaut, sind die beiden Verfahren von der grundsätzlichen Herangehensweise und den Resultaten ähnlich. Beide Methoden konstruieren einen Vektorraum, in dem die Position eines Worts durch den Kontext bestimmt wird, in dem das Wort im Textkorpus auftritt.
+\textit{GloVe} liefert im Vergleich zu \textit{Word2vec} generell etwas bessere Resultate und ist mit Parallelisierung schneller zu berechnen (vgl. \cite{keras}, S. 156). Aus diesen Gründen wird in dieser Thesis \textit{GloVe} verwendet und im Folgenden beschrieben. \\
 Die Methode nutzt ein unüberwachtes Lernen zur Konstruktion der Vektoren. Zuerst wird eine \textit{Term-Co-Occurance} (kurz \textit{TCM}) Matrix $R$ konstruiert, die so viele Zeilen enthält, wie das Vokabular Wörter besitzt. Die Spalten stehen auch für die Wörter des Vokabulars, allerdings als Kontext verstanden. Tabelle \ref{tab:GloveExample} verdeutlicht dies anhand des Beispiels aus Tabelle \ref{tab:BOWExample}.
 
 \begin{table}[ht]
@@ -277,9 +277,36 @@ Eine weitere Möglichkeit, Sätze und Wörter zu repräsentieren ist als Sequenz
 Die Erstellung der Wort-Sequenzen erfolgte in \texttt{R} mit dem Paket \texttt{keras} (\cite{kerasR}). In Kapitel \ref{kap:preselection} ist diese Art der Repräsentation der Wörter mit dem Kürzel \textit{Sequence} benannt. \\
 
 
-\subsection{\textit{Machine-Learning} Modelle}\label{kap:machineLearning}
+\subsection{Baumbasierte Verfahren}\label{kap:machineLearning}
 
 \subsubsection{Extreme Gradient Boosting}\label{kap:XG}
+
+Dieses Unterkapitel gibt eine Einführung in den \textit{XGBoost} Algorithmus und basiert auf \cite{XGBoost}, S.785-794. Die Umsetzung erfolgte mit dem \texttt{R}-Interface \texttt{xgboost} (\cite{XGBoostR}). Für den speziellen Fall der Multiklassifikation entspringen einige Informationen über die Modellierung der Dokumentation und dem Programmiercode des \texttt{R}-Pakets.\\
+\\
+Baumbasiertes \textit{Boosting} ist ein weit verbreitetes und äußerst effektives Verfahren im Feld des \textit{Machine-Learning}. Das System \textit{XGBoost} (\textit{eXtreme Gradient Boosting}) erzielt erstklassige Resultate bei \textit{Machine-Learning} Problemen jedweder Art und ist auch in der \textit{Multiclass}-Klassifikation anwendbar. Dabei zeichnet sich \textit{XGBoost} zusätzlich durch die effizientere Nutzung von Rechen-Ressourcen im Vergleich zu bestehenden Verfahren aus. \\
+Für ein \textit{Multiclass}-Klassifikationsproblem mit $C$ Klassen liegt ein Trainingsdatensatz $D = \{(\bm{x}_i, \bm{y}_i) \}$ $(|D| = N, \bm{x_i} \in \mathbb{R}^l, \bm{y}_i \in \{0,1\}^C)$ vor, wobei $N$ die Anzahl Beobachtungen und $l$ die Anzahl der Variablen ist. $\bm{y}_i$ bezeichnet den Vektor der Zielvariablen mit $C$ Einträgen, die an der Stelle der richtigen Kategorie eine $1$ enthält und $0$ sonst. Ein Baum \textit{Ensemble} Modell nutzt $C$ Regressionswälder mit jeweils $K$ Bäumen $f_k^{(c)}, k=1,...,K ;\hspace{0.2cm} c = 1,...,C$. Dabei bezeichnet $\bm{f}_k = \{f_k^{(1)},...,f_k^{(C)}\}$ die Menge der Bäume in der $k$-ten Iteration und $\bm{f}_k(\bm{x}_i) = (f_k^{(1)}(\bm{x}_i),...,f_k^{(C)}(\bm{x}_i))$ das Abbild der Menge der Bäume von $\bm{x}_i$. Die Prognose $\hat{\bm{y}}_i$ berechnet sich durch
+
+\[\hat{\bm{y}}_i = \psi(\bm{x_i}) = \sum_{k=1}^K \bm{f}_k(\bm{x_i}).\]
+
+$\hat{\bm{y}}_i$ entsteht also durch die Komponentenweise Summe der $K$ Abbilder der Bäume.
+
+Der Baum $f_k$ entspring der Menge $\in \mathcal{F} = \{f(\bm{x}) = w_{q(\bm{x})} \}, (q: \mathbb{R}^l \xrightarrow{} T, w \in \mathbb{R}^T)$. $\mathcal{F}$ bezeichnet die Menge der Klassifikations- und Regressionsbäume, $q$ ist die Struktur des Baumes, die jedem Datenpunkt den Endknoten zuweist und $T$ ist die Anzahl der Knoten des Baumes. Jeder einzelne Baum besitzt eine unabhängige Struktur $q$ und Gewichte der Endknoten $w$. Bei Klassifikationsbäumen für eine binäre Klassifikation ordnet jeder Endknoten der Beobachtung $\bm{x}_i$ eine Klasse $\hat{\bm{y}}_i \in \{0,1\}$ zu. In dem Multiklassifikationsfall von \textit{XGBoost} ordnen die Endknoten dem Datenpunkt einen stetigen Wert zu. In jedem der $C$ Wälder Regressionsbäumen gebildet, behandelt der $c$-te Baum das binäre Klassifikationsproblem, ob die Beobachtung der Klasse $C_j$ zugehörig ist oder einer der anderen Klassen.\\
+Die Parameter des Modells werden in einem additiven Trainingsprozess optimiert indem folgende Funktion minimiert wird:
+
+\[\mathcal{L}(\psi) = \sum_{i=1}^N l(\hat{\bm{y}}_i^{(t)}, \bm{y}_i) + \sum_{k=1}^K \Omega(\bm{f_k}), \]\hspace{1cm} mit
+\[\Omega(\bm{f_k}) = \gamma T + \frac{1}{2} \lambda \|w\|^2 \]
+
+
+
+
+Sei $\hat{\bm{y}}_i^{(t)}$ die Prognose von Datenpunkt $i$ in der $t$-ten Iteration des Waldes. Der Baum $f_t$ wird dann hinzugefügt während 
+
+\[\mathcal{L}^{(t)} = \sum_{i = 1}^N l(\bm{y}_i, \hat{\bm{y}}_i^{(t-1)} + f_t(\bm{x}_i)) + \Omega(f_t) \]
+
+minimiert wird. Im Multiklassifikationsfall ist $l = CE$ die \textit{Categorical Cross Entropy} (Kapitel \ref{kap:guetemass}).
+
+
+
 \subsubsection{Random Forest}\label{kap:RF}
 
 \subsection{Neuronale Netze} \label{kap:neuralNets}
@@ -447,7 +474,7 @@ Das Lernen der Gewichte sowie \textit{Tuning} und Regularisierung erfolgt bei ei
 
 
 
-\subsubsection{Recurrent Neural net und Long-Short-Term-Memory Neural Net} \label{kap:LSTM}
+\subsubsection{Recurrent Neural Net und Long-Short-Term-Memory Neural Net} \label{kap:LSTM}
 
 Dieses Unterkapitel erläutert die Idee von \textit{Recurrent Neural Networks} (kurz \textit{RNN}) und motiviert anschließend die darauf basierenden \textit{Long-Short-Term-Memory Neural Networks} (kurz \textit{LSTM}). Die Informationen über das \textit{RNN} entspringen größtenteils \cite{deepL}, S. 378-381, der darauf folgende Abschnitt über \textit{LSTM} basiert größtenteils auf \cite{deepNLP}, S.138-143.\\
 %todo: jahr, seiten manuell in klammern

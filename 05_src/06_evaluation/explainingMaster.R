@@ -8,14 +8,14 @@ res <- identifyTestSubsets(inPath = "03_computedData/05_modelData/finalModelsBac
 saveRDS(res, "03_computedData/06_evaluatedData/testSubsets.RDS")
 
 # analyse individual models to changes ####
-resXG <- explainXGBoost(modelPath = "03_computedData/05_modelData/OnlyModelSave/xgb.RDS",
-               embeddingPath = "03_computedData/04_preparedData/BOW-Full-TRUE-FALSE.rds")
-saveRDS(resXG, "03_computedData/06_evaluatedData/resXG.RDS")
+try(resXG <- explainXGBoost(modelPath = "03_computedData/05_modelData/OnlyModelSave/xgb.RDS",
+               embeddingPath = "03_computedData/04_preparedData/BOW-Full-TRUE-FALSE.rds"))
+try(saveRDS(resXG, "03_computedData/06_evaluatedData/resXG.RDS"))
 
 
-resMLP <- explainMLP(modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveSumsFull300_MLP.h5",
-                        embeddingPath = "03_computedData/04_preparedData/GloveArray-Full-300-FALSE.rds")
-saveRDS(resXG, "03_computedData/06_evaluatedData/resXG.RDS")
+try(resMLP <- explainMLP(modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveSumsFull300_MLP.h5",
+                        embeddingPath = "03_computedData/04_preparedData/GloveArray-Full-300-FALSE.rds"))
+try(saveRDS(resMLP, "03_computedData/06_evaluatedData/resMLP.RDS"))
 
 
 resCNN <- explainCNN(modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_CNN.h5",
@@ -31,21 +31,19 @@ saveRDS(resLSTM, "03_computedData/06_evaluatedData/resLSTM.RDS")
 #resLSTM <- readRDS("03_computedData/06_evaluatedData/resLSTM.RDS")
 
 # individual datapoints explaining ####
-explainIndividual <- explainIndividual(modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_CNN.h5",
+res <- explainIndividual(modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_CNN.h5",
                          embeddingPath = "03_computedData/04_preparedData/")
-saveRDS(explainIndividual, "03_computedData/06_evaluatedData/explainIndividual.RDS")
-explainIndividual <- readRDS("03_computedData/06_evaluatedData/explainIndividual.RDS")
+saveRDS(res, "03_computedData/06_evaluatedData/explainIndividual.RDS")
+res <- readRDS("03_computedData/06_evaluatedData/explainIndividual.RDS")
 
 
-
-subList <- res[[1]]
-dt <- data.table(trueLabelCheck = subList$trueLabelCheck,
-                 headline = subList$headlines, 
-                 predictMax = subList$predictMax,
-                 subList$predictProb)
-
+# ggPlot der einzelnen Wahrscheinlichkeiten der Modelle ####
 ggDataPoint1 <- plotIndividualProbs(explainData = res, index = 1)
 ggDataPoint1
+
+# ggPlot Verlauf Seq LSTM
+# explainData ist teile der liste von explainIndividual
+ggObj <- plotLSTMSeq(explainData = res[[3]], index = 1)
 
 ## xgb ####
 test <- xgb.importance(model = xgBModel)

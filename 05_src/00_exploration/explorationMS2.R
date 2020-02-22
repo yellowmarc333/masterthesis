@@ -1,3 +1,9 @@
+# todos next day
+# fehler bei MLP suchen (30min max)
+# xgboost weiterschreiben
+# plotfunktionen weiterschreiben (CNN, MLP, XG), vlt alle in eine Grafik
+
+
 # [last steps]
 # jackys korrektur
 # random forest 0.5 seiten

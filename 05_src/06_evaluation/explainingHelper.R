@@ -46,30 +46,30 @@ explainXGBoost <- function(modelPath,
                           nWords = 1, nRemove = 30)
 
 
-  # resRem2 <- modifyBOWRem(newData = newDataSub,
-  #                         model = model,
-  #                         testLabel = testLabelSub,
-  #                         testLabelRaw = testLabelRawSub,
-  #                         nWords = 2, nRemove = 30)
-  # 
-  # resRem3 <- modifyBOWRem(newData = newDataSub,
-  #                         model = model,
-  #                         testLabel = testLabelSub,
-  #                         testLabelRaw = testLabelRawSub,
-  #                         nWords = 3, nRemove = 30)
-  # 
-  # resRem4 <- modifyBOWRem(newData = newDataSub,
-  #                         model = model,
-  #                         testLabel = testLabelSub,
-  #                         testLabelRaw = testLabelRawSub,
-  #                         nWords = 4, nRemove = 30)
-  # 
-  # resSeq <- modifyBOWSeq(newData = newDataSub,
-  #                        model = model,
-  #                        testLabel = testLabelSub,
-  #                        testLabelRaw = testLabelRawSub, forward = TRUE,
-  #                        headlinesList = headlinesList,
-  #                        maxW = 27)
+  resRem2 <- modifyBOWRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 2, nRemove = 30)
+
+  resRem3 <- modifyBOWRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 3, nRemove = 30)
+
+  resRem4 <- modifyBOWRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 4, nRemove = 30)
+
+  resSeq <- modifyBOWSeq(newData = newDataSub,
+                         model = model,
+                         testLabel = testLabelSub,
+                         testLabelRaw = testLabelRawSub, forward = TRUE,
+                         headlinesList = headlinesList,
+                         maxW = 27)
   
   return(list(resRem1 = resRem1,
               resRem2 = resRem2,
@@ -117,37 +117,39 @@ explainMLP <- function(modelPath,
                           testLabel = testLabelSub,
                           testLabelRaw = testLabelRawSub,
                           nWords = 1)
+
+
+  resRem2 <- modifySOWRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 2, nRemove = 30)
+
+  resRem3 <- modifySOWRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 3, nRemove = 30)
+
+
+  resRem4 <- modifySOWRem(newData = newDataSub,
+                          model = model,
+                          testLabel = testLabelSub,
+                          testLabelRaw = testLabelRawSub,
+                          nWords = 4, nRemove = 30)
   
-  # resRem2 <- modifyEmbRem(newData = newDataSub,
-  #                         model = model,
-  #                         testLabel = testLabelSub,
-  #                         testLabelRaw = testLabelRawSub,
-  #                         nWords = 2, nRemove = 30)
-  # 
-  # resRem3 <- modifyEmbRem(newData = newDataSub,
-  #                         model = model,
-  #                         testLabel = testLabelSub,
-  #                         testLabelRaw = testLabelRawSub,
-  #                         nWords = 3, nRemove = 30)
-  # 
-  # resRem4 <- modifyEmbRem(newData = newDataSub,
-  #                         model = model,
-  #                         testLabel = testLabelSub,
-  #                         testLabelRaw = testLabelRawSub,
-  #                         nWords = 4, nRemove = 30)
-  # 
-  # resSeqForward <- modifyEmbSeq(newData = newDataSub, 
-  #                               model = model,
-  #                               testLabel = testLabelSub,
-  #                               testLabelRaw = testLabelRawSub, 
-  #                               forward = TRUE)
-  
+  resSeq <- modifySOWSeq(newData = newDataSub,
+                         model = model,
+                         testLabel = testLabelSub,
+                         testLabelRaw = testLabelRawSub,
+                         forward = TRUE)
+ 
   return(list(resPerm = resPerm,
               resRem1 = resRem1,
               resRem2 = resRem2,
               resRem3 = resRem3,
               resRem4 = resRem4,
-              resSeqForward = resSeqForward))
+              resSeq = resSeq))
   
   
 }
@@ -579,7 +581,6 @@ modifySOWRem <- function(newData, model,
                          nWords = 1, nRemove = 30){
   dims <- dim(newData)
 
-  
   if(nWords == 1) {
     nRemove <- dims[2]
     removeIndexes <- matrix(1:dims[2], ncol = nWords, byrow = TRUE)
@@ -595,6 +596,8 @@ modifySOWRem <- function(newData, model,
   accuracy <- numeric(nrow(removeIndexes))
   
   for(i in seq_len(nrow(removeIndexes))){
+    print(paste("calc iteration", i, "/", nrow(removeIndexes)))
+    
     removeInd <- removeIndexes[i, ]
     newDataModif <- newData
     # an stelle removeInd alles auf 0 setzen
@@ -605,13 +608,12 @@ modifySOWRem <- function(newData, model,
       ArrayTmp <- newDataModif[z, , ]
       colSumsTmp <- colSums(ArrayTmp)
       SOWMatrix[z, ] <- colSumsTmp/sum(abs(colSumsTmp))
-      print(z)
     }
     
-    newDataModif <- data.table(SOWMatrix)
-    browser()
+    
+
     predictProb <- data.table(model %>% 
-                                predict(newDataModif, 
+                                predict(SOWMatrix, 
                                         testLabel, batch_size = 32))
     names(predictProb) <- levels(testLabelRaw)
     # see for which class the prop is the highest
@@ -626,6 +628,46 @@ modifySOWRem <- function(newData, model,
   return(list(mean_accuracy = res,
               accuracy = accuracy))
 }
+
+
+modifySOWSeq <- function(newData, model,
+                         testLabel, testLabelRaw,
+                         forward = TRUE){
+  dims <- dim(newData)
+  # alle außer der erste werden 0 gesetzt.
+  seqIndizes <- 2:(dims[2])
+  
+  accuracy <- numeric(length(seqIndizes))
+  for(i in seqIndizes){
+    print(paste("calc iteration", i-1, "/", length(seqIndizes)))
+    permInd <- i:dims[2]
+    newDataModif <- newData
+    newDataModif[, permInd, ] <- rep(0, dims[3])
+    
+    SOWMatrix <- matrix(numeric(dims[3]*dims[1]), nrow = dims[1])
+    for(z in seq_len(dims[1])) {
+      ArrayTmp <- newDataModif[z, , ]
+      colSumsTmp <- colSums(ArrayTmp)
+      SOWMatrix[z, ] <- colSumsTmp/sum(abs(colSumsTmp))
+    }
+   
+    predictProb <- data.table(model %>% 
+                                predict(SOWMatrix, 
+                                        testLabel, batch_size = 32))
+    names(predictProb) <- levels(testLabelRaw)
+    # see for which class the prop is the highest
+    predictMax <- t(apply(predictProb, 1, function(x) {
+      return(names(x[which.max(x)]))
+    }))
+    accuracy[i-1] <- mean(predictMax == testLabelRaw)
+  }
+  
+  res <- mean(accuracy)
+  return(list(mean_accuracy = res,
+              accuracy = accuracy))
+}
+
+
 
 
 
@@ -756,13 +798,10 @@ plotIndividualProbs <- function(explainData, index = 1) {
   res <- data.table()
   for(i in seq_along(explainData)) {
     resTmp <- explainData[[i]]
-    
-    
+  
     predictProb <- as.numeric(resTmp$predictProb[index])
-    
     res[, predictProb := predictProb]
     setnames(res, "predictProb", as.character(resTmp$type))
-    
   }
   
   res[, Kategorie := names(resTmp$predictProb)]
@@ -800,19 +839,22 @@ plotIndividualProbs <- function(explainData, index = 1) {
 }
 
 
-plotLSTMSeq <- function(explainData, index = 1) {
+# explainData ist teile der liste von explainIndividual
+plotLSTMSeq <- function(explainData, index = 1,
+                        modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_LSTM.h5",
+                        embeddingPath = "03_computedData/04_preparedData/GloveArray-Full-300-FALSE.rds",
+                        deleteThreshold = 0.10){
   assertList(explainData)
   assertNumber(index)
   
-  explainData <- res[[3]]
   embIndex <- explainData$embIndexes[index]
-  
-  modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_LSTM.h5"
-  embeddingPath = "03_computedData/04_preparedData/GloveArray-Full-300-FALSE.rds"
 
+  
+  
   # load embeddings
   embeddingData <- readRDS(embeddingPath)
   newDataWhole <- embeddingData[["resultTest"]]
+  dims <- dim(newDataWhole)
   newDataSingle <- newDataWhole[embIndex, , ]
   newData <- array(newDataSingle, dim = c(1, dims[2], dims[3]))
   
@@ -825,7 +867,6 @@ plotLSTMSeq <- function(explainData, index = 1) {
   # load keras model
   model <- load_model_hdf5(modelPath)
   
-  dims <- dim(newDataWhole)
   # alle außer der erste werden 0 gesetzt.
   seqIndizes <- 2:(dims[2])
   
@@ -833,6 +874,7 @@ plotLSTMSeq <- function(explainData, index = 1) {
                                   length(unique(testLabelRaw))),
                         ncol = length(unique(testLabelRaw)))
   for(i in seqIndizes){
+    print(paste("calc iteration", i , "/", length(seqIndizes)))
     permInd <- i:dims[2]
     newDataModif <- newData
     newDataModif[, permInd, ] <- rep(0, dims[3])
@@ -841,23 +883,42 @@ plotLSTMSeq <- function(explainData, index = 1) {
                                 predict(newDataModif, 
                                         testLabel, batch_size = 32))
     
-    # see for which class the prop is the highest
     res[i-1, ] <- as.numeric(predictProb)
   }
   
   resDT <- as.data.table(res)
   setnames(resDT, levels(testLabelRaw))
   resDT[, PartOfSequence := 1:.N]
-
-  plotData <- melt(resDT, id.vars = "PartOfSequence")
   
+  headline <- explainData$headlines[index]
+  assert(length(headline) == 1)
+  headlineToken <- quanteda::tokens(headline, what = "word", remove_numbers = FALSE, 
+                                    remove_punct = FALSE, remove_symbols = FALSE, 
+                                    remove_hyphens = FALSE)[[1]]
+  headlineFilled <- c(headlineToken, 
+                      rep(NA, nrow(resDT) - length(headlineToken)))
+  resDT[, Words := headlineFilled]
+  # display only the words in the sequence + 2
+  resDTRed <- resDT[1:min(length(headlineToken)+2, .N),]
+  
+  # see for which class the prop is the highest
+  plotDataRaw <- melt(resDTRed, id.vars = c("PartOfSequence", "Words"))
+  plotDataRaw[, Delete := max(value) <= deleteThreshold, by = variable]
+  plotData <- plotDataRaw[Delete == FALSE]
+  # marc: todo
   ggObj <- ggplot(plotData, aes(x = PartOfSequence,
-                                y = value, color = variable)) +
+                                y = value, color = variable,
+                                label = Words)) +
     geom_line() +
     geom_point() +
     labs(x = "Wörter der Sequenz",
          y = "Modellwahrscheinlichkeit",
          color = "Kategorie: ") +
+    # geom_text_repel(nudge_x = 0, nudge_y = 0, segment.size = 0.5,
+    #                 segment.alpha = 0.5, point.padding = 0.5,
+    #                 box.padding = 1, size = 5) +
+    geom_label(nudge_x = 0, nudge_y = 0.03, size = 5, alpha = 0.5,
+               label.padding = unit(0.15, "lines"), na.rm = TRUE) +
     guides(fill = guide_legend(nrow = 3, byrow = TRUE)) +
     theme(axis.text.x  = element_text(size = 14),
           axis.text.y = element_text(size = 15),
@@ -867,7 +928,7 @@ plotLSTMSeq <- function(explainData, index = 1) {
           legend.key = element_rect(fill = "lightblue", color = NA),
           legend.position = "top",
           legend.text = element_text(size = 15),
-          legend.title = element_text(size = 18))
+          legend.title = element_text(size = 18)); ggObj
   
   return(ggObj)
 }

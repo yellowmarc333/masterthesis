@@ -11,7 +11,7 @@ saveRDS(res, "03_computedData/06_evaluatedData/testSubsets.RDS")
 try(resXG <- explainXGBoost(modelPath = "03_computedData/05_modelData/OnlyModelSave/xgb.RDS",
                embeddingPath = "03_computedData/04_preparedData/BOW-Full-TRUE-FALSE.rds"))
 try(saveRDS(resXG, "03_computedData/06_evaluatedData/resXG.RDS"))
-
+resXG <- readRDS("03_computedData/06_evaluatedData/resXG.RDS")
 
 try(resMLP <- explainMLP(modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveSumsFull300_MLP.h5",
                         embeddingPath = "03_computedData/04_preparedData/GloveArray-Full-300-FALSE.rds"))
@@ -37,13 +37,49 @@ saveRDS(res, "03_computedData/06_evaluatedData/explainIndividual.RDS")
 res <- readRDS("03_computedData/06_evaluatedData/explainIndividual.RDS")
 
 
-# ggPlot der einzelnen Wahrscheinlichkeiten der Modelle ####
-ggDataPoint1 <- plotIndividualProbs(explainData = res, index = 1)
-ggDataPoint1
+# ggPlots der einzelnen Wahrscheinlichkeiten der Modelle ####
+res <- readRDS("03_computedData/06_evaluatedData/explainIndividual.RDS")
+# global parameters
+fullWidth <- 15.49779
+fullHeight <- fullWidth * 9/16
+fullWidth2 <- 15.49779 * 3/4
+fullHeight2 <- fullWidth * 9/29
+outPath <- "03_computedData/06_evaluatedData/Individual/"
 
-# ggPlot Verlauf Seq LSTM
-# explainData ist teile der liste von explainIndividual
-ggObj <- plotLSTMSeq(explainData = res[[3]], index = 1)
+for(i in 1:2) {
+  ggIndProbs <- plotIndividualProbs(explainData = res, index = i)
+  ggsave(filename = paste0(outPath, "ggIndProbs", i, ".pdf"),
+         plot = ggIndProbs, width = fullHeight, height = fullWidth, 
+         device = "pdf")
+  
+  # explainData ist teile der liste von explainIndividual
+  plotDataXG <- calcPD_XG(explainData = res[[1]], index = i,
+                          ModelName = "XGBoost",
+                          modelPath = "03_computedData/05_modelData/OnlyModelSave/xgb.RDS")
+  
+  plotDataCNN <- calcPD_LSTMCNN(explainData = res[[2]], index = i,
+                                ModelName = "CNN",
+                                modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_CNN.h5")
+  
+  plotDataLSTM <- calcPD_LSTMCNN(explainData = res[[3]], index = i,
+                                 ModelName = "Bi-LSTM",
+                                 modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_LSTM.h5")
+  
+  plotDataMLP <- calcPD_MLP(explainData = res[[4]], index = i,
+                            ModelName = "MLP",
+                            modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveSumsFull300_MLP.h5")
+  
+  ggObj <- plotSeqInd(plotDataXG, plotDataLSTM, plotDataCNN, plotDataMLP)
+  ggsave(filename = paste0(outPath, "plotSeqInd", i, ".pdf"),
+         plot = ggObj, width = fullHeight, height = fullWidth, 
+         device = "pdf")
+}
+
+try(resMLP <- explainMLP(modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveSumsFull300_MLP.h5",
+                         embeddingPath = "03_computedData/04_preparedData/GloveArray-Full-300-FALSE.rds"))
+try(saveRDS(resMLP, "03_computedData/06_evaluatedData/resMLP.RDS"))
+
+
 
 ## xgb ####
 test <- xgb.importance(model = xgBModel)

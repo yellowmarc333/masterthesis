@@ -563,9 +563,7 @@ modifyBOWSeq <- function(newData, model,
                                          newdata = newDataTmp,
                                          reshape = TRUE))
     names(predictions) <- levels(testLabelRaw)
-    predictionsMax <- apply(predictions, 1 , function(x) {
-      names(x[which.max(x)])
-    })
+
     accuracy[j-1] <- mean(predictionsMax == testLabelRaw)
   }
   
@@ -600,7 +598,7 @@ modifySOWRem <- function(newData, model,
     removeInd <- removeIndexes[i, ]
     newDataModif <- newData
     # an stelle removeInd alles auf 0 setzen
-    newDataModif[, removeInd, ] <- rep(0, dims[3])
+    #newDataModif[, removeInd, ] <- rep(0, dims[3])
     
     SOWMatrix <- matrix(numeric(dims[3]*dims[1]), nrow = dims[1])
     for(z in seq_len(dims[1])) {
@@ -609,8 +607,6 @@ modifySOWRem <- function(newData, model,
       SOWMatrix[z, ] <- colSumsTmp/sum(abs(colSumsTmp))
     }
     
-    
-
     predictProb <- data.table(model %>% 
                                 predict(SOWMatrix, 
                                         testLabel, batch_size = 32))
@@ -621,6 +617,7 @@ modifySOWRem <- function(newData, model,
     }))
     
     accuracy[i] <- mean(predictMax == testLabelRaw)
+    
   }
   
   res <- mean(accuracy)
@@ -839,10 +836,11 @@ plotIndividualProbs <- function(explainData, index = 1) {
 
 
 # explainData ist teile der liste von explainIndividual
-plotLSTMSeq <- function(explainData, index = 1,
+calcPD_LSTMCNN <- function(explainData, index = 1,
                         modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveArrayFull300_LSTM.h5",
                         embeddingPath = "03_computedData/04_preparedData/GloveArray-Full-300-FALSE.rds",
-                        deleteThreshold = 0.10){
+                        deleteThreshold = 0.10,
+                        ModelName = "CNN"){
   assertList(explainData)
   assertNumber(index)
   
@@ -904,12 +902,219 @@ plotLSTMSeq <- function(explainData, index = 1,
   plotDataRaw <- melt(resDTRed, id.vars = c("PartOfSequence", "Words"))
   plotDataRaw[, Delete := max(value) <= deleteThreshold, by = variable]
   plotData <- plotDataRaw[Delete == FALSE]
-  # marc: todo
+  # setting the labels NA for all categorys that are not predicted
+  maxProbDT <- plotData[PartOfSequence == max(plotData$PartOfSequence),
+                        .(Max = max(value)), by = variable]
+  maxCategory <- maxProbDT[Max == max(Max)]$variable
+  plotData[variable != maxCategory, Words := NA]
+  plotData[, ModelName := ModelName]
+  
+  return(plotData)
+}
+# explainData ist teile der liste von explainIndividual
+calcPD_MLP <- function(explainData, index = 1,
+                           modelPath = "03_computedData/05_modelData/OnlyModelSave/mod_GloveSumsFull300_MLP.h5",
+                           embeddingPath = "03_computedData/04_preparedData/GloveArray-Full-300-FALSE.rds",
+                           deleteThreshold = 0.10,
+                       ModelName = "MLP"){
+  assertList(explainData)
+  assertNumber(index)
+  
+  embIndex <- explainData$embIndexes[index]
+ 
+  # load embeddings
+  embeddingData <- readRDS(embeddingPath)
+  newDataWhole <- embeddingData[["resultTest"]]
+  dims <- dim(newDataWhole)
+  newDataSingle <- newDataWhole[embIndex, , ]
+  newData <- array(newDataSingle, dim = c(1, dims[2], dims[3]))
+  
+  testLabelRaw <- embeddingData[["labelTest"]]
+  testLabelNumeric <- as.numeric(testLabelRaw) - 1
+  names(testLabelNumeric) <- testLabelRaw
+  testLabel <- to_categorical(testLabelNumeric)[embIndex, ]
+  rm(embeddingData)
+  
+  # load keras model
+  model <- load_model_hdf5(modelPath)
+  
+  # alle außer der erste werden 0 gesetzt.
+  seqIndizes <- 2:(dims[2])
+  
+  res <- matrix(numeric(length(seqIndizes)* 
+                          length(unique(testLabelRaw))),
+                ncol = length(unique(testLabelRaw)))
+
+  
+  for(i in seqIndizes){
+    print(paste("calc iteration", i-1, "/", length(seqIndizes)))
+    permInd <- i:dims[2]
+    newDataModif <- newData
+    newDataModif[, permInd, ] <- rep(0, dims[3])
+    
+    colSumsTmp <- colSums(newDataModif[1, , ])
+    SOWMatrix <- matrix(colSumsTmp/sum(abs(colSumsTmp)), nrow = 1)
+
+    predictProb <- data.table(model %>% 
+                                predict(SOWMatrix, 
+                                        testLabel, batch_size = 32))
+    names(predictProb) <- levels(testLabelRaw)
+    
+    res[i-1, ] <- as.numeric(predictProb)
+  }
+  
+  resDT <- as.data.table(res)
+  setnames(resDT, levels(testLabelRaw))
+  resDT[, PartOfSequence := 1:.N]
+  
+  headline <- explainData$headlines[index]
+  assert(length(headline) == 1)
+  headlineToken <- quanteda::tokens(headline, what = "word", remove_numbers = FALSE, 
+                                    remove_punct = FALSE, remove_symbols = FALSE, 
+                                    remove_hyphens = FALSE)[[1]]
+  headlineFilled <- c(headlineToken, 
+                      rep(NA, nrow(resDT) - length(headlineToken)))
+  resDT[, Words := headlineFilled]
+  # display only the words in the sequence + 2
+  resDTRed <- resDT[1:min(length(headlineToken)+2, .N),]
+  
+  # see for which class the prop is the highest
+  plotDataRaw <- melt(resDTRed, id.vars = c("PartOfSequence", "Words"))
+  plotDataRaw[, Delete := max(value) <= deleteThreshold, by = variable]
+  plotData <- plotDataRaw[Delete == FALSE]
+  # setting the labels NA for all categorys that are not predicted
+  maxProbDT <- plotData[PartOfSequence == max(plotData$PartOfSequence),
+                        .(Max = max(value)), by = variable]
+  maxCategory <- maxProbDT[Max == max(Max)]$variable
+  plotData[variable != maxCategory, Words := NA]
+  plotData[, ModelName := ModelName]
+  
+  return(plotData)
+}
+
+calcPD_XG <- function(explainData, index = 1,
+                       modelPath = "03_computedData/05_modelData/OnlyModelSave/xgb.RDS",
+                       embeddingPath = "03_computedData/04_preparedData/BOW-Full-TRUE-FALSE.rds",
+                       deleteThreshold = 0.10,
+                       ModelName = "XGBoost", maxW = 27){
+  assertList(explainData)
+  assertNumber(index)
+  
+  embIndex <- explainData$embIndexes[index]
+  
+  # load embeddings
+  embeddingData <- readRDS(embeddingPath)
+  newDataWhole <- embeddingData[["resultTest"]]
+  newDataSingle <- matrix(newDataWhole[embIndex, ], nrow = 1)
+  newData <-  as(newDataSingle, "dgCMatrix") 
+  newData@Dimnames[[1]] <- newDataWhole@Dimnames[[1]][embIndex]
+  newData@Dimnames[[2]] <- newDataWhole@Dimnames[[2]]
+ 
+  testLabelRaw <- embeddingData[["labelTest"]]
+  testLabelNumeric <- as.numeric(testLabelRaw) - 1
+  names(testLabelNumeric) <- testLabelRaw
+  testLabel <- testLabelNumeric[embIndex]
+  rm(embeddingData)
+  
+  # load keras model
+  model <- readRDS(modelPath)
+  
+  headline <- explainData$headlines[index]
+  trueLabelCheck <- explainData$trueLabelCheck[index]
+  
+  headlinesToken <- quanteda::tokens(headline, what = "word", remove_numbers = FALSE, 
+                                     remove_punct = FALSE, remove_symbols = FALSE, 
+                                     remove_hyphens = FALSE)
+  removePositions <- which(headlinesToken[[1]] %in% stopwords("english"))
+  headlinesToken <- tokens_remove(headlinesToken,
+                                  c(stopwords("english")))
+  headlinesList <- as.list(headlinesToken)
+  
+  
+  # alle außer der erste werden 0 gesetzt.
+  seqIndizes <- 2:(maxW+1)
+  
+  res <- matrix(numeric(length(seqIndizes)* 
+                          length(unique(testLabelRaw))),
+                ncol = length(unique(testLabelRaw)))
+
+  allWordsInd <- 1:length(newDataWhole@Dimnames[[2]])
+  names(allWordsInd) <- newDataWhole@Dimnames[[2]]
+  allWords <- newDataWhole@Dimnames[[2]]
+  wordsTmp <- headlinesList[[1]]
+  lengthTmp <- length(wordsTmp)
+  
+  for(j in seqIndizes){
+    newDataTmp <- newData
+    print(paste("calc iteration", j-1, "/", maxW))
+
+    # if we feed more or equal words than exist, then no alternation should be made
+    if (j >= lengthTmp){ 
+      # in the case that we are at the end of the sequence,
+      # repeat the same probabilities
+      res[j-1, ] <- as.numeric(predictions)
+    } else{
+      toZero <- wordsTmp[j:lengthTmp]
+      toZero <- toZero[toZero %in% allWords]
+      if(length(toZero) > 0) {
+        colInd <- allWordsInd[toZero]
+        newDataTmp[1, colInd] <- 0
+      }
+    }
+    
+    predictions <- as.data.table(predict(model, 
+                                         newdata = newDataTmp,
+                                         reshape = TRUE))
+    names(predictions) <- levels(testLabelRaw)
+    
+    res[j-1, ] <- as.numeric(predictions)
+  }
+  
+  
+  resDT <- as.data.table(res)
+  setnames(resDT, levels(testLabelRaw))
+  resDT[, PartOfSequence := 1:.N]
+  
+  headlineFilled <- c(headlinesToken[[1]], 
+                      rep(NA, nrow(resDT) - length(headlinesToken[[1]])))
+  resDT[, Words := headlineFilled]
+  # display only the words in the sequence + 2
+  resDTRed <- resDT[1:min(length(headlinesToken[[1]])+2, .N),]
+  
+  # see for which class the prop is the highest
+  plotDataRaw <- melt(resDTRed, id.vars = c("PartOfSequence", "Words"))
+  plotDataRaw[, Delete := max(value) <= deleteThreshold, by = variable]
+  plotData <- plotDataRaw[Delete == FALSE]
+  # setting the labels NA for all categorys that are not predicted
+  
+  maxProbDT <- plotData[PartOfSequence == max(plotData$PartOfSequence),
+                        .(Max = max(value)), by = variable]
+  maxCategory <- maxProbDT[Max == max(Max)]$variable
+  plotData[variable != maxCategory, Words := NA]
+  plotData[, ModelName := ModelName]
+  
+  return(plotData)
+}
+
+
+
+
+plotSeqInd <- function(plotData1, plotData2,
+                       plotData3 = data.table(), 
+                       plotData4 = data.table()){
+  assertDataTable(plotData1)
+  assertDataTable(plotData2)
+  assertDataTable(plotData3)
+  assertDataTable(plotData4)
+  
+  plotData <- rbind(plotData1, plotData2, plotData3, plotData4)
+  
   ggObj <- ggplot(plotData, aes(x = PartOfSequence,
                                 y = value, color = variable,
                                 label = Words)) +
     geom_line() +
     geom_point() +
+    facet_wrap(~ModelName, ncol = 1) +
     labs(x = "Wörter der Sequenz",
          y = "Modellwahrscheinlichkeit",
          color = "Kategorie: ") +
@@ -927,8 +1132,8 @@ plotLSTMSeq <- function(explainData, index = 1,
           legend.key = element_rect(fill = "lightblue", color = NA),
           legend.position = "top",
           legend.text = element_text(size = 15),
-          legend.title = element_text(size = 18)); ggObj
+          legend.title = element_text(size = 18))
   
   return(ggObj)
+  
 }
-

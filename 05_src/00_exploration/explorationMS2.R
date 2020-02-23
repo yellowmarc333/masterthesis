@@ -1,6 +1,5 @@
 # todos next day
-# fehler bei MLP suchen (30min max)
-# xgboost weiterschreiben
+# xxfehler bei MLP suchen (30min max)
 # plotfunktionen weiterschreiben (CNN, MLP, XG), vlt alle in eine Grafik
 
 

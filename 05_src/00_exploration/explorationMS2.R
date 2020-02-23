@@ -6,8 +6,6 @@
 
 # [last steps]
 # jackys korrektur
-# random forest 0.5 seiten
-# xgboost beschreiben
 # Zusammenfassung von netzteil schreiben
 # Zusammenfassung von wordembeddings schreiben
 # mean_accuracy erklären, probIfCorrect
@@ -18,6 +16,8 @@
 # Einleitung + Zusammenfassung schreiben
 # seitenzahl nur für teil der arbeit anzeigen
 
+# xxrandom forest 0.5 seiten
+# xxxgboost beschreiben
 # xxenglische wörter groß
 # xxsymbolverzeichnis
 # xxeidesstaaatliche erklärung

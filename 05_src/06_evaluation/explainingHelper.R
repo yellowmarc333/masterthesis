@@ -144,8 +144,7 @@ explainMLP <- function(modelPath,
                          testLabelRaw = testLabelRawSub,
                          forward = TRUE)
  
-  return(list(resPerm = resPerm,
-              resRem1 = resRem1,
+  return(list(resRem1 = resRem1,
               resRem2 = resRem2,
               resRem3 = resRem3,
               resRem4 = resRem4,

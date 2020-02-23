@@ -279,35 +279,86 @@ Die Erstellung der Wort-Sequenzen erfolgte in \texttt{R} mit dem Paket \texttt{k
 
 \subsection{Baumbasierte Verfahren}\label{kap:machineLearning}
 
+In diesem Kapitel werden die \textit{Machine-Learning} Modelle \textit{XGBoost} und \textit{Random Forest} erklärt. Für das Verständnis der beiden Verfahren sind Grundkenntnisse über Klassifikations- und Regressionsbäume vorausgesetzt. Für eine Einführung in die Themen sei auf \cite{CART}, Kapitel 2 und 8 verwiesen.
+%todo referenz richtig
+
+
+
 \subsubsection{Extreme Gradient Boosting}\label{kap:XG}
 
-Dieses Unterkapitel gibt eine Einführung in den \textit{XGBoost} Algorithmus und basiert auf \cite{XGBoost}, S.785-794. Die Umsetzung erfolgte mit dem \texttt{R}-Interface \texttt{xgboost} (\cite{XGBoostR}). Für den speziellen Fall der Multiklassifikation entspringen einige Informationen über die Modellierung der Dokumentation und dem Programmiercode des \texttt{R}-Pakets.\\
+Dieses Unterkapitel gibt eine Einführung in den \textit{XGBoost} Algorithmus und basiert auf \cite{XGBoost}, S.785-787. Die Umsetzung erfolgte mit dem \texttt{R}-Interface \texttt{xgboost} (\cite{XGBoostR}). Für den speziellen Fall der Multiklassifikation entspringen einige Informationen über die Modellierung der Dokumentation und dem Programmiercode des \texttt{R}-Pakets.\\
 \\
 Baumbasiertes \textit{Boosting} ist ein weit verbreitetes und äußerst effektives Verfahren im Feld des \textit{Machine-Learning}. Das System \textit{XGBoost} (\textit{eXtreme Gradient Boosting}) erzielt erstklassige Resultate bei \textit{Machine-Learning} Problemen jedweder Art und ist auch in der \textit{Multiclass}-Klassifikation anwendbar. Dabei zeichnet sich \textit{XGBoost} zusätzlich durch die effizientere Nutzung von Rechen-Ressourcen im Vergleich zu bestehenden Verfahren aus. \\
 Für ein \textit{Multiclass}-Klassifikationsproblem mit $C$ Klassen liegt ein Trainingsdatensatz $D = \{(\bm{x}_i, \bm{y}_i) \}$ $(|D| = N, \bm{x_i} \in \mathbb{R}^l, \bm{y}_i \in \{0,1\}^C)$ vor, wobei $N$ die Anzahl Beobachtungen und $l$ die Anzahl der Variablen ist. $\bm{y}_i$ bezeichnet den Vektor der Zielvariablen mit $C$ Einträgen, die an der Stelle der richtigen Kategorie eine $1$ enthält und $0$ sonst. Ein Baum \textit{Ensemble} Modell nutzt $C$ Regressionswälder mit jeweils $K$ Bäumen $f_k^{(c)}, k=1,...,K ;\hspace{0.2cm} c = 1,...,C$. Dabei bezeichnet $\bm{f}_k = \{f_k^{(1)},...,f_k^{(C)}\}$ die Menge der Bäume in der $k$-ten Iteration und $\bm{f}_k(\bm{x}_i) = (f_k^{(1)}(\bm{x}_i),...,f_k^{(C)}(\bm{x}_i))$ das Abbild der Menge der Bäume von $\bm{x}_i$. Die Prognose $\hat{\bm{y}}_i$ berechnet sich durch
-
-\[\hat{\bm{y}}_i = \psi(\bm{x_i}) = \sum_{k=1}^K \bm{f}_k(\bm{x_i}).\]
-
-$\hat{\bm{y}}_i$ entsteht also durch die Komponentenweise Summe der $K$ Abbilder der Bäume.
-
-Der Baum $f_k$ entspring der Menge $\in \mathcal{F} = \{f(\bm{x}) = w_{q(\bm{x})} \}, (q: \mathbb{R}^l \xrightarrow{} T, w \in \mathbb{R}^T)$. $\mathcal{F}$ bezeichnet die Menge der Klassifikations- und Regressionsbäume, $q$ ist die Struktur des Baumes, die jedem Datenpunkt den Endknoten zuweist und $T$ ist die Anzahl der Knoten des Baumes. Jeder einzelne Baum besitzt eine unabhängige Struktur $q$ und Gewichte der Endknoten $w$. Bei Klassifikationsbäumen für eine binäre Klassifikation ordnet jeder Endknoten der Beobachtung $\bm{x}_i$ eine Klasse $\hat{\bm{y}}_i \in \{0,1\}$ zu. In dem Multiklassifikationsfall von \textit{XGBoost} ordnen die Endknoten dem Datenpunkt einen stetigen Wert zu. In jedem der $C$ Wälder Regressionsbäumen gebildet, behandelt der $c$-te Baum das binäre Klassifikationsproblem, ob die Beobachtung der Klasse $C_j$ zugehörig ist oder einer der anderen Klassen.\\
-Die Parameter des Modells werden in einem additiven Trainingsprozess optimiert indem folgende Funktion minimiert wird:
-
-\[\mathcal{L}(\psi) = \sum_{i=1}^N l(\hat{\bm{y}}_i^{(t)}, \bm{y}_i) + \sum_{k=1}^K \Omega(\bm{f_k}), \]\hspace{1cm} mit
-\[\Omega(\bm{f_k}) = \gamma T + \frac{1}{2} \lambda \|w\|^2 \]
+\begin{equation}\label{eq:0}
+    \hat{\bm{y}}_i = \sigma(\psi(\bm{x_i})) = \sigma( \sum_{k=1}^K \bm{f}_k(\bm{x_i})).
+\end{equation}{}
 
 
+Der Vektor der Wahrscheinlichkeiten der $C$ Klassen $\hat{\bm{y}}_i$ berechnet sich also durch die komponentenweise Summe der $K$ Abbilder der Bäume und die anschließende Anwendung der $Softmax$-Aktivierungsfunktion $\sigma$ (in Kapitel \ref{kap:neuralNets} definiert). Durch die Anwendung von $\sigma$ gilt für die Wahrscheinlichkeiten der einzelnen Klassen $\hat{y}^{(1)}, ..., \hat{y}^{(C)} \in [0,1]$ und $\sum_{c=1}^C \hat{y}^{(c)} = 1$.
+
+Jeder Baum $f_k^{(c)}$ in \ref{eq:0} entspringt der Menge $ \mathcal{F} = \{f(\bm{x}) = w_{q(\bm{x})} \}, (q: \mathbb{R}^l \xrightarrow{} \{1,...,T\}, w \in \mathbb{R}^T)$. $\mathcal{F}$ bezeichnet die Menge der Klassifikations- und Regressionsbäume. Folgend bezeichnet $q_k^{(c)}$ ist die Struktur des Baumes des $c$-ten Waldes in der $k$-ten Iteration, die jedem Datenpunkt einen Endknoten zuweist und $T_k^{(c)}$ ist die Anzahl der Knoten des entsprechenden Baumes. Jeder einzelne Baum besitzt eine unabhängige Struktur. $w_{jk}^{(c)}$ ist das Gewicht des $j$-ten Endknotens. Die Gewichte der Endknoten bestimmen den \textit{Score}, die die Datenpunkte erhalten, wenn sie dem Knoten zugeordnet werden. Bei Klassifikationsbäumen für eine binäre Klassifikation ordnet jeder Endknoten der Beobachtung $\bm{x}_i$ eine Klasse $\hat{\bm{y}}_i \in \{0,1\}$ zu. In dem Multiklassifikationsfall von \textit{XGBoost} ordnen die Endknoten dem Datenpunkt einen stetigen Wert zu. In jedem der $C$ Wäldern von Regressionsbäumen behandelt der $c$-te Baum das binäre Klassifikationsproblem, ob die Beobachtung der $c$-ten Klasse $c$ zugehörig ist oder einer der anderen Klassen (vgl. \cite{XGBoostR}).\\
+Die Bäume werden gelernt, indem folgende regularisierte Funktion minimiert wird.
+\begin{equation}\label{eq:1}
+   \mathcal{L}(\psi) = \sum_{i=1}^N l(\hat{\bm{y}}_i^{(k)}, \bm{y}_i) + \sum_{k=1}^K \sum_{c=1}^C \Omega(f_k^{(c)}), \hspace{0.5cm} mit \hspace{0.5cm}
+\Omega(f_k^{(c)}) = \gamma T_k^{(c)} + \frac{1}{2} \lambda \|\bm{w}_k^{(c)}\|^2 . 
+\end{equation}
 
 
-Sei $\hat{\bm{y}}_i^{(t)}$ die Prognose von Datenpunkt $i$ in der $t$-ten Iteration des Waldes. Der Baum $f_t$ wird dann hinzugefügt während 
+Die Verlustfunktion $l$ ist eine differenzierbare konvexe Verlustfunktion. Im Multiklassifikationsfall wird $l = CE$, die \textit{Categorical Cross Entropy} (Kapitel \ref{kap:guetemass}) verwendet. Der Term $\Omega$ bestraft die Komplexität der Bäume. Wird dieser Term auf $0$ gesetzt, so vereinfacht sich \ref{eq:1} zur Zielfunktion des traditionellen Gradienten-\textit{Tree-Boosting}. Der Komplexitätsparameter $\gamma$ bestraft die Anzahl der Knoten der Bäume und $\lambda$ sorgt für eine Glättung der Gewichte. Durch die Einführung dieser Parameter wird Overfitting vorgebeugt (vgl. \cite{XGBoost}, S.786).
+Da die Parameter des Modells als Bäume Funktionen sind, können diese nicht mit traditionellen Optimierungsmethoden gelernt werden und werden deshalb in einem additiven Trainingsprozess optimiert, indem folgende Funktion minimiert wird:
+Sei $\hat{\bm{y}}_i^{(k)}$ die Prognose von Datenpunkt $i$ in der $t$-ten Iteration des Waldes. Die Bäume $f_k^{(1)}, ..., f_k^{(C)}$ werden hinzugefügt indem 
 
-\[\mathcal{L}^{(t)} = \sum_{i = 1}^N l(\bm{y}_i, \hat{\bm{y}}_i^{(t-1)} + f_t(\bm{x}_i)) + \Omega(f_t) \]
+\[\Tilde{\mathcal{L}}^{(k)} = \sum_{i = 1}^N l(\bm{y}_i,\hspace{0.04cm} \sigma (\hat{\bm{y}}_i^{(k-1)} + \bm{f}_k(\bm{x}_i))) + \sum_{c=1}^C \Omega(f_k^{(c)}) \]
 
-minimiert wird. Im Multiklassifikationsfall ist $l = CE$ die \textit{Categorical Cross Entropy} (Kapitel \ref{kap:guetemass}).
+minimiert wird. Es werden also die Bäume hinzugefügt, die das gesamte Modell am meisten im Sinne von \ref{eq:1} verbessern. Die $Softmax$ Funktion $\sigma$ sorgt hierbei dafür, dass die $CE$ berechnet werden kann. Für die Berechnung des Verlustes ist es wichtig, dass die einzelnen Klassenwahrscheinlichkeiten nicht negativ und nicht größer als $1$ sind (siehe Formel der $CE$, Kapitel \ref{kap:guetemass}). Unter Nutzung der Taylorreihenentwicklung zweiter Ordnung der Verlustfunktion ergibt sich 
 
+\begin{equation}\label{eq:2}
+     \Tilde{\mathcal{L}}^{(k)} \approx \sum_{i = 1}^N \Bigl[ l(\bm{y}_i,\hspace{0.04cm} \sigma(\hat{\bm{y}}^{(k-1)} + g_i \cdot \bm{f}_k(\bm{x}_i) + \frac{1}{2}h_i \cdot \bm{f}_k^2(\bm{x}_i)) \Bigr] + \sum_{c=1}^C \Omega(f_k^{(c)}). 
+\end{equation}{}\\
+
+
+Hierbei ist $g_i = \partial_{\hat{\bm{y}}^{(k-1)}} l(\bm{y}_i, \hat{\bm{y}}^{(k-1)})$  und $h_i = \partial_{\hat{\bm{y}}^{(k-1)}}^2 l(\bm{y}_i, \hat{\bm{y}}^{(k-1)})$ die Gradient-Statistiken erster und zweiter Ordnung. Wird nun der konstante Teil der Gleichung \ref{eq:2} entfernt, so vereinfacht sich diese zu
+
+\begin{equation}\label{eq:3}
+     \Tilde{\mathcal{L}}^{(k)} \approx \sum_{i = 1}^N \Bigl[g_i \cdot \bm{f}_k(\bm{x}_i) + \frac{1}{2}h_i \cdot \bm{f}_k^2(\bm{x}_i) \Bigr] + \Omega(f_k). 
+\end{equation}{}
+
+Sei nun $I_j = \{i|q(\bm{x}_i)\} = j$ die Menge der Beobachtungen, die dem $j$-ten Knoten zugeordnet werden. Durch die Aufteilung des Bestrafungsteils $\Omega$ kann Gleichung \ref{eq:3} wie folgt umgeschrieben werden:
+
+\begin{equation}\label{eq:4}
+     \Tilde{\mathcal{L}}^{(k)} \approx \sum_{i = 1}^N \Bigl[g_i \cdot \bm{f}_k(\bm{x}_i) + \frac{1}{2}h_i \cdot \bm{f}_k^2(\bm{x}_i) \Bigr] + \gamma \sum_{c=1}^C T_k^{(c)} + \frac{1}{2} \lambda \sum_{c=1}^C T_k^{(c)} \|\bm{w}_k^{(c)}\|^2. 
+\end{equation}{}
+\begin{equation*}
+     =\sum_{c=1}^C  \sum_{j = 1}^T \Bigl[(\sum_{i \in I_j}g_i) w_{jk}^{(c)} + \frac{1}{2}((\sum_{i \in I_j} h_i + \lambda) (w_{jk}^{(c)})^2 \Bigr] + \gamma T_k^{(c)}
+\end{equation*}{}
+
+Ist $q(\bm{x})$ eine feste Struktur, so können die optimalen Scores des $j$-ten Endknotens $w_j^*$ durch
+
+\[ w_j^* = - \frac{\sum_{i \in I_j}g_i}{\sum_{i \in I_j}h_i + \lambda} \]
+
+berechnet werden und die optimale Struktur dann durch die Minimierung von 
+
+\begin{equation}\label{eq:5}
+    \Tilde{\mathcal{L}}^{(k)}(q) = -\frac{1}{2} \frac{(\sum_{i \in I_j}g_i)^2}{\sum_{i \in I_j}h_i + \lambda} + \gamma T. 
+\end{equation}{} 
+ berechnet. Gleichung \ref{eq:5} ist ein Qualitätsmaß für die Struktur $q$ eines Baums, wobei dieses für viele Verlustfunktionen $l$ berechnet werden kann.
+ Da in der Praxis die Evaluation aller möglichen Baumstrukturen $q$ zu aufwändig ist, wird ein gieriger Algorithmus genutzt, der beginnend von dem Startknoten aus dem Baum nach und nach Splits hinzufügt. Seien $I_L$ und $I_R$ die Mengen der Beobachtungen im linken und rechten Kindknoten nach dem Split und $I = I_L \cup I_R$ die Menge der Beobachtungen vor dem Split. Die Reduktion des Verlustes nach dem Split wird berechnet durch
+ 
+ \begin{equation}\label{eq:6}
+    \mathcal{L}_{Split} = \frac{1}{2} \Bigl[ \frac{(\sum_{i \in I_L}g_i)^2}{\sum_{i \in I_L}h_i + \lambda} + \frac{(\sum_{i \in I_R}g_i)^2}{\sum_{i \in I_R}h_i + \lambda} - \frac{(\sum_{i \in I}g_i)^2}{\sum_{i \in I}h_i + \lambda} \Bigr] - \gamma . 
+\end{equation}{} 
+
+Anhand der Gleichung \ref{eq:6} werden die Kandidaten für die Splits evaluiert. Die Variablenwichtigkeit einer Variable eines \textit{XGBoost} Modells kann ebenfalls über \ref{eq:6} berechnet werden. Der sogenannte \textit{Gain} der Variable wird berechnet, indem für alle Splits im Wald, die diese Variable verwenden, die Reduktion des Verlustes summiert wird. Je höher der \textit{Gain}, desto höher der Beitrag, den diese Variable zum Modell beiträgt (\cite{XGBoostR}). Für weitere Informationen über den \textit{XGBoost} Algorithmus sei auf \cite{XGBoost}, S.787ff verwiesen.
 
 
 \subsubsection{Random Forest}\label{kap:RF}
+
+Die Implementierung im Programmiercode erfolgte in \texttt{R} mit dem Paket \texttt{ranger} (\cite{ranger}).\\
+
+\textit{Random Forest} ist ein baumbasiertes Klassifikationsverfahren, das viele einzelne schwache Klassifikatoren zu einem starken Klassifikator vereint. Dabei sind die einzelnen Lerner Klassifikationsbäume, welche alle separat das gleiche Klassifikationsproblem behandeln. Eine der möglichen Konstruktionen des Waldes ist die Nutzung von \textit{Bagging}. Dabei steht jedem der $B$ Bäume nur eine Teilmenge der Datenpunkte zum Training zur Verfügung, die als Zufallsstichprobe ohne Zurücklegen gezogen wird. Zudem können die Variablen, die zur Wahl eines Splits zur Verfügung stehen, ebenfalls als Stichprobe aus der Menge aller Variablen gezogen. Durch die zufällige Selektion von Beobachtungen und Variablen zum Training, stehen jedem der $B$ Bäume andere Informationen zur Verfügung. Bei der Klassifikation von neuen Beobachtungen aus dem Testdatensatz wird jede Beobachtung von allen $B$ Bäumen klassifiziert. Die prognostizierte Klasse des \textit{Random Forest} ist dann die Klasse, die von den meisten der $B$ Bäume zugeordnet wird. Durch die Mehrheitsentscheidung wird unter anderem Overfitting vermieden und eine hohe Anzahl von Bäumen ist von Vorteil (vgl. \cite{RF}, S.1f). 
+
+
 
 \subsection{Neuronale Netze} \label{kap:neuralNets}
 

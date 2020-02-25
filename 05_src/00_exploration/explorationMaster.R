@@ -301,3 +301,11 @@ tokens <- quanteda::tokens(texts, what = "word", remove_numbers = FALSE,
 tokens <- as.list(tokens)
 
 print(tokens[58])
+
+
+# Stopwords export
+SW <- stopwords(language = "en")
+SWmatrix <- matrix(SW, ncol = 7, byrow = TRUE)
+print(xtable(SWmatrix, include.rownames = FALSE))
+
+

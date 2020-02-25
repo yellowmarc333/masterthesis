@@ -15,6 +15,7 @@
 \newcommand\middletiny{\@setfontsize\notsotiny{6}{6}}
 \makeatother
 
+\usepackage{float}
 \usepackage{listofsymbols}
 \usepackage[utf8]{inputenc}
 \usepackage{csquotes}
@@ -103,7 +104,7 @@ Beispiel & Kategorie \textit{parents}  & Kategorie \textit{parenting} \\
 \end{center}
 \end{table}
 
-Anhand der Beispiele wird deutlich, dass es schwierig ist, diese mit menschlicher Intuition eine der beiden Kategorien eindeutig zuzuordnen. Als zusätzlicher Indikator, der für die Verschmelzung zweier Kategorien spricht, erfolgte die Betrachtung der relativen Schnittmenge der gemeinsamen häufigsten Wörter. Die häufigsten Wörter pro Kategorie werden ermittelt, indem die kompletten Daten auf die entsprechende Kategorie gefiltert werden. Anschließend werden Symbole und \textit{Stopwords} (Wörter wie \say{he}, \say{is} oder \say{through}, die komplette Liste ist im Anhang unter (todo:referenzieren) zu finden) entfernt und die Wörter nach der gesamten Anzahl ihres Auftretens sortiert. Tabelle \ref{tab:categoryMerge} zeigt die relative Schnittmenge der $100$ häufigsten Wörter für ausgewählte Paare an Kategorien.
+Anhand der Beispiele wird deutlich, dass es schwierig ist, diese mit menschlicher Intuition eine der beiden Kategorien eindeutig zuzuordnen. Als zusätzlicher Indikator, der für die Verschmelzung zweier Kategorien spricht, erfolgte die Betrachtung der relativen Schnittmenge der gemeinsamen häufigsten Wörter. Die häufigsten Wörter pro Kategorie werden ermittelt, indem die kompletten Daten auf die entsprechende Kategorie gefiltert werden. Anschließend werden Symbole und \textit{Stopwords} (Wörter wie \say{he}, \say{is} oder \say{through}, die komplette Liste ist in Tabelle \ref{appendix:Stopwords} im Anhang zu finden) entfernt und die Wörter nach der gesamten Anzahl ihres Auftretens sortiert. Tabelle \ref{tab:categoryMerge} zeigt die relative Schnittmenge der $100$ häufigsten Wörter für einen Ausschnitt der Paare an Kategorien.
 
 \begin{table}[ht]
 \begin{center}
@@ -132,17 +133,17 @@ Kategorie 1 & Kategorie 2  & relative Schnittmenge & neue Kategorie\\
   \multicolumn{2}{|c|}{Mittelwert} &  0.24 & \\
    \hline
 \end{tabular}
-\caption{Relative Schittmenge der $100$ häufigsten Wörter für Paare an Kategorien}
+\caption{Relative Schittmenge der $100$ häufigsten Wörter für ausgewählte Paare an Kategorien, absteigend geordnet nach der relativen Schnittmenge.}
 \label{tab:categoryMerge}
 \end{center}
 \end{table}
 
 Die ersten $10$ Zeilen von Tabelle \ref{tab:categoryMerge} beinhalten Kategorien, die eine relative Schnittmenge der gemeinsamen Wörter von $0.50$ oder höher haben. In den letzten beiden Zeilen ist zu sehen, dass inhaltlich verschiedene Kategorien eine vergleichbar geringe Schnittmenge an häufigsten Wörtern haben. Im Mittel hat ein Paar an Kategorien eine gemeinsame Schnittmenge von $0.24$. Dieser Wert wirkt hoch, da \textit{Stopwords} und Sonderzeichen bereits entfernt wurden.
-Die Grenze, ab der $2$ Kategorien zusammengelegt werden, wird bei einer Überschneidung von $50$ Prozent angesiedelt. Es werden dennoch $2$ Ausnahmen gebildet. \textit{parents} und \textit{fifty} werden nicht zusammengelegt, da \textit{fifty} sowohl von \textit{parents} und \textit{parenting} mit menschlicher Intuition unterscheidbar ist (siehe todo: referenzieren). Als andere Ausnahme wird das Paar \textit{arts \& culture} und \textit{arts} mit einer Überschneidung von $0.46$ zusammengelegt, da bereits \textit{arts} und \textit{culture \& arts} fusioniert wurden.\\
+Die Grenze, ab der $2$ Kategorien zusammengelegt werden, wird bei einer Überschneidung von $50$ Prozent angesiedelt. Es werden dennoch $2$ Ausnahmen gebildet. \textit{parents} und \textit{fifty} werden nicht zusammengelegt. Außerdem wird das Paar \textit{arts \& culture} und \textit{arts} mit einer Überschneidung von $0.46$ zusammengelegt, da bereits \textit{arts} und \textit{culture \& arts} mit einer Überschneidung von $0.60$ fusioniert wurden.\\
 Mit den Argumenten der menschlichen Intuition und der Ergebnisse aus Tabelle \ref{tab:categoryMerge} wurden in folgenden Fällen die Kategorien zusammengelegt:
-Die Kategorien \textit{healthy living} und \textit{wellness} wurden zu \textit{wellness \& healthy living}; \textit{parents} und \textit{parenting}  zu \textit{parents}; \textit{taste} und \textit{food \& drink} zu \textit{food, drink \&taste}; \textit{arts}, \textit{culture \& arts} und \textit{arts \& culture} zu \textit{arts \& culture}; \textit{the worldpost}, \textit{worldpost} und \textit{world news} zu \textit{world news}; \textit{style} und \textit{style \& beauty} zu \textit{style \& beauty};  sowie \textit{green} und \textit{environment} zu \textit{green \& environment}. Beispiele analog zu Tabelle \ref{tab:parentsMerge} für die anderen zusammengelegten Kategorien finden sich im Anhang (todo verlinken, auflisten). Die $41$ Kategorien wurden somit auf $32$ Kategorien reduziert, welche inhaltlich mit menschlicher Intuition unterscheidbar sind. Nach den Modifikationen folgt im nächsten Abschnitt eine Exploration des Datensatzes.
+Die Kategorien \textit{healthy living} und \textit{wellness} wurden zu \textit{wellness \& healthy living}; \textit{parents} und \textit{parenting}  zu \textit{parents}; \textit{taste} und \textit{food \& drink} zu \textit{food, drink \&taste}; \textit{arts}, \textit{culture \& arts} und \textit{arts \& culture} zu \textit{arts \& culture}; \textit{the worldpost}, \textit{worldpost} und \textit{world news} zu \textit{world news}; \textit{style} und \textit{style \& beauty} zu \textit{style \& beauty};  sowie \textit{green} und \textit{environment} zu \textit{green \& environment}. Die $41$ Kategorien wurden somit auf $32$ Kategorien reduziert, welche inhaltlich mit menschlicher Intuition unterscheidbar sind. Nach den Modifikationen folgt im nächsten Abschnitt eine Exploration des Datensatzes.
 
-\subsection{Exploration des bereinigten Datensatzes}
+\subsection{Exploration des bereinigten Datensatzes}\label{kap:exploration}
 
 Von großem Interesse ist die Verteilung der Nachrichtensparten im kompletten bereinigten Datensatz.
 Abbildung \ref{abb:barplotCategories} zeigt die absoluten Anzahlen der Datenpunkte pro Nachrichtenkategorie. 
@@ -174,7 +175,7 @@ Ein Wert von beispielsweise $0.15$ für eine bestimmte Nachrichtensparte in der 
 \caption{\textit{Wordcloud} für die häufigsten 100 Wörter aller Kategorien}
 \label{abb:WordcloudAll}
 \end{figure}
-todo: grafik gescheit ausfüllen
+
 
 Je größer ein Wort, desto häufiger kommt es insgesamt im Textkorpus vor. Es ist erstaunlich, dass \say{trump} sich über den gesamten Textkorpus als häufigstes Wort etabliert hat, in Anbetracht dessen, dass sich der Zeitraum der Daten auf über $6$ Jahre erstreckt. Die $3$ häufigsten Wörter danach sind \say{photos}, \say{new} und \say{video}. Das überraschend sehr häufige Vorkommen der Wörter \say{photos} und \say{video} könnte ein Indiz dafür sein, dass in einigen Schlagzeilen bereits die Quelle des Medienmaterials angegeben ist, das im Artikel erscheint. Es ist zu sehen, dass viele Namen und Begriffe aus der Politik zu sehen sind, was einleuchtend ist, da \textit{politics} die größte Sparte darstellt. 
 Auffallend ist außerdem, dass viele der auftauchenden Begriffe identisch oder fast identisch zu den Namen einiger Kategorien sind. Beispiele dafür sind \say{travel}, \say{wedding}, \say{style} oder \say{parents}. In Abbildung \ref{abb:WordcloudWellness} ist eine weitere \textit{Wordcloud} der zweitgrößten Sparte \textit{wellness \& healthy living} zu sehen.
@@ -195,25 +196,25 @@ Nachdem nun der Datensatz ausführlich exploriert wurde, folgt im nächsten Unte
 Für die Onlinezeitung \textit{Huffpost} kann es von Interesse sein, die Nachrichtensparte eines Artikels unter Vorlage der Schlagzeile automatisch zu kategorisieren. Neben der Kosten- und Zeiteinsparung würden so würden Fehleinschätzungen von Autoren in Form von unpassenden Kategorien vermieden werden.\\
 In dieser Thesis wird demnach ein \textit{Multiclass}-Klassifikations\-problem behandelt. Dabei ist die Zielvariable die Nachrichtenkategorie. Diese enthält $32$ Klassen und liegt als Text in kategorieller Form vor. Die in die Modellierung eingehende unabhängige Variable ist die Schlagzeile, welche als numerischer Vektor mit einer der Methoden aus Kapitel \ref{kap:3.1Wordemb} repräsentiert wird. In dieser Problemstellung ist jede Beobachtung genau einer Klasse zugehörig. 
 
-Ziel dieser Arbeit ist es, im Rahmen dieses Klassifikationsproblems verschiedene Algorithmen auf verschiedenen Arten der Repräsentation der Wörter miteinander zu vergleichen. 
+Ziel dieser Arbeit ist es, im Rahmen dieses Klassifikationsproblems verschiedene \textit{Machine-Learning}-Algorithmen auf verschiedenen Arten der Repräsentation der Wörter miteinander zu vergleichen. 
 
-Sei $\bm{x}_i$ die Repräsentation der $i$-ten Beobachtung als Vektor und $y_i \in \{c_1, ..., c_{32} \}$ die zugehörige Klasse. Die Klassen $\{c_1, ..., c_{32} \}$ können als natürliche Zahlen $\{1, ..., 32 \}$ dargestellt werden.
-%(todo checken)
-%, oder als Vektoren $\bm{c}_j \in \mathbb{R}^{32}, j %\in \{1,...,32\}$, wobei sie an der $j$-ten Stelle %eine $1$ enthalten und $0$ sonst.
+Sei $\bm{x}_i$ die Repräsentation der $i$-ten Beobachtung als Vektor (oder Matrix bei der Repräsentation durch \textit{GloVe}, siehe Kapitel \ref{Kap:Glove}) und $y_i \in \{c_1, ..., c_{32} \}$ die zugehörige Klasse. Die Klassen $\{c_1, ..., c_{32} \}$ können als natürliche Zahlen $\{1, ..., 32 \}$ dargestellt werden.
 
 
 Für die Vorhersagen $f(\bm{x}_i)$ der trainierten Modelle gilt dann, dass
 \begin{center}
-$f(\bm{x}_i) = \bm{p}_i = (p(c_1), ...., p(c_{32}))_i$, \hspace{2cm} mit $\sum\limits_{i = 1}^{32} p(c_i) = 1 $,
+$f(\bm{x}_i) = \bm{p}_i = (p(c_1), ...., p(c_{32}))_i$, \hspace{2cm} mit $\sum\limits_{j = 1}^{32} p(c_j) = 1 $,
 \end{center}
-dabei sind $p(c_j)$, $j = 1,...,32$ die modellierten Wahrscheinlichkeiten der Zugehörigkeit der Beobachtung $\bm{x_i}$ zur Klasse $c_j$, die in Summe $1$ ergeben müssen. Die eindeutige prognostizierte Klasse $\hat{y}_i$ wird dann zugeordnet durch 
+dabei sind $p(c_j)$, $j = 1,...,32$ die modellierten Wahrscheinlichkeiten der Zugehörigkeit der Beobachtung $\bm{x_i}$ zur Klasse $c_j$, die in Summe $1$ ergeben müssen. Die eindeutige prognostizierte Klasse $\hat{y}$ wird dann zugeordnet durch 
 \begin{center}
-    $\hat{y_i} =  \underset{c_1,...,c_{32}}{argmax}$ $p(c_j)$.
+    $\hat{y} =  \underset{c_1,...,c_{32}}{argmax}$ $p(c_j)$.
 \end{center}
 
-Zur Messung der Performance der Modelle erfolgt anhand der Gütemaße aus Kapitel \ref{kap:guetemass} ein Vergleich. Dabei ist nicht nur von Interesse, wie gut die Modelle insgesamt abschneiden, sondern auch ob manche Modelle bestimmte Kategorien trennschärfer identifizieren können und welche Gründe es dafür gibt. Des Weiteren soll analysiert werden, in welche Nachbarklassen die Beobachtungen bei einer Fehlklassifikation eingeordnet werden und ob diese inhaltlich nahe an der richtigen Kategorie sind. Eine weitere Untersuchungsfrage für die Modellgüte ist, inwiefern die Repräsentation der Wörter ausschlaggebend ist und welches Gewicht der verwendete Algorithmus dabei einnimmt.
-Nun sollen im nächsten Abschnitt die statistischen Methoden beschrieben werden.
-(todo: diesen Abschnitt im Laufe der Arbeit ergänzen)
+Zur Messung der Performance der Modelle erfolgt anhand der Gütemaße aus Kapitel \ref{kap:guetemass} ein Vergleich. 
+Es werden Kombinationen aus Repräsentationen der Wörter und verschiedenen Algorithmen im Rahmen einer Vorauswahl getestet. Dabei wird untersucht, welche Repräsentationen der Wörter generell gute Ergebnisse liefern und welche Modelle die bereitgestellte Information am besten nutzen können. Nach der Auswertung der Vorauswahl wird diese auf eine Endauswahl der besten Kombinationen reduziert, auf der alle weiteren Analysen stattfinden.\\
+Für diese Endauswahl findet anschließend eine ausführlichere Evaluation statt. Dabei ist nicht nur von Interesse, wie gut die Modelle anhand bestimmter Gütemaße generell abschneiden, sondern auch, ob manche Modelle bestimmte Kategorien trennschärfer identifizieren können. Des Weiteren stellt sich die Frage, in welche Nachbarklassen die Beobachtungen bei einer Fehlklassifikation eingeordnet werden und welche Kategorien die zweit-wahrscheinlichsten sind. Darüber hinaus wird eine Simulation Auskunft darüber geben, wie die Modifikation der Schlagzeilen sich auf die Vorhersagequalität auswirkt. Zuletzt ist es von Interesse, wie die Algorithmen aus den Daten lernen. Dazu wird das Verhalten der Modelle explorativ anhand von $2$ individuellen Schlagzeilen analysiert und erklärt.\\
+Im nächsten Abschnitt folgt die Beschreibung der in dieser Arbeit verwendeten statistischen Methoden.
+
 
 \newpage
 

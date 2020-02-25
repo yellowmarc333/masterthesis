@@ -5,7 +5,6 @@
 
 # [last steps]
 # Ditschi seine korrektur
-# Zielstellung updaten
 # jackys korrektur
 # Zusammenfassung von netzteil schreiben
 # Zusammenfassung von wordembeddings schreiben
@@ -17,6 +16,10 @@
 # Einleitung schreiben
 # Zusammenfassung schreiben
 # seitenzahl nur für teil der arbeit anzeigen
+
+
+# xxZielstellung updaten
+# xxAnhang erstellen
 
 
 # [MA korrigeiren (sachen zum achten):]

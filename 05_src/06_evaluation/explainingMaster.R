@@ -18,6 +18,25 @@ res$res[GloveArray300_LSTMArray == TestLabel &
           GloveArray300_CNNArray != TestLabel &
           GloveSums300_MLP != TestLabel &
           BOW_XG != TestLabel, .N]   # 547
+# wie viele Beobachtungen werden vom CNN richtig erkannt und von anderen nicht?
+res$res[GloveArray300_CNNArray == TestLabel &
+          GloveArray300_LSTMArray != TestLabel &
+          GloveSums300_MLP != TestLabel &
+          BOW_XG != TestLabel, .N]   # 
+
+# wie viele Beobachtungen werden vom XG richtig erkannt und von anderen nicht?
+res$res[BOW_XG == TestLabel &
+          GloveArray300_LSTMArray != TestLabel &
+          GloveSums300_MLP != TestLabel &
+          GloveArray300_CNNArray != TestLabel, .N]   # 
+# wie viele Beobachtungen werden vom MLP richtig erkannt und von anderen nicht?
+res$res[GloveSums300_MLP == TestLabel &
+          GloveArray300_LSTMArray != TestLabel &
+          GloveArray300_CNNArray != TestLabel &
+          BOW_XG != TestLabel, .N]   # 
+
+
+
 
 # analyse individual models to changes ####
 try(resXG <- explainXGBoost(modelPath = "03_computedData/05_modelData/OnlyModelSave/xgb.RDS",
@@ -59,8 +78,8 @@ res <- readRDS("03_computedData/06_evaluatedData/explainIndividual.RDS")
 
 outPath <- "03_computedData/06_evaluatedData/IndividualPrettier/"
 
-for(i in c(13)) {
-  i <- 13
+for(i in c(28)) {
+  i <- 28
   ggIndProbs <- plotIndividualProbs(explainData = res, index = i)
   ggsave(filename = paste0(outPath, "ggIndProbs", i, ".pdf"),
          plot = ggIndProbs, width = fullWidth, height = fullHeight, 

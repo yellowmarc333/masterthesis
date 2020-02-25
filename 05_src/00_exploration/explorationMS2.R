@@ -1,14 +1,11 @@
 # todos next day
 # wurde beschrieben, dass im CNN die Reihenfolge verloren geht?
-# vergleich, wie viele von CNN korrekt aber nur von CNN korrekt? etc.
-
 
 ################################################################################
 
 # [last steps]
 # Ditschi seine korrektur
 # Zielstellung updaten
-# individual teil runterschreiben
 # jackys korrektur
 # Zusammenfassung von netzteil schreiben
 # Zusammenfassung von wordembeddings schreiben
@@ -17,9 +14,39 @@
 # alle Zitate checken ob klammern richtig gesetzt sind, oder et al steht
 # groll+ matze cnn korrigieren
 # alex seine korrektur
-# Einleitung + Zusammenfassung schreiben
+# Einleitung schreiben
+# Zusammenfassung schreiben
 # seitenzahl nur für teil der arbeit anzeigen
 
+
+# [MA korrigeiren (sachen zum achten):]
+# -englische Wörter groß
+# - numprint für hohe zahlen
+# - umgspr vermeiden
+#- dieser Abschnitt soll -> dieser Abschnitt gibt
+#- captions nicht alles in textit
+#- label under caption
+#- hurenkinder
+# wording: modelle statt algorithmen
+
+
+# MIT zitat: groll hinweisen auf andere version
+# gradientenabstieg erklären anhand anderer Quelle? MIT S.151ff, 294.
+# vanishing gradient problem erklären
+# convolution mathematisch überhaupt nötig zu definieren?
+
+
+# [hats nicht mehr in die auswertung geschafft]
+# variablenwichtigkeit bei xgboost als wordcloud plotten, dalex und sonstiges
+# BOW/TFIDF - RF XGBoost: variablenwichtigkeit in Wordcloud
+# BOW/TFIDF - XGBoost: Dalex für einzelne Beobachtungen
+# SOW Glove - überlegen
+# Glove - CNN - filter aus dem ersten Layer über Tupel aus Wort-Vektoren laufen lassen
+#        die 2 maximalen Einträge auflisten für zb 50 filter
+# exploration function for word vectors (relate to wordclouds)
+# achors, lime checken
+
+# xxindividual teil runterschreiben
 # xxalex email beantworten
 # xxalternate teil runterschreiben
 # xxrandom forest 0.5 seiten
@@ -27,39 +54,7 @@
 # xxenglische wörter groß
 # xxsymbolverzeichnis
 # xxeidesstaaatliche erklärung
-
-# [analyse der modelle]
-# BOW/TFIDF - RF XGBoost: variablenwichtigkeit in Wordcloud
-# BOW/TFIDF - XGBoost: Dalex für einzelne Beobachtungen
-# SOW Glove - überlegen
-# Glove - CNN - filter aus dem ersten Layer über Tupel aus Wort-Vektoren laufen lassen
-#        die 2 maximalen Einträge auflisten für zb 50 filter
-# Glove - LSTM: beobachtungen nehmen die von anderen Falsch klassifiziert worden sind
-#               aber von LSTM richtig. 
-#               exchange words and see what happens, if the prediction gets into nearest
-# exploration function for word vectors (relate to wordclouds)
-# achors, lime checken
-
-
-# [next steps: runterschreiben]
-# MIT zitat: seitenanzahl checken bzw groll hinweisen
-# gradientenabstieg erklären anhand anderer Quelle? MIT S.151ff, 294.
-
-
-# vanishing gradient problem erklären
-# wording: modelle statt algorithmen
-# matze diskutieren, macht bidirectional überhaupt sinn?
-# convolution mathematisch überhaupt nötig zu definieren?
-
-# [MA korrigeiren (sachen zum achten):]
-# -englische Wörter groß
-# - numprint für hohe zahlen
-# -aus jeder korrektur die Sachen rauspicken, auf die ich achten muss
-# - umgspr vermeiden
-#- dieser Abschnitt soll -> dieser Abschnitt gibt
-#- captions nicht alles in textit
-#- label under caption
-#
+# xxvergleich, wie viele von CNN korrekt aber nur von CNN korrekt? etc.
 # xxplotIndSeq keine 7.5 x-achsenbeschriftung
 # xxim letzten plot nur die categorien auswählen, die eine der Modelle pickt?
 # xxfehler bei MLP suchen (30min max)

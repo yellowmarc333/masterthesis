@@ -598,7 +598,7 @@ modifySOWRem <- function(newData, model,
     removeInd <- removeIndexes[i, ]
     newDataModif <- newData
     # an stelle removeInd alles auf 0 setzen
-    #newDataModif[, removeInd, ] <- rep(0, dims[3])
+    newDataModif[, removeInd, ] <- rep(0, dims[3])
     
     SOWMatrix <- matrix(numeric(dims[3]*dims[1]), nrow = dims[1])
     for(z in seq_len(dims[1])) {
@@ -803,6 +803,7 @@ plotIndividualProbs <- function(explainData, index = 1) {
   res[, Kategorie := names(resTmp$predictProb)]
   
   plotData <- melt(res, id.vars = "Kategorie")
+
   ggObj <- ggplot(plotData, aes(x = Kategorie,
                                 y = value, fill = variable)) +
     geom_bar(stat = "identity", position = "dodge") + 
@@ -813,10 +814,12 @@ plotIndividualProbs <- function(explainData, index = 1) {
                          labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
                                     "GloVe 300D, Bi-LSTM", 
                                     "SOW GloVe 300D, MLP")) +
-    geom_text(aes(label = round(value, 3)), 
-              position = position_dodge(width = 0.9),
-              vjust = 0.5, hjust = 1.2,
-              angle = 90, size = 2.4) +
+    # geom_text(aes(label = round(value, 3)), 
+    #           position = position_dodge(width = 0.9),
+    #           vjust = 0.25, hjust = -0.2,
+    #           angle = 90, size = 2.4) +
+    scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1),
+                       labels = waiver()) +
     theme(axis.text.x  = element_text(angle = 45,
                                       vjust = 1, hjust = 1,
                                       size = 14),
@@ -829,7 +832,7 @@ plotIndividualProbs <- function(explainData, index = 1) {
           legend.text = element_text(size = 15),
           legend.title = element_text(size = 18),
           panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank()) 
+          panel.grid.minor = element_blank()) ;ggObj
   
   return(ggObj)
 }
@@ -901,7 +904,7 @@ calcPD_LSTMCNN <- function(explainData, index = 1,
   # see for which class the prop is the highest
   plotDataRaw <- melt(resDTRed, id.vars = c("PartOfSequence", "Words"))
   plotDataRaw[, Delete := max(value) <= deleteThreshold, by = variable]
-  plotData <- plotDataRaw[Delete == FALSE]
+  plotData <- plotDataRaw #[Delete == FALSE]
   # setting the labels NA for all categorys that are not predicted
   maxProbDT <- plotData[PartOfSequence == max(plotData$PartOfSequence),
                         .(Max = max(value)), by = variable]
@@ -981,7 +984,7 @@ calcPD_MLP <- function(explainData, index = 1,
   # see for which class the prop is the highest
   plotDataRaw <- melt(resDTRed, id.vars = c("PartOfSequence", "Words"))
   plotDataRaw[, Delete := max(value) <= deleteThreshold, by = variable]
-  plotData <- plotDataRaw[Delete == FALSE]
+  plotData <- plotDataRaw #[Delete == FALSE]
   # setting the labels NA for all categorys that are not predicted
   maxProbDT <- plotData[PartOfSequence == max(plotData$PartOfSequence),
                         .(Max = max(value)), by = variable]
@@ -1084,7 +1087,7 @@ calcPD_XG <- function(explainData, index = 1,
   # see for which class the prop is the highest
   plotDataRaw <- melt(resDTRed, id.vars = c("PartOfSequence", "Words"))
   plotDataRaw[, Delete := max(value) <= deleteThreshold, by = variable]
-  plotData <- plotDataRaw[Delete == FALSE]
+  plotData <- plotDataRaw #[Delete == FALSE]
   # setting the labels NA for all categorys that are not predicted
   
   maxProbDT <- plotData[PartOfSequence == max(plotData$PartOfSequence),
@@ -1108,6 +1111,25 @@ plotSeqInd <- function(plotData1, plotData2,
   assertDataTable(plotData4)
   
   plotData <- rbind(plotData1, plotData2, plotData3, plotData4)
+  helpDT <- plotData[, .(MaxSeq = max(PartOfSequence)), by = ModelName]
+  CatToStay1 <- plotData[ModelName == helpDT$ModelName[1] &
+                           PartOfSequence == helpDT$MaxSeq[1],
+                         ][value == max(value)]$variable
+  CatToStay2 <- plotData[ModelName == helpDT$ModelName[2] &
+                           PartOfSequence == helpDT$MaxSeq[2],
+                         ][value == max(value)]$variable
+  CatToStay3 <- plotData[ModelName == helpDT$ModelName[3] &
+                           PartOfSequence == helpDT$MaxSeq[3],
+                         ][value == max(value)]$variable
+  CatToStay4 <- plotData[ModelName == helpDT$ModelName[4] &
+                           PartOfSequence == helpDT$MaxSeq[4],
+                         ][value == max(value)]$variable
+  CategoriesToStay <- c(as.character(CatToStay1),
+                        as.character(CatToStay2),
+                        as.character(CatToStay3),
+                        as.character(CatToStay4))
+  plotData <- plotData[variable %in% CategoriesToStay]
+  maxSeqLength <- max(plotData$PartOfSequence)
   
   ggObj <- ggplot(plotData, aes(x = PartOfSequence,
                                 y = value, color = variable,
@@ -1118,11 +1140,15 @@ plotSeqInd <- function(plotData1, plotData2,
     labs(x = "Wörter der Sequenz",
          y = "Modellwahrscheinlichkeit",
          color = "Kategorie: ") +
-    # geom_text_repel(nudge_x = 0, nudge_y = 0, segment.size = 0.5,
-    #                 segment.alpha = 0.5, point.padding = 0.5,
-    #                 box.padding = 1, size = 5) +
-    geom_label(nudge_x = 0, nudge_y = 0.03, size = 5, alpha = 0.5,
-               label.padding = unit(0.15, "lines"), na.rm = TRUE) +
+    scale_x_continuous(breaks = 1:maxSeqLength, labels = waiver()) +
+    scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1),
+                       labels = waiver()) +
+    geom_label_repel(segment.size = 1, direction = "y",
+                    segment.alpha = 0.5, label.size = 0.25,
+                    box.padding = 0.25, size = 4, na.rm = TRUE) +
+    # geom_label(nudge_x = 0, #nudge_y = 0.03, size = 5, 
+    #            alpha = 0.5,
+    #            label.padding = unit(0.15, "lines"), na.rm = TRUE) +
     guides(fill = guide_legend(nrow = 3, byrow = TRUE)) +
     theme(axis.text.x  = element_text(size = 14),
           axis.text.y = element_text(size = 15),
@@ -1132,8 +1158,67 @@ plotSeqInd <- function(plotData1, plotData2,
           legend.key = element_rect(fill = "lightblue", color = NA),
           legend.position = "top",
           legend.text = element_text(size = 15),
-          legend.title = element_text(size = 18))
+          legend.title = element_text(size = 18)); ggObj
   
   return(ggObj)
   
 }
+
+
+plotSeqSimulation <- function(res1, res2, res3, res4) {
+  assertList(res1)
+  assertList(res2)
+  assertList(res3)
+  assertList(res4)
+  
+  XGSeq <- res1$resSeq$accuracy[-27]
+  CNNSeq <- res2$resSeqForward$accuracy[-1]
+  LSTMSeq <- res3$resSeqForward$accuracy[-1]
+  MLPSeq <- c(res4$resSeq$accuracy[-c(25,26)], 1, 1)
+  
+  dt <- data.table(XGBoost = XGSeq,
+                   CNN = CNNSeq,
+                   LSTM = LSTMSeq,
+                   MLP = MLPSeq)
+  dt[, PartOfSequence := 1:.N]
+  dtRed <- dt[PartOfSequence <= 15]
+
+  plotData <- melt(dtRed, id.vars = "PartOfSequence",
+                   variable.name = "ModellName")
+  
+  ggObj <- ggplot(plotData, aes(x = PartOfSequence,
+                                 y = value,
+                                 color = ModellName,
+                                 shape = ModellName)) +
+    geom_point() +
+    geom_line() +
+    labs(x = "Teile der Sequenz der Wörter",
+         y = "Durchschnittliche Accuracy") +
+    scale_color_discrete(name = "Embedding, Modell", 
+                         labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
+                                    "GloVe 300D, Bi-LSTM", 
+                                    "SOW GloVe 300D, MLP")) +
+    scale_shape_discrete(name = "Embedding, Modell", 
+                         labels = c("BOW, XGBoost","GloVe 300D, CNN" ,
+                                    "GloVe 300D, Bi-LSTM", 
+                                    "SOW GloVe 300D, MLP")) +
+    theme(axis.text.x  = element_text(size = 14),
+          axis.text.y = element_text(size = 15),
+          axis.title = element_text(size = 28),
+          axis.ticks.x = element_line(linetype = "solid"),
+          legend.background = element_rect(fill = "lightgrey", size = 6),
+          legend.key = element_rect(fill = "white",
+                                    color = NA, size = 8),
+          legend.position = "top",
+          legend.text = element_text(size = 17),
+          legend.title = element_text(size = 19),
+          panel.grid.major = element_line(), 
+          panel.grid.minor = element_line()) ; ggObj
+  
+  return(ggObj)
+  
+}
+
+
+
+

@@ -15,6 +15,7 @@
 \usepackage{numprint}
 \npthousandsep{\,}
 
+\usepackage{float}
 \usepackage[utf8]{inputenc}
 \usepackage{csquotes}
 \usepackage{array}
@@ -210,7 +211,117 @@ Der letzte zu untersuchende Aspekt ist analog zu dem vorherigen, nur dass diesma
 
 Die Punkte auf der Diagonalen der Grafik bedeuten inhaltlich, dass die häufigste zweite Wahl die richtige Kategorie ist. Bis auf wenige Ausnahmen wählen alle Modelle für alle wahren Kategorien die richtige Sparte als zweite Wahl. Die Anteil der Datenpunkte, für die das zutrifft, schwanken zwischen $40$ und $60$ Prozent. \textit{XGBoost} ordnet in $11$ wahren Kategorien die meisten Beobachtungen \textit{politics} als zweit-wahrscheinlichste Klasse zu. Für die wahre Kategorie \textit{college} erkennt nur das \textit{Bi-LSTM} am häufigsten die richte Klasse als zweite Wahl. Dies gilt ebenso für die Sparte \textit{fifty}, wobei hier der Eintrag für das \textit{MLP} fehlt. Der gleiche Eintrag fehlt ebenso in der vorherigen Abbildung \ref{abb:NeighborClassesIfTRUE}. Der Grund dafür ist, dass das \textit{MLP} für keine der Beobachtungen im Testdatensatz die Klasse \textit{fifty} vorhergesagt hat. Dies erklärt auch die $Accuracy$ von $0.00$ in dieser Sparte (siehe Abbildung \ref{abb:AccByClass}). Für \textit{good news} und \textit{money} ist für \textit{XGBoost} \textit{wellness \& healthy living} die häufigste zweite Wahl. Hierbei ist bemerkenswert, dass das \textit{Bi-LSTM} für jede wahre Kategorie die richtige Sparte als zweite Wahl am häufigsten wählen würde. Dies ist ein Merkmal, was zusätzlich zu den Ergebnissen aus Tabelle \ref{tab:finalSelection} für die Qualität dieses Modells spricht.\\
 \\
-todo: überleitung ins nächste kapitel schreiben
+Dieser Abschnitt hat sich mit den korrekten und falschen Klassifikationen auf dem Testdatensatz beschäftigt und das Szenario analysiert, in dem die Modelle die zweit-wahrscheinlichste Klasse wählen. Im nächsten Unterkapitel liegt der Fokus auf der Änderung der Vorhersagen der Modelle, wenn die Daten des Testdatensatzes verändert werden.
+
+\subsection{Veränderung der Vorhersagequalität bei Modifikation der Testdaten}\label{kap:alternate}
+
+Im Folgenden werden die Klassifikationen der Modelle der Endauswahl auf dem Testdatensatz analysiert.
+Von den $\numprint{20005}$ Beobachtungen des Testdatensatzes wurden $\numprint{4155}$ Datenpunkte von keinem der $4$ Modelle richtig klassifiziert.
+In $\numprint{316}$ Fällen hat jedes Modell eine andere Klasse vorausgesagt. Insgesamt wurden $\numprint{9666}$ Beobachtungen von allen Modellen in die richtige Nachrichtenkategorie eingeordnet. Für diese ab jetzt betrachtete Teilmenge des Testdatensatzes (folgend als $Test_{AllCorrect}$ bezeichnet) erreichen also alle $4$ Modelle eine $Accuracy$ von $1$. \\
+Nun ist es von Interesse, wie die Treffsicherheit der Modelle sinkt, wenn die einzelnen Beobachtungen verändert werden. Dabei werden die \textit{Embeddings} \textit{BOW}, \textit{GloVe 300D} und \textit{SOW GloVe 300D} für alle $9666$ mit verschiedenen Methoden modifiziert und anschließend mit den unveränderten gelernten Modellen der Endauswahl neu klassifiziert.\\
+\\
+Der erste Ansatz $(1)$ ist die Permutation der Wörter den Schlagzeilen. Dabei werden die $maxW = 27$ Spalten der \textit{GloVe 300D} Repräsentation in $30$ Durchläufen einer zufälligen neuen Reihenfolge zugewiesen. Dabei ist anzumerken, dass für jeden Durchlauf die Permutation der Spalten für alle Beobachtungen aus Gründen der Rechenzeit gleich erfolgt. Für jeden Durchlauf wird für die Modellprognosen des \textit{CNN} und \textit{Bi-LSTM} die $Accuracy$ berechnet und anschließend der Mittelwert über alle $Accuracy$ Werte gebildet. 
+Diese Kennzahl wird folglich als $\overline{Acc}^{(30)}$ bezeichnet und ist nicht zu verwechseln mit dem Gütemaß $\bar{Accuracy}$, der mittleren Trefferquote über alle Klassen aus Kapitel \ref{kap:guetemass}.
+Für die Anzahl der Durchläufe wurde $30$ als heuristischer Wert für alle folgenden Simulationen gewählt. Dieser stellt einen Kompromiss zwischen Minderung der Streuung der mittleren $Accuracy$ und der Rechenzeit der Simulation dar. Diese Simulation der Permutation wird nicht für \textit{BOW} und \textit{SOW GloVe 300D} durchgeführt, da beide \textit{Embeddings} die Reihenfolge der Wörter im Satz nicht berücksichtigen und eine Permutation in keiner Änderung der Vorhersagen resultiert. Die Ergebnisse sind in Tabelle \ref{tab:AlternatePerm} dargestellt.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|l|c|c|}
+  \hline
+  \textit{Embedding}, Modell & $Accuracy$ vor Perm. & $\overline{Acc}^{(30)}$ nach Perm.\\
+  \hline
+  \textit{GloVe 300D}, \textit{CNN} & $1$ &  $0.841$ \\
+  \textit{GloVe 300D}, \textit{Bi-LSTM} & $1$ & $0.537$ \\
+  \hline
+\end{tabular}
+\caption{$\overline{Acc}^{(30)}$ für die Klassifikationen der $30$ Permutationen von $Test_{AllCorrect}$}
+\label{tab:AlternatePerm}
+
+\end{table}
+
+Das \textit{CNN} klassifiziert im Mittel nach Permutation noch $84.1$ Prozent der Beobachtungen in $Test_{AllCorrect}$ korrekt. Dagegen sinkt die mittlere $Accuracy$ für das \textit{Bi-LSTM} auf $0.537$. Hier ist zu sehen, dass die Reihenfolge für das sequentiell gelernte \textit{Bi-LSTM} sehr wichtig ist. Im \textit{CNN} geht nach dem Lernen der \textit{Feature Maps} durch die \textit{Max-Pooling} Operation die Position der gefundenen Wörter-Tupel (-Tripel, -Quadrupel, -Quintupel) verloren. Für das Netz ist das reine Vorkommen wichtig. Selbst nach der Permutation werden teilweise einige Teile der Wörtersequenz noch nebeneinander auftreten, sodass das \textit{CNN} immer noch eine akkurate Vorhersage liefern kann.\\
+\\
+Im nächsten Ansatz $(2)$ wird untersucht, wie gut die Modelle auf fehlende Wörter reagieren. In jeweils $30$ Durchläufen werden zufällig $1$, $2$, $3$ und $4$ Wörter aus den Schlagzeilen entfernt und anschließend die mittlere $Accuracy$ über die $30$ Modellvorhersagen berechnet. Dabei werden für das \textit{GloVe 300D} \textit{Embedding} jeweils zufällige Spalten mit Nullen gefüllt. Für das \textit{SOW GloVe 300D} wird die gleiche Methodik angewandt, nur dass anschließend noch die normierte Summe gebildet wird. Da es in der \textit{BOW} Repräsentation kein \textit{Padding} gibt und die Spalten für die einzelnen Wörtern an unterschiedlichen Stellen zu finden sind, müssen für jede Beobachtung einzeln die betreffenden Stellen auf $0$ gesetzt werden. Zusätzlich ist anzumerken, dass für den \textit{BOW} die \textit{Stopwords} entfernt wurden. Die meisten Datenpunkte repräsentieren also weniger Wörter als in anderen Repräsentationen der Schlagzeilen, deshalb fällt hier die Entfernung von Wörtern tendenziell etwas stärker ins Gewicht. Die Ergebnisse der Simulation sind in Tabelle \ref{tab:AlternateRem} zusammengefasst.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|l||c|c|c|c|c|}
+  \hline
+  &  \multicolumn{5}{|c|}{$\overline{Acc}^{(30)}$ nach Entfernung von} \\
+  \hline
+  \textit{Embedding}, Modell & $0$ Wörtern & $1$ Wort & $2$ Wörtern & $3$ Wörtern & $4$ Wörtern \\
+  \hline
+   \textit{BOW}, \textit{XGBoost} & $1$ & $0.913$ &  $0.821$ & $0.735$ & $0.658$ \\
+   \textit{GloVe 300D}, \textit{CNN} & $1$  & $0.981$ & $0.967$ & $0.953$ & $0.937$ \\
+    \textit{GloVe 300D}, \textit{Bi-LSTM} & $1$ & $0.984$ & $0.971$ & $0.958$ & $0.945$ \\
+     \textit{SOW GloVe 300D}, \textit{MLP} & $1$  & $0.976$ & $ 0.964$ & $0.953$ & $0.940$\\
+     \hline
+  
+\end{tabular}
+\caption{$\overline{Acc}^{(30)}$ für die Klassifikationen der \textit{Embeddings} nach Entfernung von $1,2,3,4$ Wörtern auf $Test_{AllCorrect}$}
+\label{tab:AlternateRem}
+\end{table}
+
+Bei \textit{XGBoost} sinkt die mittlere Trefferquote am meisten bei Entfernung der Wörter. Dies ist wegen der niedrigeren mittleren Anzahl der Wörter pro Schlagzeile (nach Entfernung der \textit{Stopwords} nicht verwunderlich und der Vergleich der Werte ist mit Vorsicht zu betrachten. Für die restlichen Algorithmen schneidet das \textit{Bi-LSTM} am besten ab, unabhängig davon, wie viele Wörter entfernt wurden. Selbst nach Entfernung von $4$ Wörtern werden im Mittel $94.5$ Prozent der Beobachtungen korrekt von dem \textit{Bi-LSTM} klassifiziert. Die zweit und drittbesten Ergebnisse erzielen das \textit{CNN} und \textit{MLP}, wobei die maximalen Differenzen der $\overline{Acc}^{(30)}$ hier $0.007$ betragen und somit die Unterschiede marginal sind. Sowohl das \textit{CNN} als auch das \textit{Bi-LSTM} reagieren auf die Entfernung von bis zu $4$ Wörtern weit weniger sensibel als auf eine Permutation der Wörter (siehe Tabelle \ref{tab:AlternatePerm}).\\
+\\
+Im Zuge des letzten Ansatz $(3)$ wird untersucht, wie sich die Trefferquote ändern, wenn nach und nach die Sequenz der Wörter der Schlagzeilen den Modellen zur Verfügung gestellt wird. Dabei werden jeweils alle bis auf die ersten $1, 2, 3, ...$ Wörter aus dem \textit{Embedding} entfernt und anschließend die Vorhersage gebildet. Dies bedeutet für \textit{BOW}, dass analog zu Ansatz 2 die den Wörtern zugehörigen Einträge auf $0$ gesetzt werden. Im Falle des \textit{GloVe 300D} werden die Entsprechenden Wort-Vektoren jeder Beobachtung mit $0$-Vektoren ersetzt. Für das \textit{SOW GloVe 300D} \textit{Embedding} werden anschließend die Summen gebildet. In Abbildung \ref{abb:plotSeqSimulation} sind die durchschnittlichen $Accuracy$'s für die Modelle der Endauswahl im Verlauf der Wörtersequenz dargestellt.
+
+\begin{figure}[ht]
+    \centering
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/plotSeqSimulation.pdf} 
+\caption{Durchschnittliche \textit{Accuracy} der Modelle der Endauswahl bei sequentiellem Input von Teil $1$ bis $15$ der Wörtersequenz}
+\label{abb:plotSeqSimulation}
+\end{figure}
+
+
+Die Graphik ist auf den Teil $1$ bis $15$ der Sequenz eingeschränkt worden, da sich im weiteren Verlauf die Reihenfolge der Modelle nicht ändert und die $Accuracy$'s gegen $1$ konvergieren. Wenn die komplette Sequenz als Input dient, dann wird von allen Modellen auf dem unveränderten $Test_{AllCorrect}$ klassifiziert. In der Grafik ist zu erkennen, dass das \textit{MLP} bei Input des ersten Wortes die beste \textit{Accuracy} von allen Modellen erzielt. Bereits nach Teil $2$ der Sequenz wird es von den anderen Modellen eingeholt und befindet sich ab Teil $3$ immer unter den Kurven der anderen Modelle. \textit{XGBoost} erzielt ab Teil $3$ der Sequenz die besten Ergebnisse. Hier ist wieder zu beachten, dass in das \textit{BOW} \textit{Embedding} weniger Wörter pro Beobachtung fließen und deshalb jedes Wort der Sequenz eine höhere Bedeutung hat, als in den anderen \textit{Embeddings}. Das \textit{Bi-LSTM} liefert ab Teil $5$ der Sequenz bessere durchschnittliche $Accuracy$ Werte als das \textit{CNN}, wobei die Unterschiede marginal sind. Bemerkenswert ist, dass bereits nach $8$ Wörtern der Sequenz alle Modelle eine $Accuracy$ von mindestens $0.9$ bei der Klassifikation von erreichen. Durchschnittlich besteht eine Schlagzeile des gesamten Datensatzes aus $11.022$ Wörtern (siehe Kapitel \ref{kap:exploration}).
+
+
+\subsection{Erklärung der Klassifikation von individuellen Schlagzeilen}
+
+Im letzten Abschnitt fanden die Untersuchungen auf der Teilmenge der Beobachtungen des Testdatensatzes statt, für die alle Modelle die richtige Klasse vorhersagen. Das \textit{Bi-LSTM} auf dem \textit{GloVe 300D} \textit{Embedding} hat sich bezüglich der Gütemaße aus Tabelle \ref{tab:finalSelection} als das performanteste Modell erwiesen. Hier ist es von Interesse, an welchen Stellen dieses Modell zusätzliche Informationen nutzt, um die richtige Klasse zu identifizieren, während die anderen Modelle eine inkorrekte Klasse wählen. Dieser Sachverhalt wird im Folgenden beispielhaft exploriert. Von den $\numprint{20005}$ Schlagzeilen im Testdatensatz wurden $547$ Beobachtungen nur von dem \textit{Bi-LSTM} richtig klassifiziert. Innerhalb dieser Teilmenge gibt es $71$ Datenpunkte, denen zusätzlich von allen Modellen eine andere Kategorie zugeordnet wurde. Im Folgenden werden $2$ dieser $71$ Beobachtungen des Testdatensatzes analysiert. \\
+\\
+Die erste Schlagzeile lautet: \say{\textit{little girl meets trump impersonator, does not hold back}} und die zugehörige wahre Kategorie ist \textit{comedy}. Die vorhergesagten Modellwahrscheinlichkeiten des Datenpunktes sind in Abbildung \ref{abb:IndProbs13}  für die Nachrichtenkategorien dargestellt.
+
+\begin{figure}[ht]
+    \centering
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/ggIndProbs13.pdf} 
+\caption{Modellwahrscheinlichkeiten der Schlagzeile \textit{little girl meets trump impersonator, does not hold back} für die einzelnen Nachrichtenkategorien}
+\label{abb:IndProbs13}
+\end{figure}
+
+In der Abbildung ist zu sehen, dass wie gewünscht jedes der $4$ Modelle für eine andere Kategorie die höchste Wahrscheinlichkeit realisiert. Dabei sind die Kategorien, denen von den Modellen hohe Wahrscheinlichkeiten zugeordnet werden, \textit{politics}, \textit{entertainment}, \textit{comedy}, \textit{parents}, \textit{wierd news} und \textit{women}. Müsste mit menschlicher Intuition klassifiziert werden, so scheinen die Sparten \textit{entertainment}, \textit{comedy} und \textit{wierd news} wahrscheinlich und die Kategorien \textit{politics}, \textit{parents} und \textit{women} eher unwahrscheinlich. Nun stellt sich die Frage, wie die Wörter der Schlagzeile sequentiell Einfluss auf die Wahrscheinlichkeiten der einzelnen Kategorien nehmen. Mit Ansatz $(3)$ aus Kapitel \ref{kap:alternate} wird die Schlagzeile nun Wort für Wort den Modellen als \textit{Embedding} zur Verfügung gestellt und die Wahrscheinlichkeiten für die Kategorien berechnet. Abbildung \ref{abb:plotSeqInd13} veranschaulicht dies, wobei aus Gründen der Visualisierung nur die Wahrscheinlichkeiten der $4$ Kategorien gezeichnet sind, die die Modelle voraussagen.
+
+\begin{figure}[!ht]
+    \centering
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/plotSeqInd13.pdf} 
+\caption{Modellwahrscheinlichkeiten der Schlagzeile \textit{little girl meets trump impersonator, does not hold back} für die einzelnen Nachrichtenkategorien bei sequentiellem Input der Wörtersequenz. Die Wörter sind an der Kategorie gekennzeichnet, für die das jeweilige Modell die höchste Wahrscheinlichkeit zum Ende der Sequenz einordnet.}
+\label{abb:plotSeqInd13}
+\end{figure}
+
+Nach Input der ersten $3$ Wörter \say{\textit{little girl meets}} ordnen alle Modelle \textit{parents} eine hohe Wahrscheinlichkeit zu. Das darauf folgende Wort \say{\textit{trump}} erhöht bei allen Modellen die Zuversicht für \textit{politics}. Zusätzlich wird die Wahrscheinlichkeit für \textit{comedy} und \textit{entertainment} erhöht und die Zuversicht für \textit{parents} stark reduziert. Mit Hinzunahme von \say{\textit{impersonator}} sinkt für alle Modelle außer \textit{XGBoost} die Erwartung für \textit{politics}. Für \textit{XGBoost} ändert sich der Wert nicht und \textit{politics} bleibt bis zum Ende der Sequenz mit einer Wahrscheinlichkeit von $\approx 0.73$ die favorisierte Klasse. Im Falle des \textit{MLP} bewirkt \say{\textit{impersonator}} den Anstieg von \textit{entertainment} zur Klasse mit der höchsten Wahrscheinlichkeit. Das Satzzeichen \say{\textit{,}} wirkt sich minimal auf die Änderung der Wahrscheinlichkeiten aus, doch es senkt die Zuversicht der neuronalen Netze für \textit{comedy} und \textit{entertainment} und erhöht die Zuversicht für \textit{politics}. Im weiteren Verlauf des Satz erhöht sich die Zuversicht des \textit{Bi-LSTM} für \textit{comedy} konstant und nimmt den maximalen Endwert nach \textit{entertainment} an. Für das\textit{CNN} resultiert die gewählte Klasse in \textit{parents}, marginal vor \textit{politics}. Das \textit{MLP} entscheidet sich für \textit{entertainment} mit einer Zuversicht von $\approx 0.4$, wobei es \textit{politics} auch eine moderate Wahrscheinlichkeit zuordnet. Bei Analyse der Abbildung sei angemerkt, dass die Kategorien \textit{queer voices}, \textit{wierd news} und \textit{women} (siehe Abbildung \ref{abb:IndProbs13}) nicht eingezeichnet sind und auch einen Teil der Wahrscheinlichkeit am Ende der Sequenz ausmachen.\\
+Die Klassifikation der Schlagzeile ist mit menschlicher Intuition ist nicht eindeutig. In Zusammenhang dazu ist anzumerken, dass sich das \textit{Bi-LSTM} und \textit{CNN} bei diesem Datenpunkt verhältnismäßig unsicher sind und die Zuversicht für die Klassifikation $<  0.25$ beträgt. Im Kontrast dazu ist sich \textit{XGBoost} auf Grund von \say{\textit{trump}} mit $\approx 0.73$ sehr sicher, dass die richtige Klasse \textit{politics} ist, wobei diese Sparte nicht zu den intuitiven zählt. Zusammenfassend zu diesem Beispiel wurde klar, dass sich für die Modelle die Wahl der favorisierte Klasse mit Input der Sequenz öfters ändert. Aufgefallen ist zusätzlich, dass die hinzukommenden Worte die Wahrscheinlichkeiten der Modelle meistens in die gleiche Richtung beeinflussen, wenn auch unterschiedlich stark. So scheinen die Modelle zumindest teilweise ähnliche Informationen für die Worte aus den \textit{Embeddings} zu generieren, auch wenn die Form der \textit{Embeddings} unterschiedlich ist.\\
+\\
+Das zweite Beispiel ist die Schlagzeile \say{\textit{allen toussaint, legendary pianist, dies at the age of 77}} mit der wahren Kategorie \textit{black voices}. Unter Kenntnis, dass \textit{Allen Toussaint} ein schwarzer amerikanischer Musiker und Songschreiber ist, scheint die Kategorie \textit{black voices} nicht abwegig. Ansonsten könnte die Schlagzeile auch zu \textit{arts \& culture} gehören. Andere Sparten wirken mit menschlicher Intuition eher abwegig. In Abbildung \ref{abb:IndProbs2} sind die Modellwahrscheinlichkeiten des Datenpunktes für die einzelnen Nachrichtensparten dargestellt.
+
+\begin{figure}[ht]
+    \centering
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/ggIndProbs28.pdf} 
+\caption{Modellwahrscheinlichkeiten der Schlagzeile \textit{allen toussaint, legendary pianist, dies at the age of 77} für die einzelnen Nachrichtenkategorien}
+\label{abb:IndProbs28}
+\end{figure}
+
+Es ist zu sehen, dass den Kategorien \textit{arts \& culture}, \textit{black voices}, \textit{entertainment}, \textit{politics}, \textit{sports} und \textit{wellness \& healthy living} die meiste Wahrscheinlichkeit zugeordnet wurde. Verwunderlich ist vor allem, dass \textit{entertainment} hohe Wahrscheinlichkeiten zugewiesen bekommt, obwohl es sich um eine Todesmeldung handelt. Wie bei dem vorigen Beispiel werden nun die Modellwahrscheinlichkeiten über den sequentiellen Input der Wörter betrachtet. Dies sind in Abbildung \ref{abb:plotSeqInd28} visualisiert.
+
+\begin{figure}[!ht]
+    \centering
+\includegraphics[width = \textwidth,  keepaspectratio]{Images/plotSeqInd28.pdf} 
+\caption{Modellwahrscheinlichkeiten der Schlagzeile \textit{allen toussaint, legendary pianist, dies at the age of 77} für die einzelnen Nachrichtenkategorien bei sequentiellem Input der Wörtersequenz. Die Wörter sind an der Kategorie gekennzeichnet, für die das jeweilige Modell die höchste Wahrscheinlichkeit zum Ende der Sequenz einordnet.}
+\label{abb:plotSeqInd28}
+\end{figure}
+
+Bei Input der ersten $2$ Wörter \say{\textit{allen toussaint}} erhöht sich bei den neuronalen Netzen die Wahrscheinlichkeit für \textit{black voices}. Der Grund dafür kann sein, dass der Name im Trainingsprozess bereits in der selben Kategorie vorgekommen ist. Bei dem Hinzukommen von \say{\textit{legendary}} steigt die Zuversicht des \textit{Bi-LSTM} und \textbf{MLP} für \textit{black voices} wobei die Zuversicht des \textit{CNN} sinkt. Für alle neuronalen Netze erhöht sich auch die Wahrscheinlichkeit für \textit{entertainment}. \textit{XGBoost} sagt zu Beginn der Sequenz für \textit{wellness \& healthy living} die höchste Wahrscheinlichkeit voraus und ändert die Prognosen im Laufe des Sequenz nur minimal. Es macht den Eindruck, dass \textit{XGBoost} aus der Schlagzeile keine Information für die angezeigten Kategorien extrahieren kann und eine der Klassen mit den meisten Beobachtungen im Trainingsdatensatz prognostiziert. Unter Hinzunahme von \say{\textit{pianist}} erhöht sich die Zuversicht der neuronalen Netze für \textit{arts \& culture}. Für das \textit{CNN} und \textit{MLP} sinkt die Wahrscheinlichkeit für \textit{black voices}, während das \textit{Bi-LSTM} die Wahrscheinlichkeit nicht reduziert. Das nächste \say{\textit{,}} erhöht für das \textit{Bi-LSTM} die Wahrscheinlichkeit der wahren Klasse. Für das \textit{CNN} sinkt ab diesem Teil der Sequenz die Wahrscheinlichkeit für \textit{arts \& culture} leicht ab, doch letztendlich nimmt diese Klasse die höchste Wahrscheinlichkeit von $\approx 0.48$ an. Die Verringerung der Zuversicht für \textit{arts \& culture} passiert auch im Falle des \textit{MLP}, allerdings steigt dort weiterhin die Wahrscheinlichkeit für \textit{entertainment} an, was auch die Sparte ist, die am Ende der Sequenz das Maximum annimmt. Nicht intuitiv ist, dass für das Wort \say{\textit{dies}} bei allen $3$ neuronalen Netzen die Zuversicht für \textit{entertainment} steigt. Schwierig zu Interpretieren ist die starke Schwankung des \textit{Bi-LSTM} bei den Wörtern \say{\textit{age}}, \say{\textit{of}}, \say{\textit{77}} im Vergleich zu den anderen Netzen.
+
 
 
 \paragraph{Noch fehlende Punkte:}
@@ -220,14 +331,10 @@ todo: überleitung ins nächste kapitel schreiben
     \item tuning wurde klein gehalten, die Modelle werden auf 90 \% der Daten nicht nochmal verändert. (ausser nrounds, epochen, numtrees etc)
 \end{itemize}{}
 
-\subsection{Analyse der Modelle}
+
 
 \begin{itemize}
-
-    \item beobachtungen verändern, wörter wegnehmen, hinzufügen, reihenfolge ändern und schauen ob das verfahren stabil /sensitiv zur reihenfolge
     \item variablenwichtigkeit bei xgboost als wordcloud plotten, dalex und sonstiges
-    \item random forest direkt variablenwichtigkeit
-    \item nachbarklassen identifizieren durch confusionmatrix
     \item confusionmatrix zeigen
     \item convolutional filters holen und ähnlichkeiten zu combinationen aus word vectors erhalten über tupel/tripel von wortvectoren laufen lassen und schauen wo die ähnlichkeit am größten ist
 \end{itemize}{}
@@ -238,7 +345,8 @@ todo: überleitung ins nächste kapitel schreiben
 \subsection{Ergebnisse}
 
 \begin{itemize}
-    \item Bi-LSTM performt am besten
+    \item Bi-LSTM performt am besten Tabelle \ref{tab:finalSelection}
+    \item Bi-LSTM anfällig gegen Permutation, CNN nicht Tabelle \ref{tab:AlternatePerm}
     \item welches Modell ist bzgl wenig rechenzeit und Speichergröße zu empfehlen?
 \end{itemize}{}
 
@@ -251,6 +359,10 @@ todo: überleitung ins nächste kapitel schreiben
     \item Weitere Architekturen im Bereich Bi-LSTM (Attention, sentence level etc)
     \item kompliziertere word embeddings wie encoder technologien wie BERT
     \item meta informationen wie author, text, shortdescriptions hinzuziehen
+    \item balancing
+    \item alternated Data
+    \item alex seine idee
+    \item binäre klassifkationen um kategorien zu mergen 
 \end{itemize}
 
 

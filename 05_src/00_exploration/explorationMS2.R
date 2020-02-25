@@ -1,9 +1,14 @@
 # todos next day
-# xxfehler bei MLP suchen (30min max)
-# plotfunktionen weiterschreiben (CNN, MLP, XG), vlt alle in eine Grafik
+# wurde beschrieben, dass im CNN die Reihenfolge verloren geht?
+# vergleich, wie viele von CNN korrekt aber nur von CNN korrekt? etc.
 
+
+################################################################################
 
 # [last steps]
+# Ditschi seine korrektur
+# Zielstellung updaten
+# individual teil runterschreiben
 # jackys korrektur
 # Zusammenfassung von netzteil schreiben
 # Zusammenfassung von wordembeddings schreiben
@@ -15,6 +20,8 @@
 # Einleitung + Zusammenfassung schreiben
 # seitenzahl nur für teil der arbeit anzeigen
 
+# xxalex email beantworten
+# xxalternate teil runterschreiben
 # xxrandom forest 0.5 seiten
 # xxxgboost beschreiben
 # xxenglische wörter groß
@@ -53,6 +60,10 @@
 #- captions nicht alles in textit
 #- label under caption
 #
+# xxplotIndSeq keine 7.5 x-achsenbeschriftung
+# xxim letzten plot nur die categorien auswählen, die eine der Modelle pickt?
+# xxfehler bei MLP suchen (30min max)
+# xxplotfunktionen weiterschreiben (CNN, MLP, XG), vlt alle in eine Grafik
 # xxemail an alex: rnn/lstm dimensionen der matrizen erklären?
 # xxalex die mail schreiben
 # xxpermutationfunction schreiben für glove array

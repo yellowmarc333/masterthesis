@@ -52,25 +52,22 @@
 
 \section{Einleitung}
 
-\begin{itemize}
-\item Natural Language Processing (NLP) ist aktuelles Thema mit vielen Anwendungsfällen, zB. überwachte Klassifikation von Kurztexten.
-   \item Größtenteils Artikel und Tutorials über binäre Klassifikation (zB. IMDB Sentiment Classification, Spam Vs NonSpam etc.)
-   \item In der Realität oft viel mehr Klassen, zB:
-   \item Themen-Kategorisierung von Kundenbeschwerden
-   \item Tagging von Forenbeiträgen (Stackoverflow)
-   \item Produktkategorien von Artikeln anhand Artikelbeschreibung
-   \item Kategorisierung von Nachrichtenkategorien
-    \item nutzen der klassifikation für die Redaktion
-    \item oft nur binäre klassifikation, multi selteneres topic
-    \item Multiclass auch bei next best offer
-    \item bag of words kein guten Ruf, bei welchen Datensätzen lohnen sich Neural nets überhaupt.
-\end{itemize}{}
+Das vielseitige Gebiet des \textit{Natural Language Processing} (\textit{NLP}) beschäftigt sich als Schnittstelle zwischen Sprachwissenschaft und Informatik mit der algorithmischen Verarbeitung von Text- und Sprachdaten und hat sich in den letzten Jahren als zentrales Thema der Künstlichen Intelligenz etabliert. Die zentrale Herausforderung des Text-basierten \textit{NLP} besteht darin, geschriebene Sprache zu erkennen, zu verstehen und die verarbeitete Information zur Lösung einer Problemstellung zu nutzen. In einem idealen Szenario erreicht eine geschickt konstruierte Algorithmik das Level der menschlichen Intuition oder übertrifft diese sogar. Dabei existiert eine Vielzahl von aktuellen Anwendungen die mit Verfahren des \textit{Machine-Learning} optimiert werden und Gegenstand aktueller Forschung und unseres Alltags sind. Automatische multilinguale Übersetzungen von Texten sind im Internet omnipräsent. Eine inhaltlich sinnvolle Zusammenfassung von langen Texten gehört auf Websiten oder in Apps mittlerweile zum Standard. Moderne Systeme der Künstlichen Intelligenz sind bereits in der Lage, Reden oder ganze Bücher zu generieren. \\
+\\
+Zu den variantenreichen Anwendungen des \textit{NLP} gehört unter anderem auch die Klassifikation von Texten. Zu den bekanntesten Problemstellungen gehören unter anderem die Klassifikation von Emails in die Kategorien \say{Spam} und \say{nicht Spam} oder die Einordnung von \textit{IMDB} (\textit{International Movie Database}) Rezensionen in positive und negative Reviews. Bei der Recherche von textbasierter Klassifikation fällt auf, dass viele Artikel, Tutorials und \textit{Machine-Learning}-Wettbewerbe entweder ein binäres Klassifikationsproblem thematisieren, oder den Mehrklassenfall mit maximal $5$ Klassen. \\
+Doch in der Realität gibt es oft eine Vielzahl von Kategorien, denen ein Datenpunkt zugeordnet werden soll. Zum Beispiel ist es für die Betreiber eines Forums von Interesse, neue Beiträge oder \textit{Threads} automatisch mit einem oder mehreren \textit{Tags} zu versehen, Online-Shops wollen neuen Artikel im Sortiment automatisch eine der vorhandenen Produktkategorien vergeben und für ein Kundencenter ist eine automatische Kategorisierung von Tickets unter Umständen präziser als die Einordnung ihrer Verfasser. \\
+\\
+Die automatische Klassifikation von Nachrichtenschlagzeilen ist ein vergleichbarer Anwendungsfall. Für die US-Amerikanische Onlinezeitung \textit{Huffpost} liegen Schlagzeilen von Artikeln vor, die jeweils einer von $41$ Kategorien angehören. Dabei kann die manuelle Zuordnung der Kategorie durch den Autor eventuell subjektiv sein oder unpräzise erfolgen. \\
+Die in dieser Arbeit thematisierte \textit{Multiclass}-Klassifizierung der Schlagzeilen versucht, unter Nutzung von verschiedenen numerischen Repräsentationen der Texte diese mithilfe baumbasierter Algorithmen und verschiedenen neuronalen Netzen den Zielkategorien akkurat zuzuordnen.\\
+\\
+In Kapitel \ref{kap:2} wird der verwendete Datensatz vorgestellt und die vorgenommenen Änderungen erläutert. Im Rahmen der darauf folgenden Exploration wird dem Leser ein Einblick in die Daten gewährt.
+Anschließend folgt die Darlegung der Zielstellung dieser Arbeit. Die verwendeten statischen Methoden werden in Kapitel \ref{kap:3} zusammengefasst. Diese beinhalten Gütemaße, verschiedene Methoden zur Repräsentation der Wörter sowie die verwendeten neuronalen Netze und baumbasierte Verfahren. Kapitel \ref{Kap:statAus} umfasst die statistische Analyse und Auswertung der berechneten \textit{Machine-Learning}-Modelle sowie die Beantwortung der Untersuchungsfragen der Zielstellung. Zuletzt fasst Kapitel \ref{kap:5} die wichtigsten Ergebnisse zusammen und gibt einen Ausblick auf weitere mögliche Untersuchungen.
 
+\newpage
 
+\section{Datensatz und Zielstellung}\label{kap:2}
 
-\section{Datensatz und Problemstellung}
-
-In diesem Kapitel wird der für diese Thesis relevante Datensatz vorgestellt. Nach dessen Bereinigung erfolgt eine Exploration und anschließend die Darlegung der Zielstellung dieser Thesis.
+In diesem Kapitel wird der in dieser Thesis genutzte Datensatz vorgestellt. Nach dessen Bereinigung erfolgt eine detaillierte Exploration und anschließend die Darlegung der Zielstellung dieser Thesis.
 
 
 \subsection{Initialer Datensatz}

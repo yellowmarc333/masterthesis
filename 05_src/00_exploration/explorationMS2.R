@@ -4,20 +4,22 @@
 ################################################################################
 
 # [last steps]
-# Ditschi seine korrektur
+
 # jackys korrektur
-# Zusammenfassung von netzteil schreiben
-# Zusammenfassung von wordembeddings schreiben
-# mean_accuracy erklären, probIfCorrect
-# modelle vorstellen in kapitel 4 (struktur der netze)
-# alle Zitate checken ob klammern richtig gesetzt sind, oder et al steht
+# modelle vorstellen in kapitel 4 (struktur der netze)?
+# zitate checken (mit klammern und et al.)
 # groll+ matze cnn korrigieren
 # alex seine korrektur
-# Einleitung schreiben
 # Zusammenfassung schreiben
-# seitenzahl nur für teil der arbeit anzeigen
+# einleitung + zusammenfassung [eigende korrekturen]
+# kapitel 4.4 [eigende korrekturen]
 
-
+# xx xgboost teil (eigenkorrektur)
+# xxZusammenfassung von wordembeddings schreiben
+# xxEinleitung schreiben
+# xxDitschi seine korrektur
+# xx seitenzahl nur für teil der arbeit anzeigen
+# xxmean_accuracy erklären, probIfCorrect
 # xxZielstellung updaten
 # xxAnhang erstellen
 

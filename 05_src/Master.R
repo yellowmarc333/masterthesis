@@ -84,6 +84,9 @@ try(prepareDataGlove(inPath = "03_computedData/03_integratedData/",
                  subsetSize = "Full", word2VecSize = 300, mergeSD = FALSE,
                  gloveName = "glove.42B.300d.txt"))
 
+prepareDataSeq(inPath = "03_computedData/03_integratedData/",
+               outPath = "03_computedData/04_preparedData/", 
+               subsetSize = "Full", mergeSD = FALSE)
 
 #------------------modelling-----------####
 predictPreselection()

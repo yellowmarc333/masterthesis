@@ -1,3 +1,7 @@
+# Zeichen: 
+# Thesis: 170000
+# Code: 220000
+
 # todos next day
 # wurde beschrieben, dass im CNN die Reihenfolge verloren geht?
 
@@ -5,15 +9,16 @@
 
 # [last steps]
 
-# jackys korrektur
-# modelle vorstellen in kapitel 4 (struktur der netze)?
-# zitate checken (mit klammern und et al.)
-# groll+ matze cnn korrigieren
-# alex seine korrektur
-# Zusammenfassung schreiben
-# einleitung + zusammenfassung [eigende korrekturen]
-# kapitel 4.4 [eigende korrekturen]
+# jackys korrektur (1h)
+# zitate checken (mit klammern und et al.) (0.5h)
+# alex seine korrektur (3-4h)
+# zusammenfassung [eigende korrekturen] (0.75h)
+# kapitel 4.4 [eigende korrekturen] (1h)
 
+# xxeinleitung [eigende korrekturen]
+# xxgroll+ matze cnn korrigieren
+# xxindikatorfunktion
+# xxZusammenfassung schreiben
 # xx xgboost teil (eigenkorrektur)
 # xxZusammenfassung von wordembeddings schreiben
 # xxEinleitung schreiben
@@ -42,8 +47,8 @@
 
 
 # [hats nicht mehr in die auswertung geschafft]
+# modelle vorstellen in kapitel 4 (struktur der netze)? hyperparameter
 # variablenwichtigkeit bei xgboost als wordcloud plotten, dalex und sonstiges
-# BOW/TFIDF - RF XGBoost: variablenwichtigkeit in Wordcloud
 # BOW/TFIDF - XGBoost: Dalex für einzelne Beobachtungen
 # SOW Glove - überlegen
 # Glove - CNN - filter aus dem ersten Layer über Tupel aus Wort-Vektoren laufen lassen

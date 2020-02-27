@@ -198,6 +198,8 @@ ggsave(filename = paste0(outPath, "wordCloudEducation.pdf"),
 #                                split = " ")[[1]])
 # paste(uniqueWords, collapse = " & ")
 
+# beispiele BOW und TFIDF ####
+
 text1 <- "the cat likes to sit"
 text2 <- "the dog does not like his owner"
 text3 <- "the owner likes the dog"
@@ -223,9 +225,23 @@ dfm = as.dfm(dtm)
 
 tfidf = dfm_tfidf(x = dfm, scheme_tf = "augmented", 
                   scheme_df = "inverse", smoothing = 1,
-                  k = 1)
+                  k = 0.5)
+tfidf
+dfm_DT <- as.data.table(dfm)
+dfm_DT[, document := NULL]
+setcolorder(dfm_DT, c("the", "dog", "cat", "like",
+                      "likes", "to", "sit", "owner",
+                      "his", "does", "not"))
 
-tokens.sparse <- round(tfidf, digits = 3)
+dfm_matrix <- as.matrix(dfm_DT)
+maxPerRow <- apply(dfm_matrix, 1, max)
+TF <- 0.5 + 0.5*dfm_matrix /maxPerRow
+IDF <- log(nrow(dfm_matrix)/apply(dfm_matrix, 2, function(x){
+  sum(x != 0)
+}))
+TFIDF <- t(apply(TF, 1, function(x) x* IDF))
+
+print(xtable(TFIDF, include_rownames = FALSE, digits = 3))
 
 ## Glove Example:  
 
@@ -244,19 +260,46 @@ vocab <- text2vec::prune_vocabulary(vocab, term_count_min = 0L)
 # Use our filtered vocabulary
 vectorizer <- text2vec::vocab_vectorizer(vocab)
 # use window of 5 for context words
-tcm <- text2vec::create_tcm(itoken, vectorizer, skip_grams_window = 2L,
+tcm <- text2vec::create_tcm(itoken, vectorizer, skip_grams_window = 5L,
                             skip_grams_window_context = c("symmetric"),
                             weights = c(1,1))
-colOrder <- tcm@Dimnames[[1]]
-newOrder <- c(11, 8, 1, 5, 10, 6, 2, 9, 4, 3, 7)
-tcmDT <- as.data.table(as.matrix(tcm))
-tcmDTOrdered <- tcmDT[newOrder, ]
-setcolorder(tcmDTOrdered, newOrder)
-row.names(tcmDTOrdered) <- colOrder[newOrder]
+tcm_DT <- as.data.table(as.matrix(tcm))[c(11, 8, 1, 5, 10, 6, 2, 9, 4, 3, 7)]
+setcolorder(tcm_DT, c("the", "dog", "cat", "like",
+                      "likes", "to", "sit", "owner",
+                      "his", "does", "not"))
+# colOrder <- tcm@Dimnames[[1]]
+# newOrder <- c(11, 8, 1, 5, 10, 6, 2, 9, 4, 3, 7)
+# tcmDT <- as.data.table(as.matrix(tcm))
+# tcmDTOrdered <- tcmDT[newOrder, ]
+# setcolorder(tcmDTOrdered, newOrder)
+# row.names(tcmDTOrdered) <- colOrder[newOrder]
 
-print(xtable(tcmDTOrdered, label = "tab:GloveExample"), 
+print(xtable(t(tcm_DT), label = "tab:GloveExample"), 
       include.rownames = TRUE)
+# reconstruct glove example by hand ####
 
+korpus <- c(0, 0, strsplit(text1, split = " ")[[1]], 0, 0, 
+            0, 0, strsplit(text2, split = " ")[[1]], 0, 0,
+            0, 0, strsplit(text3, split = " ")[[1]], 0, 0)
+searchWords <- c("the", "dog", "cat", "like",
+                 "likes", "to", "sit", "owner",
+                 "his", "does", "not")
+searchGrid <- expand.grid(searchWords, searchWords)
+resultVec <- numeric(nrow(searchGrid))
+for(i in 1:nrow(searchGrid)){
+  Word <- searchGrid[i,1]
+  Context <- searchGrid[i, 2]
+  counterVec <- numeric(length(korpus)-4)
+  for(j in (3:(length(korpus)-4))){
+    window <- korpus[(j-2):(j+2)]
+    counterVec[j] <- (Word %in% window) & (Context %in% window)
+  }
+  resultVec[i] <- paste0("$",sum(counterVec), "$")
+}
+resultMatrix <- matrix(resultVec, byrow = FALSE, nrow = 11,
+                       ncol = 11)
+row.names(resultMatrix) <- searchWords
+print(xtable(resultMatrix))
 
 # OSV ####
 dataRaw <- fread("03_computedData/01_importedData/News.csv")

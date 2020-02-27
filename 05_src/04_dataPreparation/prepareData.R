@@ -164,9 +164,8 @@ prepareDataTFIDF = function(inPath = "03_computedData/03_integratedData/",
   
   tfidf = dfm_tfidf(x = dfm, scheme_tf = "augmented", 
                     scheme_df = "inverse", smoothing = 1,
-                    k = 1)
-  
-  tokens.sparse <- tfidf
+                    k = 0.5)
+    tokens.sparse <- tfidf
   
   if(!saveSparse) {
     tokens.dfm <- as.data.frame(as.matrix(tokens.sparse))

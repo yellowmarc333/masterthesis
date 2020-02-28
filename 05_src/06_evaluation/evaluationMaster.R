@@ -59,7 +59,7 @@ ggsave(filename = paste0(outPath, "NeighborClassesIfFALSE.pdf"),
 # Im falle einer missklassifikation, in welche kategorien fallen die meisten
 # beobachtungen?
 ggObj <- identifyMisclassSums("03_computedData/05_modelData/finalModels/")
-ggsave(filename = paste0(outPath, "MissclassCounts.pdf"),
+ggsave(filename = paste0(outPath, "NeighborMissclassCounts.pdf"),
        plot = ggObj, width = fullWidth, height = fullHeight, 
        device = "pdf")
 

@@ -404,7 +404,8 @@ identifyNeighborClassesIfTRUE <- function(inPath) {
                                 color = ModelName, 
                                 size = share,
                                 shape = ModelName)) +
-    geom_count(alpha = 0.6) +
+    #geom_count(alpha = 0.6) +
+    geom_jitter(width = 0.2, height = 0.2,  alpha = 0.6)+
     labs(x = "Wahre Kategorie",
          y = "Zweit-wahrscheinlichste Kategorie",
          size = "Anteil Datenpunkte:") +
@@ -492,7 +493,8 @@ identifyNeighborClassesIfFALSE <- function(inPath) {
                               color = ModelName, 
                               size = shareCorrect,
                               shape = ModelName)) +
-    geom_count(alpha = 0.6) +
+    #geom_count(alpha = 0.6) +
+    geom_jitter(width = 0.2, height = 0.2,  alpha = 0.6) +
     labs(x = "Wahre Kategorie",
          y = "Zweit-wahrscheinlichste Kategorie",
          size = "Anteil Datenpunkte:") +
@@ -565,7 +567,8 @@ identifyMisclassSums <- function(inPath) {
                                 color = ModelName, 
                                 size = share,
                                 shape = ModelName)) +
-    geom_count(alpha = 0.6) +
+    #geom_count(alpha = 0.6) +
+    geom_jitter(width = 0.2, height = 0.2, alpha = 0.6) +
     labs(x = "Wahre Kategorie",
          y = "Kategorie mit meisten Fehlklassifikationen",
          size = "Anteil Datenpunkte:") +

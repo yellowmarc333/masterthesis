@@ -9,12 +9,13 @@
 
 # [last steps]
 
-# jackys korrektur (1h)
-# zitate checken (mit klammern und et al.) (0.5h)
-# alex seine korrektur (3-4h)
-# zusammenfassung [eigende korrekturen] (0.75h)
-# kapitel 4.4 [eigende korrekturen] (1h)
+# hurenkinder und keine fragezeichen
 
+# xxzitate checken (mit klammern und et al.) (0.5h)
+# xxjackys korrektur (1h)
+# xxzusammenfassung [eigende korrekturen] (0.75h)
+# xxkapitel 4.4 [eigende korrekturen] (1h)
+# xxalex seine korrektur (3-4h)
 # xxeinleitung [eigende korrekturen]
 # xxgroll+ matze cnn korrigieren
 # xxindikatorfunktion
